@@ -89,6 +89,28 @@ The passphrase is resolved in this order:
 4. Deduplicates records across databases by `ZUNIQUE_ID`
 5. Resolves contact names and call types, writes CSV
 
+## Google Calendar sync
+
+Calls can be synced to Google Calendar via a webhook. A separate workflow receives the call data, deduplicates by `unique_id`, and creates calendar events.
+
+### Setup
+
+1. Set up a webhook-based workflow that creates Google Calendar events from the call data
+2. Add the webhook URL to `.env`:
+   ```
+   WEBHOOK_URL=https://your-instance.com/webhook/your-webhook-path
+   ```
+
+### Sending calls
+
+```bash
+uv run python send_to_webhook.py            # send all answered calls
+uv run python send_to_webhook.py --weeks 4  # only last 4 weeks
+uv run python send_to_webhook.py --dry-run  # preview without sending
+```
+
+Calendar events use the format `Contact Name — Call Type` as title, with direction, type, phone number, and duration in the description. Duplicate calls are skipped automatically using the call's `unique_id` as the Google Calendar event ID.
+
 ## Limitations
 
 - Call history only goes back as far as iOS retains it (typically ~1 year, varies)
