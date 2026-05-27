@@ -109,8 +109,6 @@ def build_contact_lookup(backup: EncryptedBackup) -> dict[str, str]:
             JOIN ABMultiValue m ON p.ROWID = m.record_id
             WHERE m.property IN (3, 4)
         """).fetchall()
-        conn.close()
-
         total_contacts = conn.execute("SELECT COUNT(*) FROM ABPerson").fetchone()[0]
         conn.close()
 
