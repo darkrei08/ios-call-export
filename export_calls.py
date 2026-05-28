@@ -320,6 +320,17 @@ def main():
             except (subprocess.TimeoutExpired, FileNotFoundError):
                 pass
     if not passphrase:
+        try:
+            result = subprocess.run(
+                ["security", "find-generic-password", "-a", os.environ.get("USER", ""), "-s", "ios-backup-passphrase", "-w"],
+                capture_output=True, text=True, timeout=10,
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                passphrase = result.stdout.strip()
+                print("Passphrase loaded from Keychain")
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+    if not passphrase:
         passphrase = getpass.getpass("Backup encryption passphrase: ")
 
     print("Decrypting backup...")

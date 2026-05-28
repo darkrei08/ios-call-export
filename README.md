@@ -54,13 +54,18 @@ Edit `.env` and uncomment one of the options:
 
 - **`BACKUP_PASSPHRASE`** -- set the passphrase directly
 - **`OP_BACKUP_REF`** -- use a [1Password secret reference](https://developer.1password.com/docs/cli/secret-references/) (requires [`op` CLI](https://developer.1password.com/docs/cli/), triggers biometric prompt)
+- **macOS Keychain** -- store the passphrase encrypted in Keychain (works unattended, recommended for cron):
+  ```bash
+  security add-generic-password -a "$USER" -s "ios-backup-passphrase" -w
+  ```
 
 The passphrase is resolved in this order:
 
 1. `--passphrase` command-line argument
 2. `BACKUP_PASSPHRASE` environment variable (via `.env` or shell)
 3. `OP_BACKUP_REF` environment variable (via `.env` or shell)
-4. Interactive prompt
+4. macOS Keychain (`ios-backup-passphrase`)
+5. Interactive prompt
 
 ## CSV output
 
