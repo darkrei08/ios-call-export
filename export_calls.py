@@ -190,7 +190,9 @@ def read_calls_from_db(db_path: str, contacts: dict[str, str]) -> list[dict]:
     for row in cursor:
         dt = apple_timestamp_to_datetime(row["ZDATE"])
         originated = bool(row["ZORIGINATED"])
-        answered = bool(row["ZANSWERED"])
+        # ZANSWERED only reflects whether *we* answered (meaningful for incoming calls).
+        # For outgoing calls, use duration > 0 to determine if the other party picked up.
+        answered = bool(row["ZANSWERED"]) or (originated and row["ZDURATION"] > 0)
 
         if not answered and not originated:
             direction = "Missed"
