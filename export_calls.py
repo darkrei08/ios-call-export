@@ -1,3 +1,4 @@
+from logger import app_logger
 #!/usr/bin/env python3
 """Extract iPhone call history from an encrypted local backup to CSV."""
 
@@ -151,7 +152,7 @@ def build_contact_lookup(backup: EncryptedBackup) -> dict[str, str]:
                 output_filename=tmp_path,
             )
     except Exception:
-        print("Warning: Could not extract AddressBook — contact names will be empty", file=sys.stderr)
+        app_logger.error("Warning: Could not extract AddressBook — contact names will be empty")
         return {}
 
     try:
@@ -198,7 +199,7 @@ def build_contact_lookup(backup: EncryptedBackup) -> dict[str, str]:
                 dupes += 1
             lookup[key] = name
 
-        print(f"  {total_contacts} contacts, {phones} phones, {emails} emails, {dupes} duplicates, {len(lookup)} unique keys")
+        app_logger.info(f"  {total_contacts} contacts, {phones} phones, {emails} emails, {dupes} duplicates, {len(lookup)} unique keys")
         return lookup
     finally:
         os.unlink(tmp_path)
@@ -308,7 +309,7 @@ def read_calls_from_db(db_path: str, contacts: dict[str, str]) -> list[dict]:
 def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
     backup = EncryptedBackup(backup_directory=backup_dir, passphrase=passphrase)
 
-    print("Extracting contacts...")
+    app_logger.info("Extracting contacts...")
     contacts = build_contact_lookup(backup)
 
     seen_unique_ids: set[str] = set()
@@ -323,7 +324,7 @@ def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
         except FileNotFoundError:
             continue
         except Exception as e:
-            print(f"  Skipping {label}: {e}", file=sys.stderr)
+            app_logger.error(f"  Skipping {label}: {e}")
             continue
 
         try:
@@ -337,7 +338,7 @@ def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
                     seen_unique_ids.add(uid)
                 all_calls.append(call)
                 new_count += 1
-            print(f"  {label}: {new_count} calls")
+            app_logger.info(f"  {label}: {new_count} calls")
         finally:
             os.unlink(tmp_path)
 
@@ -346,7 +347,7 @@ def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
 
 
 def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str, excel_compat: bool) -> tuple[int, str]:
-    print("Decrypting backup...")
+    app_logger.info("Decrypting backup...")
     calls = extract_calls(backup_dir, passphrase)
 
     if not calls:
@@ -381,7 +382,7 @@ def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str,
         writer.writeheader()
         writer.writerows(calls)
 
-    print(f"Exported {len(calls)} calls to {resolved_path}")
+    app_logger.info(f"Exported {len(calls)} calls to {resolved_path}")
 
     # Print statistics summary
     total_calls = len(calls)
@@ -407,16 +408,16 @@ def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str,
             contact_counter[identifier] += 1
     top_contacts = contact_counter.most_common(3)
 
-    print("\n--- Export Summary ---")
-    print(f"Total Calls:      {total_calls}")
-    print(f"Total Duration:   {duration_str}")
-    print(f"Directions:       Incoming: {incoming} | Outgoing: {outgoing} | Missed: {missed}")
-    print(f"Status:           Answered: {answered} | Unanswered/Missed: {total_calls - answered}")
+    app_logger.info("\n--- Export Summary ---")
+    app_logger.info(f"Total Calls:      {total_calls}")
+    app_logger.info(f"Total Duration:   {duration_str}")
+    app_logger.info(f"Directions:       Incoming: {incoming} | Outgoing: {outgoing} | Missed: {missed}")
+    app_logger.info(f"Status:           Answered: {answered} | Unanswered/Missed: {total_calls - answered}")
     if top_contacts:
-        print("Top 3 Contacts:")
+        app_logger.info("Top 3 Contacts:")
         for idx, (contact, count) in enumerate(top_contacts, 1):
-            print(f"  {idx}. {contact} ({count} calls)")
-    print("----------------------\n")
+            app_logger.info(f"  {idx}. {contact} ({count} calls)")
+    app_logger.info("----------------------\n")
 
     return total_calls, resolved_path
 
@@ -434,18 +435,18 @@ def main():
     else:
         backups = find_backups()
         if not backups:
-            print("No iOS backups found.", file=sys.stderr)
-            print("Create one via Finder/iTunes (with encryption enabled)", file=sys.stderr)
+            app_logger.error("No iOS backups found.")
+            app_logger.error("Create one via Finder/iTunes (with encryption enabled)")
             sys.exit(1)
 
         if len(backups) == 1:
             backup_dir = str(backups[0])
-            print(f"Found backup: {backup_dir}")
+            app_logger.info(f"Found backup: {backup_dir}")
         else:
-            print("Multiple backups found:")
+            app_logger.info("Multiple backups found:")
             for i, b in enumerate(backups):
                 mtime = datetime.fromtimestamp(b.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
-                print(f"  [{i}] {b.name} (modified: {mtime})")
+                app_logger.info(f"  [{i}] {b.name} (modified: {mtime})")
             choice = input("Select backup number: ").strip()
             backup_dir = str(backups[int(choice)])
 
@@ -460,7 +461,7 @@ def main():
                 )
                 if result.returncode == 0 and result.stdout.strip():
                     passphrase = result.stdout.strip()
-                    print("Passphrase loaded from 1Password")
+                    app_logger.info("Passphrase loaded from 1Password")
             except (subprocess.TimeoutExpired, FileNotFoundError):
                 pass
     if not passphrase:
@@ -471,7 +472,7 @@ def main():
             )
             if result.returncode == 0 and result.stdout.strip():
                 passphrase = result.stdout.strip()
-                print("Passphrase loaded from Keychain")
+                app_logger.info("Passphrase loaded from Keychain")
         except (subprocess.TimeoutExpired, FileNotFoundError):
             pass
     if not passphrase:
@@ -480,7 +481,7 @@ def main():
     try:
         process_and_export_calls(backup_dir, passphrase, args.output, args.excel)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        app_logger.error(f"Error: {e}")
         sys.exit(1)
 
 

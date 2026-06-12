@@ -4,6 +4,7 @@ import shutil
 import os
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
 from export_calls import build_contact_lookup, apple_timestamp_to_datetime
+from logger import app_logger
 
 # iOS dates are typically measured in seconds from Jan 1, 2001
 APPLE_EPOCH_OFFSET = 978307200
@@ -28,8 +29,8 @@ class DataViewerBackend:
             self.backup.extract_file(relative_path=RelativePath.CALL_HISTORY, output_filename=calls_path)
             self.calls_db = sqlite3.connect(calls_path, check_same_thread=False)
             self.calls_db.row_factory = sqlite3.Row
-        except Exception:
-            pass # Non fatale
+        except Exception as e:
+            app_logger.error("Errore estrazione Calls DB per Viewer", exc_info=True)
             
         # Extract SMS DB
         sms_path = os.path.join(self.temp_dir, "sms.sqlite")
@@ -37,8 +38,8 @@ class DataViewerBackend:
             self.backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=sms_path)
             self.sms_db = sqlite3.connect(sms_path, check_same_thread=False)
             self.sms_db.row_factory = sqlite3.Row
-        except Exception:
-            pass # Non fatale
+        except Exception as e:
+            app_logger.error("Errore estrazione SMS DB per Viewer", exc_info=True)
 
     def search_calls(self, search_term: str = "", limit: int = 100):
         if not self.calls_db:

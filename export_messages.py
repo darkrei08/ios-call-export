@@ -1,3 +1,4 @@
+from logger import app_logger
 import os
 import sys
 import json
@@ -16,12 +17,12 @@ def get_messages_data(backup_dir: str, passphrase: str) -> dict:
     """Extract sms.db and build the messages dictionary grouped by handle."""
     backup = EncryptedBackup(backup_directory=backup_dir, passphrase=passphrase)
     
-    print("Building contact lookup from AddressBook...")
+    app_logger.info("Building contact lookup from AddressBook...")
     contact_lookup = build_contact_lookup(backup)
 
     tmp_path = tempfile.mktemp(suffix=".sqlite")
     try:
-        print("Extracting sms.db...")
+        app_logger.info("Extracting sms.db...")
         # Redirect stdout temporarily if library is noisy
         backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=tmp_path)
     except Exception as e:
@@ -89,10 +90,10 @@ def get_messages_data(backup_dir: str, passphrase: str) -> dict:
 
 def export_messages_to_csv_and_html(backup_dir: str, passphrase: str, output_html: str, output_csv: str, excel_compat: bool = True):
     """Main entry point to build the HTML viewer and the CSV export."""
-    print("Inizio estrazione messaggi...")
+    app_logger.info("Inizio estrazione messaggi...")
     chat_data = get_messages_data(backup_dir, passphrase)
     
-    print(f"Trovate conversazioni per {len(chat_data)} contatti.")
+    app_logger.info(f"Trovate conversazioni per {len(chat_data)} contatti.")
     
     # --- HTML EXPORT ---
     template_path = Path(__file__).parent / "assets" / "messages_template.html"
@@ -107,7 +108,7 @@ def export_messages_to_csv_and_html(backup_dir: str, passphrase: str, output_htm
     
     with open(output_html, "w", encoding="utf-8") as f:
         f.write(html_content)
-    print(f"File Viewer generato con successo: {output_html}")
+    app_logger.info(f"File Viewer generato con successo: {output_html}")
     
     # --- CSV EXPORT ---
     sep = ';' if excel_compat else ','
@@ -131,7 +132,7 @@ def export_messages_to_csv_and_html(backup_dir: str, passphrase: str, output_htm
                     msg['service'],
                     msg['text']
                 ])
-    print(f"File CSV generato con successo: {output_csv}")
+    app_logger.info(f"File CSV generato con successo: {output_csv}")
     
     return len(chat_data)
 
@@ -139,7 +140,7 @@ if __name__ == "__main__":
     from export_calls import find_backups
     backups = find_backups()
     if not backups:
-        print("Nessun backup trovato.")
+        app_logger.info("Nessun backup trovato.")
         sys.exit(1)
         
     backup_dir = str(backups[0])

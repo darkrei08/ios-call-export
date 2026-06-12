@@ -161,14 +161,14 @@ class App(tk.Tk):
         self.btn_theme = ttk.Button(self.header_frame, text="🌙 Tema Scuro", style="Secondary.TButton", command=self.switch_theme)
         self.btn_theme.pack(side='right', padx=32, pady=32)
 
-        title_label = tttk.Label(self.header_frame, text="iOS Backup Explorer", style="Title.TLabel")
+        title_label = ttk.Label(self.header_frame, text="iOS Backup Explorer", style="Title.TLabel")
         title_label.pack(anchor='w', padx=32, pady=(20, 4))
         
-        subtitle_label = tttk.Label(self.header_frame, text="Esplora ed esporta dati dai tuoi backup iOS crittografati.", style="Subtitle.TLabel")
+        subtitle_label = ttk.Label(self.header_frame, text="Esplora ed esporta dati dai tuoi backup iOS crittografati.", style="Subtitle.TLabel")
         subtitle_label.pack(anchor='w', padx=32)
 
         # Main scrollable container
-        container = tttk.Frame(self, padding=16)
+        container = ttk.Frame(self, padding=16)
         container.pack(fill='both', expand=True)
 
         # Global Credentials Section
@@ -205,11 +205,11 @@ class App(tk.Tk):
         self.notebook.pack(fill='both', expand=True, pady=(0, 16))
         
         # Tab 1: Export
-        self.tab_export = tttk.Frame(self.notebook)
-        self.tab_view_calls = tttk.Frame(self.notebook)
-        self.tab_view_msgs = tttk.Frame(self.notebook)
-        self.tab_explorer = tttk.Frame(self.notebook)
-        self.tab_wifi = tttk.Frame(self.notebook)
+        self.tab_export = ttk.Frame(self.notebook)
+        self.tab_view_calls = ttk.Frame(self.notebook)
+        self.tab_view_msgs = ttk.Frame(self.notebook)
+        self.tab_explorer = ttk.Frame(self.notebook)
+        self.tab_wifi = ttk.Frame(self.notebook)
         
         self.notebook.add(self.tab_export, text="📥 Esportazioni")
         self.notebook.add(self.tab_view_calls, text="📞 Vista Chiamate")
@@ -241,17 +241,17 @@ class App(tk.Tk):
         container = ttk.Frame(self.tab_export, padx=16, pady=16)
         container.pack(fill='both', expand=True)
 
-        lbl_desc = tttk.Label(container, text="Seleziona i dati da esportare dal tuo backup crittografato.", style="TLabel")
+        lbl_desc = ttk.Label(container, text="Seleziona i dati da esportare dal tuo backup crittografato.", style="TLabel")
         lbl_desc.pack(anchor='w', pady=(0, 16))
 
         # Checkboxes for export types
         self.export_calls_var = tk.BooleanVar(value=True)
         self.export_msgs_var = tk.BooleanVar(value=False)
 
-        chk_calls = tttk.Checkbutton(container, text="📞 Cronologia Chiamate (CSV)", variable=self.export_calls_var)
+        chk_calls = ttk.Checkbutton(container, text="📞 Cronologia Chiamate (CSV)", variable=self.export_calls_var)
         chk_calls.pack(anchor='w', pady=(0, 4))
 
-        chk_msgs = tttk.Checkbutton(container, text="💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)", variable=self.export_msgs_var)
+        chk_msgs = ttk.Checkbutton(container, text="💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)", variable=self.export_msgs_var)
         chk_msgs.pack(anchor='w', pady=(0, 16))
 
         # Config Frame
@@ -259,7 +259,7 @@ class App(tk.Tk):
         config_frame.pack(fill='x', pady=(0, 20))
         
         self.excel_var = tk.BooleanVar(value=True)
-        chk_excel = tttk.Checkbutton(config_frame, text="Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)", variable=self.excel_var)
+        chk_excel = ttk.Checkbutton(config_frame, text="Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)", variable=self.excel_var)
         chk_excel.pack(anchor='w')
 
         # Action Bar
@@ -271,7 +271,7 @@ class App(tk.Tk):
 
         self.spinner = ttk.Progressbar(action_frame, mode='indeterminate', length=150)
         
-        lbl_logs = tttk.Label(container, text="Log Operazioni:", style="TLabel")
+        lbl_logs = ttk.Label(container, text="Log Operazioni:", style="TLabel")
         lbl_logs.pack(anchor='w', pady=(16, 4))
         
         self.log_text = ScrolledText(container, height=10, padx=8, pady=8)
@@ -300,6 +300,7 @@ class App(tk.Tk):
                 self.after(0, self._on_db_loaded)
             except Exception as e:
                 err_msg = str(e)
+                app_logger.error("Errore caricamento database", exc_info=True)
                 self.after(0, lambda err=err_msg: messagebox.showerror("Errore", err))
         
         threading.Thread(target=_load, daemon=True).start()
@@ -323,7 +324,7 @@ class App(tk.Tk):
         self.search_calls_var.trace("w", lambda *args: self.after(300, self.update_calls_view))
         search_entry = ttk.Entry(top_frame, textvariable=self.search_calls_var, width=40)
         search_entry.pack(side='right')
-        tttk.Label(top_frame, text="Cerca:").pack(side='right', padx=8)
+        ttk.Label(top_frame, text="Cerca:").pack(side='right', padx=8)
         
         columns = ("Data", "Contatto/Numero", "Durata", "Direzione", "Servizio")
         self.tree_calls = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse')
@@ -359,7 +360,7 @@ class App(tk.Tk):
         self.search_msgs_var.trace("w", lambda *args: self.after(300, self.update_msgs_view))
         search_entry = ttk.Entry(top_frame, textvariable=self.search_msgs_var, width=40)
         search_entry.pack(side='right')
-        tttk.Label(top_frame, text="Cerca (Testo o Numero):").pack(side='right', padx=8)
+        ttk.Label(top_frame, text="Cerca (Testo o Numero):").pack(side='right', padx=8)
         
         columns = ("Data", "Contatto", "Direzione", "Servizio", "Testo")
         self.tree_msgs = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse')
@@ -419,11 +420,11 @@ class App(tk.Tk):
         self.search_var.trace("w", self.filter_files)
         self.search_entry = ttk.Entry(self.action_frame, textvariable=self.search_var, width=30)
         self.search_entry.pack(side='right')
-        self.lbl_search = tttk.Label(self.action_frame, text="Cerca:", style="TLabel")
+        self.lbl_search = ttk.Label(self.action_frame, text="Cerca:", style="TLabel")
         self.lbl_search.pack(side='right', padx=8)
 
         # Path label for Live mode
-        self.lbl_live_path = tttk.Label(container, text="Percorso: /", style="TLabel")
+        self.lbl_live_path = ttk.Label(container, text="Percorso: /", style="TLabel")
 
         columns = ("col1", "col2")
         self.file_tree = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse')
@@ -453,7 +454,7 @@ class App(tk.Tk):
         container = ttk.Frame(self.tab_wifi, padx=24, pady=24)
         container.pack(fill='both', expand=True)
         
-        tttk.Label(container, text="Estrazione Password Wi-Fi (In arrivo)", style="Section.TLabel").pack(pady=(0, 16))
+        ttk.Label(container, text="Estrazione Password Wi-Fi (In arrivo)", style="Section.TLabel").pack(pady=(0, 16))
         
         msg = ("Le password del Wi-Fi sono conservate nel Keychain cifrato del dispositivo.\n"
                "L'estrazione del Keychain richiederà una gestione avanzata della decrittografia.\n\n"
@@ -535,6 +536,7 @@ class App(tk.Tk):
             self.log_message(f"📁 Selezionato manualmente backup in: {dir_path}\n")
 
     def log_message(self, message):
+        app_logger.info(message.strip())
         self.log_text.configure(state='normal')
         self.log_text.insert('end', message)
         self.log_text.see('end')
@@ -587,9 +589,8 @@ class App(tk.Tk):
 
             self.after(0, self._export_success)
         except Exception as e:
-            import traceback
-            err_details = traceback.format_exc()
-            self.after(0, self._export_failure, str(e), err_details)
+            app_logger.error("Errore durante l'esportazione in background", exc_info=True)
+            self.after(0, self._export_failure, str(e))
 
     def _export_success(self):
         self.spinner.stop()
@@ -598,7 +599,7 @@ class App(tk.Tk):
         self.log_message("✅ Tutte le operazioni di esportazione sono state completate!\nControlla i file sul Desktop.\n")
         messagebox.showinfo("Successo", "Esportazione completata!\nControlla i file sul Desktop.")
 
-    def _export_failure(self, error_msg, details):
+    def _export_failure(self, error_msg):
         self.spinner.stop()
         self.spinner.pack_forget()
         self.btn_export.configure(state='normal')
@@ -658,6 +659,7 @@ class App(tk.Tk):
             files = get_backup_files(backup_dir, passphrase)
             self.after(0, self._populate_backup_tree, files, None)
         except Exception as e:
+            app_logger.error("Errore lettura backup", exc_info=True)
             self.after(0, self._populate_backup_tree, [], str(e))
 
     def _populate_backup_tree(self, files, error_msg):
@@ -696,7 +698,8 @@ class App(tk.Tk):
         except ImportError as e:
             self.after(0, self._populate_live_tree, None, [], f"Modulo mancante: {e}. Prova: pip install pymobiledevice3")
         except Exception as e:
-            self.after(0, self._populate_live_tree, None, [], str(e))
+            app_logger.error("Errore popolamento albero live", exc_info=True)
+            self.after(0, self._populate_live_tree, None, [], f"Errore lettura live: {e}")
 
     def _populate_live_tree(self, info, files, error_msg):
         self.btn_load_files.configure(state='normal', text="Carica Lista File")
