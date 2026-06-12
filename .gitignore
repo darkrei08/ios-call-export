@@ -12,3 +12,14 @@ wheels/
 # Secrets and output
 .env
 *.csv
+
+# AI tools and agents configuration
+.agents/
+.claude/
+.cursor/
+.gemini/
+.kiro/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+graphify-out/

@@ -15,6 +15,8 @@ import tempfile
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+import phonenumbers
+from phonenumbers import geocoder
 from dotenv import load_dotenv
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
 
@@ -44,17 +46,45 @@ CALL_TYPES = {
     16: "FaceTime Audio",
 }
 
-DEFAULT_BACKUP_DIR = Path.home() / "Library" / "Application Support" / "MobileSync" / "Backup"
-
-
 def find_backups() -> list[Path]:
-    if not DEFAULT_BACKUP_DIR.exists():
-        return []
-    return sorted(
-        [p for p in DEFAULT_BACKUP_DIR.iterdir() if p.is_dir() and (p / "Manifest.db").exists()],
-        key=lambda p: p.stat().st_mtime,
-        reverse=True,
-    )
+    backup_dirs = []
+    home = Path.home()
+    if sys.platform == "darwin":  # macOS
+        backup_dirs.extend([
+            home / "Library" / "Application Support" / "MobileSync" / "Backup",
+            home / "Library" / "Application Support" / "iMazing" / "Backups",
+        ])
+    elif sys.platform == "win32":  # Windows
+        appdata = os.environ.get("APPDATA")
+        userprofile = os.environ.get("USERPROFILE")
+        if appdata:
+            backup_dirs.extend([
+                Path(appdata) / "Apple Computer" / "MobileSync" / "Backup",
+                Path(appdata) / "iMazing" / "Backups",
+            ])
+        if userprofile:
+            backup_dirs.extend([
+                Path(userprofile) / "Apple" / "MobileSync" / "Backup",
+                Path(userprofile) / "Apple Computer" / "MobileSync" / "Backup",
+            ])
+    else:  # Linux / others
+        backup_dirs.extend([
+            home / "MobileSync" / "Backup",
+            home / "Backups",
+        ])
+
+    found_backups = []
+    for b_dir in backup_dirs:
+        if b_dir.exists():
+            try:
+                for p in b_dir.iterdir():
+                    if p.is_dir() and (p / "Manifest.db").exists():
+                        found_backups.append(p)
+            except OSError:
+                continue
+
+    found_backups.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return found_backups
 
 
 def apple_timestamp_to_datetime(timestamp: float | None) -> datetime | None:
@@ -77,6 +107,38 @@ def normalize_phone(number: str) -> str:
     if len(digits) > 10:
         digits = digits[-10:]
     return digits
+
+
+def parse_phone_info(number: str) -> dict:
+    info = {
+        "country_prefix": "",
+        "national_number": "",
+        "phone_country": "",
+    }
+    if not number:
+        return info
+
+    if "@" in number:
+        return info
+
+    try:
+        clean_number = number
+        if clean_number.startswith("00"):
+            clean_number = "+" + clean_number[2:]
+        elif not clean_number.startswith("+"):
+            if clean_number.startswith("39") and len(clean_number) >= 11:
+                clean_number = "+" + clean_number
+
+        parsed = phonenumbers.parse(clean_number, "IT")
+        if phonenumbers.is_possible_number(parsed):
+            info["country_prefix"] = f"+{parsed.country_code}"
+            info["national_number"] = str(parsed.national_number)
+            country_it = geocoder.country_name_for_number(parsed, "it")
+            info["phone_country"] = country_it or geocoder.country_name_for_number(parsed, "en")
+    except Exception:
+        pass
+
+    return info
 
 
 def build_contact_lookup(backup: EncryptedBackup) -> dict[str, str]:
@@ -217,6 +279,8 @@ def read_calls_from_db(db_path: str, contacts: dict[str, str]) -> list[dict]:
         dt_local = dt.astimezone() if dt else None
         end_local = end_dt.astimezone() if end_dt else None
 
+        phone_info = parse_phone_info(address)
+
         calls.append({
             "id": row["Z_PK"],
             "unique_id": row["ZUNIQUE_ID"] if has_unique_id else "",
@@ -224,6 +288,9 @@ def read_calls_from_db(db_path: str, contacts: dict[str, str]) -> list[dict]:
             "end": end_local.strftime("%Y-%m-%d %H:%M:%S") if end_local else "",
             "contact_name": contact_name,
             "phone_number": address,
+            "country_prefix": phone_info["country_prefix"],
+            "national_number": phone_info["national_number"],
+            "phone_country": phone_info["phone_country"],
             "duration": format_duration(row["ZDURATION"]),
             "duration_seconds": duration_secs,
             "direction": direction,
@@ -278,6 +345,82 @@ def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
     return all_calls
 
 
+def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str, excel_compat: bool) -> tuple[int, str]:
+    print("Decrypting backup...")
+    calls = extract_calls(backup_dir, passphrase)
+
+    if not calls:
+        raise ValueError("No call records found.")
+
+    resolved_path = output_path
+    if os.path.isdir(resolved_path) or resolved_path.endswith(("/", "\\")):
+        resolved_path = os.path.join(resolved_path, "calls.csv")
+
+    parent_dir = os.path.dirname(resolved_path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
+
+    if excel_compat:
+        for call in calls:
+            pn = call["phone_number"]
+            if pn and re.sub(r"[+\s\-()]", "", pn).isdigit():
+                call["phone_number"] = f'="{pn}"'
+            nn = call["national_number"]
+            if nn and nn.isdigit():
+                call["national_number"] = f'="{nn}"'
+
+    fieldnames = [
+        "id", "unique_id", "start", "end", "contact_name", "phone_number",
+        "country_prefix", "national_number", "phone_country",
+        "duration", "duration_seconds", "direction", "call_type", "answered",
+        "country_code", "service_provider", "location"
+    ]
+    with open(resolved_path, "w", newline="", encoding="utf-8-sig") as f:
+        delimiter = ";" if excel_compat else ","
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=delimiter)
+        writer.writeheader()
+        writer.writerows(calls)
+
+    print(f"Exported {len(calls)} calls to {resolved_path}")
+
+    # Print statistics summary
+    total_calls = len(calls)
+    total_secs = sum(c["duration_seconds"] for c in calls)
+    tot_m, tot_s = divmod(total_secs, 60)
+    tot_h, tot_m = divmod(tot_m, 60)
+    duration_str = f"{tot_h}h {tot_m}m {tot_s}s"
+
+    incoming = sum(1 for c in calls if c["direction"] == "Incoming")
+    outgoing = sum(1 for c in calls if c["direction"] == "Outgoing")
+    missed = sum(1 for c in calls if c["direction"] == "Missed")
+    answered = sum(1 for c in calls if c["answered"])
+
+    from collections import Counter
+    contact_counter = Counter()
+    for c in calls:
+        name = c["contact_name"]
+        number = c["phone_number"]
+        identifier = name if name else number
+        if identifier:
+            if identifier.startswith('="') and identifier.endswith('"'):
+                identifier = identifier[2:-1]
+            contact_counter[identifier] += 1
+    top_contacts = contact_counter.most_common(3)
+
+    print(f"\n--- Export Summary ---")
+    print(f"Total Calls:      {total_calls}")
+    print(f"Total Duration:   {duration_str}")
+    print(f"Directions:       Incoming: {incoming} | Outgoing: {outgoing} | Missed: {missed}")
+    print(f"Status:           Answered: {answered} | Unanswered/Missed: {total_calls - answered}")
+    if top_contacts:
+        print("Top 3 Contacts:")
+        for idx, (contact, count) in enumerate(top_contacts, 1):
+            print(f"  {idx}. {contact} ({count} calls)")
+    print(f"----------------------\n")
+
+    return total_calls, resolved_path
+
+
 def main():
     parser = argparse.ArgumentParser(description="Export iPhone call history to CSV")
     parser.add_argument("--backup-dir", help="Path to the iOS backup directory")
@@ -286,21 +429,13 @@ def main():
     parser.add_argument("--excel", action="store_true", help="Format CSV specifically for Excel (semicolon separator, text-formatted phone numbers)")
     args = parser.parse_args()
 
-    output_path = args.output
-    if os.path.isdir(output_path) or output_path.endswith(("/", "\\")):
-        output_path = os.path.join(output_path, "calls.csv")
-
-    parent_dir = os.path.dirname(output_path)
-    if parent_dir:
-        os.makedirs(parent_dir, exist_ok=True)
-
     if args.backup_dir:
         backup_dir = args.backup_dir
     else:
         backups = find_backups()
         if not backups:
-            print(f"No iOS backups found in {DEFAULT_BACKUP_DIR}", file=sys.stderr)
-            print("Create one via Finder > [your iPhone] > Back Up Now (with encryption enabled)", file=sys.stderr)
+            print("No iOS backups found.", file=sys.stderr)
+            print("Create one via Finder/iTunes (with encryption enabled)", file=sys.stderr)
             sys.exit(1)
 
         if len(backups) == 1:
@@ -342,27 +477,11 @@ def main():
     if not passphrase:
         passphrase = getpass.getpass("Backup encryption passphrase: ")
 
-    print("Decrypting backup...")
-    calls = extract_calls(backup_dir, passphrase)
-
-    if not calls:
-        print("No call records found.", file=sys.stderr)
+    try:
+        process_and_export_calls(backup_dir, passphrase, args.output, args.excel)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
-
-    if args.excel:
-        for call in calls:
-            pn = call["phone_number"]
-            if pn and re.sub(r"[+\s\-()]", "", pn).isdigit():
-                call["phone_number"] = f'="{pn}"'
-
-    fieldnames = ["id", "unique_id", "start", "end", "contact_name", "phone_number", "duration", "duration_seconds", "direction", "call_type", "answered", "country_code", "service_provider", "location"]
-    with open(output_path, "w", newline="", encoding="utf-8-sig") as f:
-        delimiter = ";" if args.excel else ","
-        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=delimiter)
-        writer.writeheader()
-        writer.writerows(calls)
-
-    print(f"Exported {len(calls)} calls to {output_path}")
 
 
 if __name__ == "__main__":
