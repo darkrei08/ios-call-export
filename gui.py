@@ -173,7 +173,6 @@ class App(tk.Tk):
 
         # Global Credentials Section
         cred_frame = ttk.Frame(container, padding=16)
-        cred_frame.configure(highlightthickness=0)
         cred_frame.pack(fill='x', pady=(0, 16))
         
         lbl_font = ('Segoe UI', 10, 'bold')
@@ -473,26 +472,8 @@ class App(tk.Tk):
         import sv_ttk
         self.is_dark_mode = not self.is_dark_mode
         sv_ttk.set_theme('dark' if self.is_dark_mode else 'light')
-
-    def old_toggle_theme(self):
-        self.is_dark_mode = not self.is_dark_mode
-        self.setup_styles()
-        
-        # Update specific standard tk widgets
-        self.configure(bg=self.bg_color)
-        self.header_frame.configure(bg=self.card_color)
-        self.accent_line.configure(bg=self.border_color)
-        
-        self.lbl_backup.configure(bg=self.card_color)
-        self.lbl_pass.configure(bg=self.card_color)
-        self.show_pass_check.configure(bg=self.card_color)
-        
-        self.log_text.configure(bg=self.log_bg)
-
-        if self.is_dark_mode:
-            self.btn_theme.configure(text="☀️ Tema Chiaro")
-        else:
-            self.btn_theme.configure(text="🌙 Tema Scuro")
+        if hasattr(self, 'btn_theme'):
+            self.btn_theme.configure(text="☀️ Tema Chiaro" if self.is_dark_mode else "🌙 Tema Scuro")
 
     def toggle_pass_visibility(self):
         if self.show_pass_var.get():
