@@ -172,7 +172,7 @@ class App(tk.Tk):
         container.pack(fill='both', expand=True)
 
         # Global Credentials Section
-        cred_frame = ttk.Frame(container, padx=16, pady=16)
+        cred_frame = ttk.Frame(container, padding=16)
         cred_frame.configure(highlightthickness=0)
         cred_frame.pack(fill='x', pady=(0, 16))
         
@@ -238,7 +238,7 @@ class App(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def create_export_tab(self):
-        container = ttk.Frame(self.tab_export, padx=16, pady=16)
+        container = ttk.Frame(self.tab_export, padding=16)
         container.pack(fill='both', expand=True)
 
         lbl_desc = ttk.Label(container, text="Seleziona i dati da esportare dal tuo backup crittografato.", style="TLabel")
@@ -255,7 +255,7 @@ class App(tk.Tk):
         chk_msgs.pack(anchor='w', pady=(0, 16))
 
         # Config Frame
-        config_frame = ttk.LabelFrame(container, text="Impostazioni Chiamate", padx=16, pady=16)
+        config_frame = ttk.LabelFrame(container, text="Impostazioni Chiamate", padding=16)
         config_frame.pack(fill='x', pady=(0, 20))
         
         self.excel_var = tk.BooleanVar(value=True)
@@ -317,7 +317,7 @@ class App(tk.Tk):
         self.update_msgs_view()
 
     def create_view_calls_tab(self):
-        container = ttk.Frame(self.tab_view_calls, padx=16, pady=16)
+        container = ttk.Frame(self.tab_view_calls, padding=16)
         container.pack(fill='both', expand=True)
         
         top_frame = ttk.Frame(container)
@@ -353,7 +353,7 @@ class App(tk.Tk):
             self.tree_calls.insert("", "end", values=r)
 
     def create_view_msgs_tab(self):
-        container = ttk.Frame(self.tab_view_msgs, padx=16, pady=16)
+        container = ttk.Frame(self.tab_view_msgs, padding=16)
         container.pack(fill='both', expand=True)
         
         top_frame = ttk.Frame(container)
@@ -397,7 +397,7 @@ class App(tk.Tk):
             self.tree_msgs.insert("", "end", values=r)
 
     def create_explorer_tab(self):
-        container = ttk.Frame(self.tab_explorer, padx=16, pady=16)
+        container = ttk.Frame(self.tab_explorer, padding=16)
         container.pack(fill='both', expand=True)
         
         # Source selector
@@ -457,7 +457,7 @@ class App(tk.Tk):
         self.on_source_changed()
 
     def create_wifi_tab(self):
-        container = ttk.Frame(self.tab_wifi, padx=24, pady=24)
+        container = ttk.Frame(self.tab_wifi, padding=24)
         container.pack(fill='both', expand=True)
         
         ttk.Label(container, text="Estrazione Password Wi-Fi (In arrivo)", style="Section.TLabel").pack(pady=(0, 16))
