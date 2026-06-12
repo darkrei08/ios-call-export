@@ -23,6 +23,7 @@ Whether you need to archive your calls for billing purposes, legal requirements,
 
 ### 🌟 Why Choose iOS Call Exporter?
 * 🔒 **100% Privacy-First**: Everything runs locally on your machine. Your backup password and call data never leave your computer.
+* 🔍 **Auto Backup Discovery**: No need to manually hunt for backup folders. The app automatically scans default **iTunes/Finder** and **iMazing** backup paths on macOS and Windows, and presents all detected backups sorted by date.
 * 📞 **VoIP Support**: It doesn't just export carrier calls. It automatically detects and formats calls from **WhatsApp, Microsoft Teams, FaceTime, Telegram**, and more.
 * 📇 **Smart Contact Matching**: Say goodbye to raw phone numbers. The tool parses your iOS address book to seamlessly attach contact names to each call.
 * 📊 **Excel-Ready**: Generates a rich CSV tailored to avoid annoying scientific notation in Microsoft Excel, including clean human-readable call durations and international country prefixes.
@@ -43,6 +44,28 @@ Beautifully parsed data ready for pivot tables or billing reports.
 <p align="center">
   <img src="assets/data_mockup.png" width="650" alt="iOS Call Exporter Data Mockup">
 </p>
+
+#### 📄 Exported CSV — What You Get
+Here's a real preview of the exported file opened in Excel. Each row is a call, with all metadata parsed and enriched automatically:
+<p align="center">
+  <img src="assets/csv_export_example.png" width="700" alt="CSV Export Example opened in Excel">
+</p>
+
+<details>
+<summary><strong>🔍 Raw CSV snippet (click to expand)</strong></summary>
+
+```csv
+id;unique_id;start;end;contact_name;phone_number;duration;duration_seconds;direction;call_type;answered;country_code;service_provider;location
+111;78FFE58A-...;2025-10-18 20:38:16;2025-10-18 20:38:45;Maria Rossi;="+393471234567";00:00:29;29;Incoming;Phone;True;IT;com.apple.Telephony;Italia
+98;21F655FA-...;2025-10-20 10:05:22;2025-10-20 10:05:27;;="+393495678901";00:00:05;5;Incoming;Phone;True;IT;com.apple.Telephony;Italia
+45;02EC87D5-...;2025-10-23 17:10:25;2025-10-23 17:10:25;;="+393397654321";00:00:00;0;Missed;Phone;False;IT;com.apple.Telephony;Italia
+120;F9060753-...;2025-10-31 21:45:28;2025-10-31 21:45:51;Francesco Verdi;="+393423456789";00:00:23;23;Outgoing;FaceTime Video;True;;com.apple.FaceTime;Italia
+3008;7E34EFB5-...;2026-05-27 15:56:35;2026-05-27 16:10:45;Anna Colombo;="+393283210456";00:14:09;849;Incoming;WhatsApp;True;;net.whatsapp.WhatsApp;Italia
+```
+
+> **Note:** Phone numbers are wrapped in `="+39..."` to prevent Excel from mangling them with scientific notation.
+
+</details>
 
 ---
 
@@ -71,7 +94,9 @@ Launch the graphical interface with:
 ```bash
 uv run python gui.py
 ```
-*The app will automatically find your backup. Enter your password, choose where to save the CSV, and you're done!*
+*The app will automatically find your backup from iTunes/Finder or iMazing. Enter your password, choose where to save the CSV, and you're done!*
+
+> 💡 **Tip:** If you use **iMazing** to manage your iPhone backups, iOS Call Exporter will detect those too — no extra configuration needed.
 
 ---
 
@@ -83,7 +108,22 @@ If you prefer the terminal or want to automate the export via cron jobs, you can
 ```bash
 uv run python export_calls.py
 ```
-*By default, this script auto-detects the most recent backup and outputs `calls.csv`.*
+*By default, this script auto-detects the most recent backup from iTunes/Finder or iMazing and outputs `calls.csv`.*
+
+#### 🔍 Automatic Backup Discovery
+Both the GUI and CLI automatically scan the following default paths to find valid iOS backups:
+
+| Platform | Source | Path |
+|---|---|---|
+| **macOS** | iTunes / Finder | `~/Library/Application Support/MobileSync/Backup/` |
+| **macOS** | iMazing | `~/Library/Application Support/iMazing/Backups/` |
+| **Windows** | iTunes (legacy) | `%APPDATA%\Apple Computer\MobileSync\Backup\` |
+| **Windows** | Apple Devices | `%USERPROFILE%\Apple\MobileSync\Backup\` |
+| **Windows** | iMazing | `%APPDATA%\iMazing\Backups\` |
+
+Backups are validated by checking for the presence of `Manifest.db` and automatically sorted by modification date (most recent first).
+
+> If your backup is stored in a non-standard location, you can always specify it manually with `--backup-dir` or by clicking "Sfoglia..." (Browse) in the GUI.
 
 #### Advanced Options
 ```text
@@ -142,6 +182,7 @@ Che tu abbia bisogno di archiviare le chiamate per scopi di fatturazione, requis
 
 ### 🌟 Perché Scegliere iOS Call Exporter?
 * 🔒 **Privacy al 100%**: Tutto viene eseguito localmente sul tuo computer. La password del tuo backup e i dati delle tue chiamate non lasciano mai la tua macchina.
+* 🔍 **Rilevamento Automatico dei Backup**: Non serve cercare manualmente le cartelle. L'app scansiona automaticamente i percorsi di default di **iTunes/Finder** e **iMazing** su macOS e Windows, e presenta tutti i backup rilevati ordinati per data.
 * 📞 **Supporto VoIP**: Non esporta solo le chiamate standard. Rileva e formatta automaticamente le chiamate di **WhatsApp, Microsoft Teams, FaceTime, Telegram** e molte altre app.
 * 📇 **Riconoscimento Contatti Intelligente**: Dì addio ai numeri di telefono illeggibili. Il tool analizza la tua rubrica iOS per associare il nome corretto a ogni chiamata.
 * 📊 **Ottimizzato per Excel**: Genera un file CSV studiato appositamente per evitare la fastidiosa notazione scientifica di Microsoft Excel, includendo durate leggibili e prefissi internazionali.
@@ -162,6 +203,28 @@ Dati elaborati e pronti per tabelle pivot o report aziendali.
 <p align="center">
   <img src="assets/data_mockup.png" width="650" alt="Mockup dei dati esportati">
 </p>
+
+#### 📄 CSV Esportato — Cosa Otterrai
+Ecco un'anteprima reale del file esportato aperto in Excel. Ogni riga rappresenta una chiamata, con tutti i metadati analizzati e arricchiti automaticamente:
+<p align="center">
+  <img src="assets/csv_export_example.png" width="700" alt="Esempio di CSV esportato aperto in Excel">
+</p>
+
+<details>
+<summary><strong>🔍 Esempio CSV grezzo (clicca per espandere)</strong></summary>
+
+```csv
+id;unique_id;start;end;contact_name;phone_number;duration;duration_seconds;direction;call_type;answered;country_code;service_provider;location
+111;78FFE58A-...;2025-10-18 20:38:16;2025-10-18 20:38:45;Maria Rossi;="+393471234567";00:00:29;29;Incoming;Phone;True;IT;com.apple.Telephony;Italia
+98;21F655FA-...;2025-10-20 10:05:22;2025-10-20 10:05:27;;="+393495678901";00:00:05;5;Incoming;Phone;True;IT;com.apple.Telephony;Italia
+45;02EC87D5-...;2025-10-23 17:10:25;2025-10-23 17:10:25;;="+393397654321";00:00:00;0;Missed;Phone;False;IT;com.apple.Telephony;Italia
+120;F9060753-...;2025-10-31 21:45:28;2025-10-31 21:45:51;Francesco Verdi;="+393423456789";00:00:23;23;Outgoing;FaceTime Video;True;;com.apple.FaceTime;Italia
+3008;7E34EFB5-...;2026-05-27 15:56:35;2026-05-27 16:10:45;Anna Colombo;="+393283210456";00:14:09;849;Incoming;WhatsApp;True;;net.whatsapp.WhatsApp;Italia
+```
+
+> **Nota:** I numeri di telefono sono avvolti in `="+39..."` per impedire a Excel di convertirli in notazione scientifica.
+
+</details>
 
 ---
 
@@ -190,7 +253,9 @@ Avvia l'interfaccia grafica digitando:
 ```bash
 uv run python gui.py
 ```
-*L'app troverà automaticamente il tuo backup. Inserisci la password, scegli dove salvare il CSV, ed è fatta!*
+*L'app troverà automaticamente il tuo backup da iTunes/Finder o iMazing. Inserisci la password, scegli dove salvare il CSV, ed è fatta!*
+
+> 💡 **Suggerimento:** Se usi **iMazing** per gestire i backup del tuo iPhone, iOS Call Exporter rileva anche quelli — nessuna configurazione aggiuntiva richiesta.
 
 ---
 
@@ -202,7 +267,22 @@ Se preferisci il terminale o vuoi automatizzare l'esportazione, puoi usare diret
 ```bash
 uv run python export_calls.py
 ```
-*Di default, lo script rileva l'ultimo backup e genera un file `calls.csv`.*
+*Di default, lo script rileva l'ultimo backup da iTunes/Finder o iMazing e genera un file `calls.csv`.*
+
+#### 🔍 Rilevamento Automatico dei Backup
+Sia la GUI che la CLI scansionano automaticamente i seguenti percorsi per trovare i backup iOS validi:
+
+| Piattaforma | Sorgente | Percorso |
+|---|---|---|
+| **macOS** | iTunes / Finder | `~/Library/Application Support/MobileSync/Backup/` |
+| **macOS** | iMazing | `~/Library/Application Support/iMazing/Backups/` |
+| **Windows** | iTunes (legacy) | `%APPDATA%\Apple Computer\MobileSync\Backup\` |
+| **Windows** | Apple Devices | `%USERPROFILE%\Apple\MobileSync\Backup\` |
+| **Windows** | iMazing | `%APPDATA%\iMazing\Backups\` |
+
+I backup vengono validati controllando la presenza di `Manifest.db` e ordinati automaticamente per data di modifica (il più recente per primo).
+
+> Se il tuo backup si trova in una posizione non standard, puoi sempre specificarlo manualmente con `--backup-dir` oppure cliccando "Sfoglia..." nella GUI.
 
 #### Opzioni Avanzate
 ```text
