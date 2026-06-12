@@ -93,5 +93,22 @@ def get_logger(name="ios_export"):
 
     return logger
 
+def dump_latest_logs(limit=100) -> str:
+    """Restituisce gli ultimi N log formattati con stack trace, pronti da copiare."""
+    try:
+        with sqlite3.connect(DB_FILE, timeout=5.0) as conn:
+            rows = conn.execute("SELECT timestamp, level, module, line, message, exc_text FROM logs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        
+        dump = []
+        for row in reversed(rows):
+            timestamp, level, module, line, message, exc_text = row
+            entry = f"[{timestamp}] [{level}] [{module}:{line}] {message}"
+            if exc_text:
+                entry += f"\n--- STACK TRACE ---\n{exc_text}\n-------------------"
+            dump.append(entry)
+        return "\n".join(dump)
+    except Exception as e:
+        return f"Impossibile leggere il database di debug: {e}"
+
 # Singleton default instance
 app_logger = get_logger()

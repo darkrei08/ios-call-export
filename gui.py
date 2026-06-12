@@ -271,9 +271,15 @@ class App(tk.Tk):
 
         self.spinner = ttk.Progressbar(action_frame, mode='indeterminate', length=150)
         
-        lbl_logs = ttk.Label(container, text="Log Operazioni:", style="TLabel")
-        lbl_logs.pack(anchor='w', pady=(16, 4))
-        
+        log_header_frame = ttk.Frame(container)
+        log_header_frame.pack(fill='x', pady=(16, 4))
+
+        lbl_logs = ttk.Label(log_header_frame, text="Log Operazioni:", style="TLabel")
+        lbl_logs.pack(side='left')
+
+        btn_copy_log = ttk.Button(log_header_frame, text="📋 Copia Log (Debug)", command=self.copy_debug_log)
+        btn_copy_log.pack(side='right')
+
         self.log_text = ScrolledText(container, height=10, padx=8, pady=8)
         self.log_text.pack(fill='both', expand=True)
 
@@ -541,6 +547,16 @@ class App(tk.Tk):
         self.log_text.insert('end', message)
         self.log_text.see('end')
         self.log_text.configure(state='disabled')
+
+    def copy_debug_log(self):
+        """Copies the comprehensive SQLite debug log (with stack traces) to clipboard."""
+        logs = dump_latest_logs(limit=200)
+        if logs.strip():
+            self.clipboard_clear()
+            self.clipboard_append(logs)
+            messagebox.showinfo("Log Copiato", "Gli ultimi eventi e gli errori dettagliati (inclusi stack trace) sono stati copiati negli appunti.\n\nOra puoi incollarli e inviarli a un'AI o a chi ti assiste!")
+        else:
+            messagebox.showwarning("Log Vuoto", "Non ci sono log da copiare.")
 
     def start_export(self):
         if not self.selected_backup_dir:
