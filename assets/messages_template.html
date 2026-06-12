@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS Messages Exporter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f3f4f6;
+            --bg-sidebar: #ffffff;
+            --bg-chat: #ffffff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --border: #e5e7eb;
+            --accent: #007aff;
+            --accent-hover: #0056b3;
+            --bubble-sent: #007aff;
+            --bubble-sent-text: #ffffff;
+            --bubble-received: #e5e5ea;
+            --bubble-received-text: #000000;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-main: #000000;
+                --bg-sidebar: #1c1c1e;
+                --bg-chat: #1c1c1e;
+                --text-main: #ffffff;
+                --text-sub: #8e8e93;
+                --border: #38383a;
+                --accent: #0a84ff;
+                --accent-hover: #409cff;
+                --bubble-sent: #0a84ff;
+                --bubble-sent-text: #ffffff;
+                --bubble-received: #3a3a3c;
+                --bubble-received-text: #ffffff;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 350px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .sidebar-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 10px; }
+        .search-box { width: 100%; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border); background-color: var(--bg-main); color: var(--text-main); font-family: inherit; }
+        
+        .chat-list { flex-grow: 1; overflow-y: auto; }
+        .chat-item { padding: 15px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+        .chat-item:hover { background-color: var(--bg-main); }
+        .chat-item.active { background-color: var(--accent); color: #fff; }
+        .chat-item.active .chat-preview, .chat-item.active .chat-date { color: rgba(255,255,255,0.8); }
+        
+        .chat-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+        .chat-name { font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+        .chat-date { font-size: 12px; color: var(--text-sub); }
+        .chat-preview { font-size: 14px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Main Chat Area */
+        .main-area { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-chat); }
+        .chat-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background-color: rgba(255,255,255,0.8); backdrop-filter: blur(10px); }
+        @media (prefers-color-scheme: dark) { .chat-header { background-color: rgba(28,28,30,0.8); } }
+        
+        .header-title { font-size: 20px; font-weight: 600; }
+        .header-subtitle { font-size: 14px; color: var(--text-sub); }
+        
+        .toolbar-btns button { background-color: var(--bg-main); border: 1px solid var(--border); color: var(--accent); padding: 8px 16px; border-radius: 8px; font-weight: 500; cursor: pointer; transition: 0.2s; font-family: inherit; margin-left: 8px;}
+        .toolbar-btns button:hover { background-color: var(--border); }
+
+        .chat-history { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        
+        /* Bubbles */
+        .message { display: flex; flex-direction: column; max-width: 70%; }
+        .msg-sent { align-self: flex-end; align-items: flex-end; }
+        .msg-received { align-self: flex-start; align-items: flex-start; }
+        
+        .bubble { padding: 12px 16px; border-radius: 18px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
+        .msg-sent .bubble { background-color: var(--bubble-sent); color: var(--bubble-sent-text); border-bottom-right-radius: 4px; }
+        .msg-received .bubble { background-color: var(--bubble-received); color: var(--bubble-received-text); border-bottom-left-radius: 4px; }
+        
+        .msg-time { font-size: 11px; color: var(--text-sub); margin-top: 4px; padding: 0 4px; }
+        
+        /* Empty State */
+        .empty-state { flex-grow: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--text-sub); }
+        .empty-state h2 { font-weight: 500; margin-bottom: 8px; }
+        
+        /* Print Styles */
+        @media print {
+            .sidebar, .toolbar-btns { display: none !important; }
+            .main-area { width: 100%; display: block; }
+            .chat-history { overflow: visible; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>Messaggi</h1>
+            <input type="text" id="searchInput" class="search-box" placeholder="Cerca contatti...">
+        </div>
+        <div class="chat-list" id="chatList">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <div class="main-area" id="mainArea">
+        <div class="empty-state" id="emptyState">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 16px; opacity: 0.5;">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z"></path>
+            </svg>
+            <h2>Seleziona una conversazione</h2>
+            <p>Scegli una chat dalla barra laterale per visualizzarne il contenuto.</p>
+        </div>
+        
+        <div class="chat-header" id="chatHeader" style="display: none;">
+            <div>
+                <div class="header-title" id="headerTitle">Contact Name</div>
+                <div class="header-subtitle" id="headerSubtitle">+39 333 1234567</div>
+            </div>
+            <div class="toolbar-btns">
+                <button onclick="exportCSV()">Esporta CSV</button>
+                <button onclick="window.print()">Stampa / PDF</button>
+            </div>
+        </div>
+        
+        <div class="chat-history" id="chatHistory" style="display: none;">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- INJECT_DATA_HERE -->
+    <script>
+        // Placeholder for python injection. DO NOT REMOVE the comment above.
+        const CHAT_DATA = {{ CHAT_DATA_JSON }};
+        
+        let currentChatId = null;
+
+        function renderChatList(filter = '') {
+            const listEl = document.getElementById('chatList');
+            listEl.innerHTML = '';
+            
+            // Convert to array to sort
+            const chats = Object.values(CHAT_DATA).filter(chat => {
+                const name = (chat.contact_name || chat.handle_id || '').toLowerCase();
+                return name.includes(filter.toLowerCase());
+            });
+
+            // Sort by most recent message
+            chats.sort((a, b) => {
+                const lastA = a.messages.length > 0 ? a.messages[a.messages.length - 1].timestamp : 0;
+                const lastB = b.messages.length > 0 ? b.messages[b.messages.length - 1].timestamp : 0;
+                return lastB - lastA; // descending
+            });
+
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `chat-item ${currentChatId === chat.handle_id ? 'active' : ''}`;
+                div.onclick = () => selectChat(chat.handle_id);
+
+                const lastMsg = chat.messages[chat.messages.length - 1];
+                const dateStr = lastMsg ? new Date(lastMsg.timestamp * 1000).toLocaleDateString() : '';
+                const preview = lastMsg ? (lastMsg.is_from_me ? 'Tu: ' : '') + lastMsg.text : '';
+
+                div.innerHTML = `
+                    <div class="chat-item-header">
+                        <div class="chat-name">${chat.contact_name || chat.handle_id}</div>
+                        <div class="chat-date">${dateStr}</div>
+                    </div>
+                    <div class="chat-preview">${escapeHtml(preview)}</div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        function selectChat(handleId) {
+            currentChatId = handleId;
+            renderChatList(document.getElementById('searchInput').value);
+            
+            const chat = CHAT_DATA[handleId];
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('chatHistory').style.display = 'flex';
+            
+            document.getElementById('headerTitle').textContent = chat.contact_name || chat.handle_id;
+            document.getElementById('headerSubtitle').textContent = chat.contact_name ? chat.handle_id : 'Sconosciuto';
+
+            const historyEl = document.getElementById('chatHistory');
+            historyEl.innerHTML = '';
+
+            chat.messages.forEach(msg => {
+                const wrapper = document.createElement('div');
+                wrapper.className = `message ${msg.is_from_me ? 'msg-sent' : 'msg-received'}`;
+                
+                const dateStr = new Date(msg.timestamp * 1000).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+                
+                wrapper.innerHTML = `
+                    <div class="bubble">${escapeHtml(msg.text || '[Nessun testo / Allegato]')}</div>
+                    <div class="msg-time">${dateStr}</div>
+                `;
+                historyEl.appendChild(wrapper);
+            });
+
+            // Scroll to bottom
+            historyEl.scrollTop = historyEl.scrollHeight;
+        }
+
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        function exportCSV() {
+            if (!currentChatId) return;
+            const chat = CHAT_DATA[currentChatId];
+            
+            let csvContent = "data:text/csv;charset=utf-8,Data,Mittente,Testo\n";
+            
+            chat.messages.forEach(msg => {
+                const dateStr = new Date(msg.timestamp * 1000).toISOString().replace('T', ' ').substring(0, 19);
+                const sender = msg.is_from_me ? "Tu" : (chat.contact_name || chat.handle_id);
+                const text = (msg.text || "").replace(/"/g, '""');
+                csvContent += `"${dateStr}","${sender}","${text}"\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `chat_${chat.contact_name || chat.handle_id}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderChatList(e.target.value);
+        });
+
+        // Initial render
+        if (Object.keys(CHAT_DATA).length > 0) {
+            renderChatList();
+        } else {
+            document.getElementById('emptyState').innerHTML = "<h2>Nessun messaggio trovato nel backup.</h2>";
+        }
+    </script>
+</body>
+</html>

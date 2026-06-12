@@ -407,7 +407,7 @@ def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str,
             contact_counter[identifier] += 1
     top_contacts = contact_counter.most_common(3)
 
-    print(f"\n--- Export Summary ---")
+    print("\n--- Export Summary ---")
     print(f"Total Calls:      {total_calls}")
     print(f"Total Duration:   {duration_str}")
     print(f"Directions:       Incoming: {incoming} | Outgoing: {outgoing} | Missed: {missed}")
@@ -416,7 +416,7 @@ def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str,
         print("Top 3 Contacts:")
         for idx, (contact, count) in enumerate(top_contacts, 1):
             print(f"  {idx}. {contact} ({count} calls)")
-    print(f"----------------------\n")
+    print("----------------------\n")
 
     return total_calls, resolved_path
 

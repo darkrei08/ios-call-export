@@ -1,5 +1,5 @@
-from typing import List, Dict, Tuple
-import os
+from typing import List, Dict
+
 
 try:
     from pymobiledevice3.lockdown import create_using_usbmux
@@ -49,7 +49,7 @@ def list_live_files(path: str = "/") -> List[Dict]:
                 try:
                     stat_info = afc.stat(full_path)
                     is_dir = stat_info.get("st_ifmt", "") == "S_IFDIR"
-                except:
+                except Exception:
                     is_dir = False
                     
                 files.append({

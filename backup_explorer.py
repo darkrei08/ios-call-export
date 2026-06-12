@@ -1,4 +1,4 @@
-import sys
+
 from iphone_backup_decrypt import EncryptedBackup
 
 def get_backup_files(backup_dir: str, passphrase: str) -> list[dict]:

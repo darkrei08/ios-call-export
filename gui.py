@@ -23,11 +23,11 @@ except ImportError:
 
 # Try to import the core modules
 try:
-    from export_calls import find_backups, process_and_export_calls
+    from export_calls import find_backups
 except ImportError:
     # Append current directory to path if launched from outside
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    from export_calls import find_backups, process_and_export_calls
+    from export_calls import find_backups
 
 
 class TextRedirector:
@@ -203,49 +203,191 @@ class App(tk.Tk):
         # Notebook for Tabs
         self.notebook = ttk.Notebook(container)
         self.notebook.pack(fill='both', expand=True, pady=(0, 16))
-
-        # Tab 1: Calls
-        self.tab_calls = ttk.Frame(self.notebook)
-        self.notebook.add(self.tab_calls, text="📞 Chiamate")
-        self.create_calls_tab()
-
-        # Tab 2: Explorer
+        
+        # Tab 1: Export
+        self.tab_export = ttk.Frame(self.notebook)
+        self.tab_view_calls = ttk.Frame(self.notebook)
+        self.tab_view_msgs = ttk.Frame(self.notebook)
         self.tab_explorer = ttk.Frame(self.notebook)
+        self.tab_wifi = ttk.Frame(self.notebook)
+        
+        self.notebook.add(self.tab_export, text="📥 Esportazioni")
+        self.notebook.add(self.tab_view_calls, text="📞 Vista Chiamate")
+        self.notebook.add(self.tab_view_msgs, text="💬 Vista Messaggi")
         self.notebook.add(self.tab_explorer, text="📂 File Explorer")
+        self.notebook.add(self.tab_wifi, text="📶 Wi-Fi Passwords")
+        
+        # --- TAB 1: Esportazioni ---
+        self.create_export_tab()
+
+        # --- TAB 2/3: Viewers ---
+        self.create_view_calls_tab()
+        self.create_view_msgs_tab()
+
+        # Tab 4: Explorer
         self.create_explorer_tab()
 
-        # Tab 3: Wi-Fi
-        self.tab_wifi = ttk.Frame(self.notebook)
-        self.notebook.add(self.tab_wifi, text="📶 Wi-Fi Passwords")
+        # Tab 5: Wi-Fi
         self.create_wifi_tab()
 
         # Log Section
-        ttk.Label(container, text="Avanzamento e Report", style="Section.TLabel").pack(anchor='w', pady=(0, 8))
-        self.log_text = ScrolledText(container, state='disabled', height=8, font=('Consolas', 10), bg=self.log_bg, fg=self.log_fg, bd=0, relief='flat', highlightthickness=1, highlightbackground=self.border_color, highlightcolor=self.border_color, padx=12, pady=12)
+        # Log is now in the first tab
+        
+        # Viewer Backend
+        self.db_backend = None
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def create_export_tab(self):
+        container = tk.Frame(self.tab_export, bg=self.card_color, padx=16, pady=16)
+        container.pack(fill='both', expand=True)
+
+        lbl_desc = ttk.Label(container, text="Seleziona i dati da esportare dal tuo backup crittografato.", style="TLabel", background=self.card_color)
+        lbl_desc.pack(anchor='w', pady=(0, 16))
+
+        # Checkboxes for export types
+        self.export_calls_var = tk.BooleanVar(value=True)
+        self.export_msgs_var = tk.BooleanVar(value=False)
+
+        chk_calls = ttk.Checkbutton(container, text="📞 Cronologia Chiamate (CSV)", variable=self.export_calls_var)
+        chk_calls.pack(anchor='w', pady=(0, 4))
+
+        chk_msgs = ttk.Checkbutton(container, text="💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)", variable=self.export_msgs_var)
+        chk_msgs.pack(anchor='w', pady=(0, 16))
+
+        # Config Frame
+        config_frame = tk.LabelFrame(container, text="Impostazioni Chiamate", bg=self.card_color, fg=self.text_color, font=('Segoe UI', 10, 'bold'), padx=16, pady=16)
+        config_frame.pack(fill='x', pady=(0, 20))
+        
+        self.excel_var = tk.BooleanVar(value=True)
+        chk_excel = ttk.Checkbutton(config_frame, text="Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)", variable=self.excel_var)
+        chk_excel.pack(anchor='w')
+
+        # Action Bar
+        action_frame = tk.Frame(container, bg=self.card_color)
+        action_frame.pack(fill='x', pady=8)
+
+        self.btn_export = ttk.Button(action_frame, text="AVVIA ESPORTAZIONE", style="Primary.TButton", command=self.start_export)
+        self.btn_export.pack(side='left')
+
+        self.spinner = ttk.Progressbar(action_frame, mode='indeterminate', length=150)
+        
+        lbl_logs = ttk.Label(container, text="Log Operazioni:", style="TLabel", background=self.card_color)
+        lbl_logs.pack(anchor='w', pady=(16, 4))
+        
+        self.log_text = ScrolledText(container, height=10, bg='#1e1e1e', fg='#d4d4d4', font=('Consolas', 10), bd=0, padx=8, pady=8)
         self.log_text.pack(fill='both', expand=True)
 
-    def create_calls_tab(self):
-        container = tk.Frame(self.tab_calls, bg=self.card_color, padx=24, pady=24)
+    # --- Live Data Viewers ---
+    def load_db_backend(self):
+        if not self.selected_backup_dir:
+            messagebox.showerror("Errore", "Nessun backup selezionato.")
+            return
+
+        passphrase = self.pass_var.get().strip()
+        if not passphrase:
+            if not messagebox.askyesno("Attenzione", "Password vuota. Continuare?"):
+                return
+                
+        self.log_message("⏳ Caricamento dei database (Chiamate & Messaggi) in corso...\n")
+        
+        def _load():
+            try:
+                from db_viewers import DataViewerBackend
+                if self.db_backend:
+                    self.db_backend.close()
+                self.db_backend = DataViewerBackend(self.selected_backup_dir, passphrase)
+                self.db_backend.load_databases()
+                self.after(0, self._on_db_loaded)
+            except Exception as e:
+                err_msg = str(e)
+                self.after(0, lambda err=err_msg: messagebox.showerror("Errore", err))
+        
+        threading.Thread(target=_load, daemon=True).start()
+
+    def _on_db_loaded(self):
+        self.log_message("✅ Database caricati in memoria locale. Pronti per la ricerca veloce.\n")
+        self.update_calls_view()
+        self.update_msgs_view()
+
+    def create_view_calls_tab(self):
+        container = tk.Frame(self.tab_view_calls, bg=self.card_color, padx=16, pady=16)
         container.pack(fill='both', expand=True)
         
-        lbl_font = ('Segoe UI', 10, 'bold')
-        self.lbl_out = tk.Label(container, text="File di destinazione (CSV):", bg=self.card_color, fg=self.text_color, font=lbl_font)
-        self.lbl_out.grid(row=0, column=0, sticky='w', pady=12)
+        top_frame = tk.Frame(container, bg=self.card_color)
+        top_frame.pack(fill='x', pady=(0, 10))
         
-        self.out_var = tk.StringVar(value=str(Path.home() / "Desktop" / "calls.csv"))
-        self.out_entry = ttk.Entry(container, textvariable=self.out_var, width=50)
-        self.out_entry.grid(row=0, column=1, sticky='we', padx=(16, 16), pady=12, ipady=4)
+        btn_load = ttk.Button(top_frame, text="Carica/Aggiorna Dati dal Backup", command=self.load_db_backend)
+        btn_load.pack(side='left')
         
-        btn_browse_out = ttk.Button(container, text="Sfoglia...", style="Secondary.TButton", command=self.browse_output)
-        btn_browse_out.grid(row=0, column=2, pady=12)
-        container.columnconfigure(1, weight=1)
+        self.search_calls_var = tk.StringVar()
+        self.search_calls_var.trace("w", lambda *args: self.after(300, self.update_calls_view))
+        search_entry = ttk.Entry(top_frame, textvariable=self.search_calls_var, width=40)
+        search_entry.pack(side='right')
+        ttk.Label(top_frame, text="Cerca:", background=self.card_color).pack(side='right', padx=8)
+        
+        columns = ("Data", "Contatto/Numero", "Durata", "Direzione", "Servizio")
+        self.tree_calls = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse')
+        for col in columns:
+            self.tree_calls.heading(col, text=col)
+            self.tree_calls.column(col, width=150)
+            
+        scroll = ttk.Scrollbar(container, orient="vertical", command=self.tree_calls.yview)
+        self.tree_calls.configure(yscrollcommand=scroll.set)
+        self.tree_calls.pack(side='left', fill='both', expand=True)
+        scroll.pack(side='right', fill='y')
 
-        self.excel_var = tk.BooleanVar(value=True)
-        self.excel_check = tk.Checkbutton(container, text="Ottimizza formato per Microsoft Excel", variable=self.excel_var, bg=self.card_color, fg=self.text_color, activebackground=self.card_color, activeforeground=self.text_color, selectcolor=self.card_color)
-        self.excel_check.grid(row=1, column=0, columnspan=3, sticky='w', pady=12)
+    def update_calls_view(self):
+        if not self.db_backend:
+            return
+        term = self.search_calls_var.get()
+        results = self.db_backend.search_calls(term)
+        self.tree_calls.delete(*self.tree_calls.get_children())
+        for r in results:
+            self.tree_calls.insert("", "end", values=r)
 
-        self.btn_export = ttk.Button(container, text="AVVIA ESPORTAZIONE CHIAMATE", style="Primary.TButton", command=self.start_export_thread)
-        self.btn_export.grid(row=2, column=0, columnspan=3, sticky='we', pady=(24,0))
+    def create_view_msgs_tab(self):
+        container = tk.Frame(self.tab_view_msgs, bg=self.card_color, padx=16, pady=16)
+        container.pack(fill='both', expand=True)
+        
+        top_frame = tk.Frame(container, bg=self.card_color)
+        top_frame.pack(fill='x', pady=(0, 10))
+        
+        btn_load = ttk.Button(top_frame, text="Carica/Aggiorna Dati dal Backup", command=self.load_db_backend)
+        btn_load.pack(side='left')
+        
+        self.search_msgs_var = tk.StringVar()
+        self.search_msgs_var.trace("w", lambda *args: self.after(300, self.update_msgs_view))
+        search_entry = ttk.Entry(top_frame, textvariable=self.search_msgs_var, width=40)
+        search_entry.pack(side='right')
+        ttk.Label(top_frame, text="Cerca (Testo o Numero):", background=self.card_color).pack(side='right', padx=8)
+        
+        columns = ("Data", "Contatto", "Direzione", "Servizio", "Testo")
+        self.tree_msgs = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse')
+        self.tree_msgs.heading("Data", text="Data")
+        self.tree_msgs.heading("Contatto", text="Contatto")
+        self.tree_msgs.heading("Direzione", text="Direzione")
+        self.tree_msgs.heading("Servizio", text="Servizio")
+        self.tree_msgs.heading("Testo", text="Testo del Messaggio")
+        
+        self.tree_msgs.column("Data", width=150, stretch=False)
+        self.tree_msgs.column("Contatto", width=150, stretch=False)
+        self.tree_msgs.column("Direzione", width=80, stretch=False)
+        self.tree_msgs.column("Servizio", width=80, stretch=False)
+        self.tree_msgs.column("Testo", width=400, stretch=True)
+            
+        scroll = ttk.Scrollbar(container, orient="vertical", command=self.tree_msgs.yview)
+        self.tree_msgs.configure(yscrollcommand=scroll.set)
+        self.tree_msgs.pack(side='left', fill='both', expand=True)
+        scroll.pack(side='right', fill='y')
+
+    def update_msgs_view(self):
+        if not self.db_backend:
+            return
+        term = self.search_msgs_var.get()
+        results = self.db_backend.search_messages(term)
+        self.tree_msgs.delete(*self.tree_msgs.get_children())
+        for r in results:
+            self.tree_msgs.insert("", "end", values=r)
 
     def create_explorer_tab(self):
         container = tk.Frame(self.tab_explorer, bg=self.card_color, padx=16, pady=16)
@@ -327,13 +469,10 @@ class App(tk.Tk):
         self.configure(bg=self.bg_color)
         self.header_frame.configure(bg=self.card_color)
         self.accent_line.configure(bg=self.border_color)
-        self.form_card.configure(bg=self.card_color, highlightbackground=self.border_color)
-        self.inner_form.configure(bg=self.card_color)
         
         self.lbl_backup.configure(bg=self.card_color, fg=self.text_color)
         self.lbl_pass.configure(bg=self.card_color, fg=self.text_color)
         self.show_pass_check.configure(bg=self.card_color, fg=self.text_color, activebackground=self.card_color, activeforeground=self.text_color, selectcolor=self.card_color)
-        self.lbl_out.configure(bg=self.card_color, fg=self.text_color)
         
         self.log_text.configure(bg=self.log_bg, fg=self.log_fg, insertbackground=self.log_fg, highlightbackground=self.border_color, highlightcolor=self.border_color)
 
@@ -389,99 +528,76 @@ class App(tk.Tk):
             self.backup_var.set(dir_path)
             self.log_message(f"📁 Selezionato manualmente backup in: {dir_path}\n")
 
-    def browse_output(self):
-        file_path = filedialog.asksaveasfilename(
-            title="Salva file CSV come",
-            defaultextension=".csv",
-            filetypes=[("File CSV (*.csv)", "*.csv"), ("Tutti i file (*.*)", "*.*")],
-            initialfile="calls.csv"
-        )
-        if file_path:
-            self.out_var.set(file_path)
-
     def log_message(self, message):
         self.log_text.configure(state='normal')
         self.log_text.insert('end', message)
         self.log_text.see('end')
         self.log_text.configure(state='disabled')
 
-    def start_export_thread(self):
-        # Validation checks
+    def start_export(self):
         if not self.selected_backup_dir:
-            messagebox.showerror("Dati Mancanti", "Seleziona o sfoglia una cartella di backup valida prima di procedere.")
+            messagebox.showerror("Errore", "Nessun backup selezionato. Sfoglia e seleziona una cartella di backup valida.")
             return
 
         passphrase = self.pass_var.get().strip()
         if not passphrase:
-            if not messagebox.askyesno("Password vuota", "Hai inserito una password vuota. Se il backup è crittografato, l'esportazione fallirà.\nVuoi continuare lo stesso?"):
+            if not messagebox.askyesno("Attenzione", "Hai lasciato la password vuota. Se il backup è crittografato l'esportazione fallirà.\nVuoi procedere comunque?"):
                 return
-
-        output_path = self.out_var.get().strip()
-        if not output_path:
-            messagebox.showerror("Dati Mancanti", "Specifica un percorso valido per il file di destinazione (CSV).")
+                
+        if not self.export_calls_var.get() and not self.export_msgs_var.get():
+            messagebox.showwarning("Nessuna selezione", "Seleziona almeno una voce da esportare (Chiamate o Messaggi).")
             return
 
-        # Disable controls during export
-        self.btn_export.configure(state='disabled', text="ESPORTAZIONE IN CORSO...")
-        self.pass_entry.configure(state='disabled')
-        self.out_entry.configure(state='disabled')
-        self.backup_combobox.configure(state='disabled')
-        
-        # Clear log area
-        self.log_text.configure(state='normal')
-        self.log_text.delete('1.0', 'end')
-        self.log_text.configure(state='disabled')
+        self.btn_export.configure(state='disabled')
+        self.spinner.pack(side='left', padx=16)
+        self.spinner.start()
+        self.log_text.delete(1.0, tk.END)
 
-        # Start background thread
+        self.log_message("⏳ Inizializzazione in corso...\n")
+
         thread = threading.Thread(
-            target=self.run_export_process,
-            args=(self.selected_backup_dir, passphrase, output_path, self.excel_var.get()),
+            target=self._run_export,
+            args=(self.selected_backup_dir, passphrase, self.excel_var.get(), self.export_calls_var.get(), self.export_msgs_var.get()),
             daemon=True
         )
         thread.start()
 
-    def run_export_process(self, backup_dir, passphrase, output_path, excel_compat):
-        # Redirect stdout and stderr to the GUI log panel
-        redirector = TextRedirector(self.log_text)
-        sys.stdout = redirector
-        sys.stderr = redirector
-
-        success = False
-        error_msg = ""
-        
+    def _run_export(self, backup_dir, passphrase, use_excel, do_calls, do_msgs):
         try:
-            total_calls, resolved_path = process_and_export_calls(
-                backup_dir=backup_dir,
-                passphrase=passphrase,
-                output_path=output_path,
-                excel_compat=excel_compat
-            )
-            success = True
+            if do_calls:
+                from export_calls import process_and_export_calls
+                out_csv = str(Path.home() / "Desktop" / "calls.csv")
+                self.log_message("📞 Avvio estrazione Chiamate...\n")
+                process_and_export_calls(backup_dir, passphrase, out_csv, use_excel)
+                self.log_message(f"✅ Chiamate esportate con successo in:\n{out_csv}\n\n")
+                
+            if do_msgs:
+                from export_messages import export_messages_to_html
+                out_html = str(Path.home() / "Desktop" / "Messages_Viewer.html")
+                self.log_message("💬 Avvio estrazione Messaggi (SMS & iMessage)...\n")
+                count = export_messages_to_html(backup_dir, passphrase, out_html)
+                self.log_message(f"✅ Trovate {count} conversazioni.\n")
+                self.log_message(f"✅ Messaggi esportati con successo nel Visualizzatore HTML in:\n{out_html}\n\n")
+
+            self.after(0, self._export_success)
         except Exception as e:
-            error_msg = str(e)
-            print(f"\n❌ ERRORE DI ESPORTAZIONE: {error_msg}")
-        finally:
-            # Restore stdout and stderr
-            sys.stdout = self.original_stdout
-            sys.stderr = self.original_stderr
-            
-            # Update GUI elements back on the main thread
-            self.after(0, self.export_finished, success, error_msg)
+            import traceback
+            err_details = traceback.format_exc()
+            self.after(0, self._export_failure, str(e), err_details)
 
-    def export_finished(self, success, error_msg):
-        # Re-enable controls
-        self.btn_export.configure(state='normal', text="AVVIA ESPORTAZIONE")
-        self.pass_entry.configure(state='normal')
-        self.out_entry.configure(state='normal')
-        self.backup_combobox.configure(state='readonly')
+    def _export_success(self):
+        self.spinner.stop()
+        self.spinner.pack_forget()
+        self.btn_export.configure(state='normal')
+        self.log_message("✅ Tutte le operazioni di esportazione sono state completate!\nControlla i file sul Desktop.\n")
+        messagebox.showinfo("Successo", "Esportazione completata!\nControlla i file sul Desktop.")
 
-        if success:
-            messagebox.showinfo("Esportazione Completata", "🎉 La cronologia delle chiamate è stata esportata con successo!")
-        else:
-            if "Incorrect passphrase" in error_msg or "password" in error_msg.lower():
-                messagebox.showerror("Errore Decrittografia", "Password non corretta. Verifica la chiave di crittografia inserita.")
-            else:
-                messagebox.showerror("Errore Esportazione", f"Si è verificato un errore durante l'esportazione:\n{error_msg}")
+    def _export_failure(self, error_msg, details):
+        self.spinner.stop()
+        self.spinner.pack_forget()
+        self.btn_export.configure(state='normal')
+        self.log_message(f"❌ Errore durante l'esportazione: {error_msg}\n")
+        messagebox.showerror("Errore Esportazione", f"Si è verificato un errore:\n{error_msg}")
 
     # --- File Explorer Methods ---
 
@@ -703,6 +819,11 @@ class App(tk.Tk):
                     messagebox.showinfo("Successo", f"File estratto con successo:\n{out_path}")
                 except Exception as e:
                     messagebox.showerror("Errore Estrazione", f"Errore durante l'estrazione live:\n{e}")
+
+    def on_closing(self):
+        if hasattr(self, 'db_backend') and self.db_backend:
+            self.db_backend.close()
+        self.destroy()
 
 if __name__ == "__main__":
     app = App()
