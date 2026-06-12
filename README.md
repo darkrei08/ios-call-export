@@ -1,10 +1,10 @@
-# ios-call-export
+# 📱 iOS Call Exporter
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.14%2B-blue.svg" alt="Python Version">
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
   <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows%20%7C%20Linux-orange.svg" alt="Platforms">
-  <img src="https://img.shields.io/badge/Backend-SQLite-lightgrey.svg" alt="SQLite">
+  <img src="https://img.shields.io/badge/Data-Privacy%20First-success.svg" alt="Privacy First">
 </p>
 
 ---
@@ -17,293 +17,235 @@
 
 ## 🇺🇸 English Version
 
-Export iPhone call history from an encrypted local iTunes/macOS backup to CSV. This tool automatically retrieves and decrypts your backups, matches call entries with contact names from your address book, parses international phone numbers, resolves duration, and supports third-party VoIP apps like WhatsApp, Microsoft Teams, FaceTime, and others.
+**Export your entire iPhone call history directly from your local backups to a beautifully formatted Excel/CSV file.** 
 
-### 📸 Demo & Preview
-#### 🖥️ Graphical User Interface (GUI)
-Below is the modern desktop interface that scans for backups, accepts your passphrase, and exports call history in one click:
+Whether you need to archive your calls for billing purposes, legal requirements, or personal analytics, **iOS Call Exporter** is the most comprehensive, privacy-respecting tool available. It works completely offline, decrypting your iTunes/macOS backups on the fly.
+
+### 🌟 Why Choose iOS Call Exporter?
+* 🔒 **100% Privacy-First**: Everything runs locally on your machine. Your backup password and call data never leave your computer.
+* 📞 **VoIP Support**: It doesn't just export carrier calls. It automatically detects and formats calls from **WhatsApp, Microsoft Teams, FaceTime, Telegram**, and more.
+* 📇 **Smart Contact Matching**: Say goodbye to raw phone numbers. The tool parses your iOS address book to seamlessly attach contact names to each call.
+* 📊 **Excel-Ready**: Generates a rich CSV tailored to avoid annoying scientific notation in Microsoft Excel, including clean human-readable call durations and international country prefixes.
+* 📅 **Google Calendar Sync**: Comes with an optional built-in webhook script to sync your call history directly into your Google Calendar.
+
+---
+
+### 📸 Demo & Interface
+
+#### Modern Desktop App (GUI)
+A sleek, dark-mode-ready interface that automatically detects your iPhone backups. Just type your password and click Export!
 <p align="center">
-  <img src="assets/gui_mockup.png" width="550" alt="iOS Call Exporter GUI Mockup">
+  <img src="assets/gui_mockup.png" width="600" alt="iOS Call Exporter GUI Mockup">
 </p>
 
-#### 📊 Exported CSV Spreadsheet Output
-The exported CSV database includes detailed fields, readable dates, formatted durations, and carrier country prefixes:
+#### Clean Excel Output
+Beautifully parsed data ready for pivot tables or billing reports.
 <p align="center">
-  <img src="assets/data_mockup.png" width="600" alt="iOS Call Exporter Data Mockup">
+  <img src="assets/data_mockup.png" width="650" alt="iOS Call Exporter Data Mockup">
 </p>
 
 ---
 
-### ✨ Features
-- **Automatic Backup Location**: Searches system paths automatically to find local iPhone backups.
-- **Passphrase Decryption**: Seamlessly decrypts backup files on-the-fly. (iOS requires backups to be encrypted to include call records).
-- **Contact Name Resolution**: Extracts matching names from `AddressBook.sqlitedb`.
-- **FaceTime & VoIP Support**: Detects and labels FaceTime, WhatsApp, Teams, and standard carrier calls.
-- **Rich CSV Export**: Formats data with local timezone timestamps, carrier ISO country codes, prefixes, national format numbers, and human-readable durations.
-- **Excel Formatting Option**: Allows formatting optimization specifically for Microsoft Excel (preventing scientific notation on numbers and using proper delimiters).
-- **Google Calendar Sync Integration**: Webhook-ready script to sync call logs to Google Calendar events with built-in deduplication.
+### 🚀 Quick Start Guide (For Everyone)
 
----
+Want to get your call history right now? Follow these simple steps:
 
-### 🛠️ Prerequisites & Installation
-1. **Prerequisites**:
-   - macOS, Windows, or Linux with a local iOS backup.
-   - Python **3.14+**
-   - [uv](https://docs.astral.sh/uv/) (Fast Python package manager)
+#### Step 1: Create an Encrypted Backup
+Apple requires backups to be encrypted to include your private call history.
+1. Connect your iPhone to your Mac/PC with a cable.
+2. Open **Finder** (macOS) or **iTunes/Apple Devices** (Windows) and select your iPhone.
+3. Check the **"Encrypt local backup"** box and set a password (don't forget it!).
+4. Click **"Back Up Now"** and wait for it to finish.
 
-2. **Creating an encrypted backup**:
-   - Connect your iPhone to your Mac/PC.
-   - Open **Finder** (macOS) or **iTunes** (Windows), select your iPhone in the sidebar.
-   - Check **Encrypt local backup** and set a passphrase (write it down or save it!).
-   - Click **Back Up Now** and wait.
-   *Backups are typically stored in `~/Library/Application Support/MobileSync/Backup/` on macOS.*
-
-3. **Clone and Install**:
+#### Step 2: Download the App
+To run this tool, you need **Python 3.14+** and **uv** (a blazing fast Python manager).
+1. Download this repository.
+2. Open your terminal/command prompt in the downloaded folder.
+3. Run this command to install everything automatically:
    ```bash
-   git clone <this-repo>
-   cd ios-call-export
    uv sync
    ```
 
----
-
-### 🚀 Usage
-#### 🖥️ Desktop GUI (Graphical User Interface)
-To run the visual app, use:
+#### Step 3: Export!
+Launch the graphical interface with:
 ```bash
 uv run python gui.py
 ```
-This launches a desktop window that auto-detects your local backups, lets you input your passphrase, choose the output file, and exports everything with one click.
-*(On Linux, ensure you have Tkinter installed: `sudo apt install python3-tk` / `sudo dnf install python3-tkinter`).*
-
-#### 💻 CLI (Command Line Interface)
-To run the terminal script, use:
-```bash
-uv run python export_calls.py
-```
-By default, this script auto-detects the most recent backup and outputs `calls.csv`.
-
-**CLI Options:**
-```text
---backup-dir PATH    Path to a specific backup directory
---output, -o PATH    Output CSV path (default: calls.csv)
---passphrase TEXT    Backup encryption passphrase
---excel              Format CSV specifically for Excel (semicolon separator, text-formatted numbers)
-```
+*The app will automatically find your backup. Enter your password, choose where to save the CSV, and you're done!*
 
 ---
 
-### 🔑 Passphrase Configuration
-You can configure your password in several ways. The script checks for the passphrase in this order:
-1. `--passphrase` command line argument
-2. `BACKUP_PASSPHRASE` environment variable in `.env`
-3. `OP_BACKUP_REF` (1Password CLI reference) environment variable in `.env`
-4. macOS Keychain key (`ios-backup-passphrase`)
-5. Interactive user prompt
+### 💻 Developer Guide (CLI & Automation)
 
-#### To use `.env` or macOS Keychain:
-1. Copy the example environment file:
-   ```bash
-   cp .env.example .env
-   ```
-2. Edit `.env` and uncomment/configure `BACKUP_PASSPHRASE` or `OP_BACKUP_REF`.
-3. To store in macOS Keychain (recommended for unattended/cron runs):
+If you prefer the terminal or want to automate the export via cron jobs, you can use the CLI directly.
+
+#### Basic CLI Usage
+```bash
+uv run python export_calls.py
+```
+*By default, this script auto-detects the most recent backup and outputs `calls.csv`.*
+
+#### Advanced Options
+```text
+--backup-dir PATH    Path to a specific backup directory
+--output, -o PATH    Output CSV path (default: calls.csv)
+--passphrase TEXT    Backup encryption passphrase (bypasses prompts)
+--excel              Format CSV specifically for Excel (semicolon separator)
+```
+
+#### Passphrase Automation (`.env` or Keychain)
+You can inject the passphrase silently for automated tasks:
+1. `BACKUP_PASSPHRASE` in a `.env` file.
+2. `OP_BACKUP_REF` in a `.env` file (1Password CLI reference).
+3. **macOS Keychain**:
    ```bash
    security add-generic-password -a "$USER" -s "ios-backup-passphrase" -w
    ```
 
+#### Google Calendar Sync Webhook
+You can automatically push answered calls to a webhook (like n8n, Make, or Zapier) to sync to Google Calendar.
+```bash
+cp .env.example .env
+# Edit .env and add your WEBHOOK_URL
+uv run python send_to_webhook.py --weeks 4
+```
+
 ---
 
-### 📋 CSV Schema Definition
+### 📋 Exported CSV Fields
 
 | Column | Description |
 |---|---|
-| `id` | Database primary key |
-| `unique_id` | Stable UUID for the call record |
-| `start` | Call start time (`YYYY-MM-DD HH:MM:SS`) |
-| `end` | Call end time (`YYYY-MM-DD HH:MM:SS`) |
-| `contact_name` | Resolved contact name from AddressBook |
-| `phone_number` | Raw phone number or email (for FaceTime) |
-| `country_prefix` | International country prefix (e.g. `+39`) |
-| `national_number` | National/local phone number without prefix |
-| `phone_country` | Country name resolved from phone number prefix |
-| `duration` | Human-readable duration (`HH:MM:SS`) |
-| `duration_seconds` | Duration as integer seconds |
+| `start` / `end` | Call times (`YYYY-MM-DD HH:MM:SS`) |
+| `contact_name` | Resolved name from AddressBook |
+| `phone_number` | Raw identifier (phone or email) |
+| `country_prefix` | International code (e.g. `+39`, `+1`) |
+| `duration` | Readable format (`HH:MM:SS`) |
 | `direction` | `Incoming`, `Outgoing`, or `Missed` |
-| `call_type` | `Phone`, `FaceTime Video`, `FaceTime Audio`, or app name (e.g. `Whatsapp`) |
-| `answered` | `True` or `False` |
-| `country_code` | ISO country code of carrier/roaming location (e.g. `DE`) |
-| `service_provider` | Bundle ID of the calling service |
-| `location` | Location string if available |
-
----
-
-### ⚙️ Google Calendar Sync
-You can automatically sync answered calls to your Google Calendar using the webhook script.
-1. Configure your calendar webhook inside `.env`:
-   ```env
-   WEBHOOK_URL=https://your-instance.com/webhook/your-webhook-path
-   ```
-2. Send the call records:
-   ```bash
-   uv run python send_to_webhook.py            # Send all answered calls
-   uv run python send_to_webhook.py --weeks 4  # Send calls from the last 4 weeks
-   uv run python send_to_webhook.py --dry-run  # Dry run preview (does not send)
-   ```
-*Calls are deduplicated on Google Calendar using the unique `unique_id` as the calendar event ID.*
+| `call_type` | `Phone`, `FaceTime`, `Whatsapp`, `Teams`, etc. |
 
 ---
 
 ### ⚠️ Limitations
-- **History Retention**: Call logs are only kept for as long as iOS stores them on the device (typically up to ~1 year/1000 calls).
-- **Deleted Contacts**: Names cannot be resolved for contacts deleted prior to the backup unless stored in `ZNAME` within the database.
-- **Group FaceTime Calls**: iOS does not store participants in the main record table, so phone numbers/contacts for group FaceTime calls may be empty.
-- **Backup Encryption Requirement**: You **must** enable "Encrypt local backup" in Finder/iTunes; Apple excludes call history database files from unencrypted backups for privacy reasons.
+- iOS only keeps about ~1,000 recent calls or roughly 1 year of history on the device. Older calls are permanently purged by the system.
+- If a contact was deleted before the backup was taken, their name cannot be resolved.
+- **You MUST enable Encrypted Backups.** Apple completely strips call history from unencrypted backups for privacy reasons.
 
 ---
 ---
 
 ## 🇮🇹 Versione Italiana
 
-Esporta la cronologia delle chiamate dell'iPhone da un backup locale crittografato di iTunes/macOS in formato CSV. Questo strumento individua e decrittografa automaticamente i backup, associa i record delle chiamate ai contatti della tua rubrica telefonica, analizza i prefissi internazionali, calcola la durata e supporta chiamate da app di terze parti (come WhatsApp, Microsoft Teams, FaceTime e altre).
+**Esporta l'intera cronologia delle chiamate del tuo iPhone direttamente dai tuoi backup locali in un bellissimo file Excel/CSV.**
 
-### 📸 Demo e Anteprima
-#### 🖥️ Interfaccia Grafica (GUI)
-Ecco l'interfaccia desktop moderna che rileva i backup sul sistema, richiede la password ed esporta tutto in un clic:
+Che tu abbia bisogno di archiviare le chiamate per scopi di fatturazione, requisiti legali o analisi personali, **iOS Call Exporter** è lo strumento più completo e attento alla privacy disponibile. Funziona completamente offline, decrittografando i tuoi backup di iTunes/macOS in tempo reale.
+
+### 🌟 Perché Scegliere iOS Call Exporter?
+* 🔒 **Privacy al 100%**: Tutto viene eseguito localmente sul tuo computer. La password del tuo backup e i dati delle tue chiamate non lasciano mai la tua macchina.
+* 📞 **Supporto VoIP**: Non esporta solo le chiamate standard. Rileva e formatta automaticamente le chiamate di **WhatsApp, Microsoft Teams, FaceTime, Telegram** e molte altre app.
+* 📇 **Riconoscimento Contatti Intelligente**: Dì addio ai numeri di telefono illeggibili. Il tool analizza la tua rubrica iOS per associare il nome corretto a ogni chiamata.
+* 📊 **Ottimizzato per Excel**: Genera un file CSV studiato appositamente per evitare la fastidiosa notazione scientifica di Microsoft Excel, includendo durate leggibili e prefissi internazionali.
+* 📅 **Sincronizzazione Google Calendar**: Include uno script opzionale per inviare la cronologia chiamate direttamente sul tuo calendario Google.
+
+---
+
+### 📸 Demo e Interfaccia
+
+#### Applicazione Desktop Moderna (GUI)
+Un'interfaccia elegante (con tema scuro integrato) che rileva automaticamente i tuoi backup. Inserisci la password ed esporta!
 <p align="center">
-  <img src="assets/gui_mockup.png" width="550" alt="iOS Call Exporter GUI Mockup">
+  <img src="assets/gui_mockup.png" width="600" alt="Mockup dell'interfaccia di iOS Call Exporter">
 </p>
 
-#### 📊 Esempio di File CSV Esportato
-Il file CSV generato include campi dettagliati, orari formattati, durate leggibili e prefissi internazionali dei contatti:
+#### File Excel Pulito e Ordinato
+Dati elaborati e pronti per tabelle pivot o report aziendali.
 <p align="center">
-  <img src="assets/data_mockup.png" width="600" alt="iOS Call Exporter Data Mockup">
+  <img src="assets/data_mockup.png" width="650" alt="Mockup dei dati esportati">
 </p>
 
 ---
 
-### ✨ Funzionalità
-- **Individuazione Automatica del Backup**: Cerca automaticamente le cartelle di backup dell'iPhone nel sistema.
-- **Decrittografia in Locale**: Sblocca i database crittografati direttamente sulla tua macchina. (La crittografia del backup è obbligatoria per far sì che iOS includa la cronologia chiamate).
-- **Risoluzione Nomi Rubrica**: Recupera i nomi associati ai numeri o email estraendoli da `AddressBook.sqlitedb`.
-- **Supporto FaceTime e Chiamate VoIP**: Riconosce ed etichetta correttamente FaceTime, WhatsApp, Teams e chiamate di rete fissa/mobile.
-- **Danti Completi ed Estesi**: Include data locale, prefisso telefonico, nazione del contatto, nazione di roaming del telefono, durata e stato (risposta/non risposta).
-- **Formato Compatibile con Excel**: Opzione per salvare il CSV in formato ottimizzato per Excel (separatore punto e virgola `;` e numeri di telefono formattati come testo per evitarne l'alterazione).
-- **Sincronizzazione Google Calendar**: Script pronto all'uso per inviare i dati a un webhook che crea eventi in Google Calendar, evitando duplicati.
+### 🚀 Guida Rapida (Per Tutti gli Utenti)
 
----
+Vuoi ottenere la tua cronologia chiamate subito? Segui questi tre semplici passaggi:
 
-### 🛠️ Prerequisiti e Installazione
-1. **Requisiti di Sistema**:
-   - macOS, Windows o Linux con un backup iOS locale.
-   - Python **3.14+**
-   - [uv](https://docs.astral.sh/uv/) (Gestore di pacchetti Python ultra veloce)
+#### Step 1: Crea un Backup Crittografato
+Apple richiede che i backup siano crittografati con password per includere i registri delle chiamate private.
+1. Collega l'iPhone al Mac/PC con un cavo.
+2. Apri il **Finder** (su macOS) o **iTunes/Dispositivi Apple** (su Windows) e seleziona l'iPhone.
+3. Spunta la casella **"Crittografa backup locale"** e imposta una password (scrivitela!).
+4. Clicca su **"Effettua backup adesso"** e attendi la fine.
 
-2. **Creare un backup crittografato**:
-   - Collega l'iPhone al Mac o PC.
-   - Apri il **Finder** (macOS) o **iTunes** (Windows) e seleziona il tuo iPhone nella barra laterale.
-   - Seleziona **Crittografa backup locale** e inserisci una password (conservala!).
-   - Clicca su **Effettua backup adesso** e attendi il completamento.
-   *Su macOS i backup sono salvati in `~/Library/Application Support/MobileSync/Backup/`.*
-
-3. **Clonare il repository ed installare**:
+#### Step 2: Scarica il Programma
+Per eseguire questo strumento, hai bisogno di **Python 3.14+** e **uv** (un gestore di pacchetti velocissimo).
+1. Scarica o clona questo repository.
+2. Apri il terminale (o Prompt dei Comandi) nella cartella scaricata.
+3. Esegui questo comando per installare tutto automaticamente:
    ```bash
-   git clone <this-repo>
-   cd ios-call-export
    uv sync
    ```
 
----
-
-### 🚀 Utilizzo
-#### 🖥️ Interfaccia Grafica Desktop (GUI)
-Per avviare l'applicazione visiva, esegui:
+#### Step 3: Esporta!
+Avvia l'interfaccia grafica digitando:
 ```bash
 uv run python gui.py
 ```
-Questo comando apre una finestra in cui potrai selezionare il backup, inserire la password, scegliere dove salvare il file CSV e avviare l'esportazione con un clic.
-*(Su Linux, assicurati che sia installato Tkinter: `sudo apt install python3-tk` o `sudo dnf install python3-tkinter`).*
-
-#### 💻 Interfaccia a Linea di Comando (CLI)
-Per eseguire lo script da terminale:
-```bash
-uv run python export_calls.py
-```
-Lo script rileverà automaticamente il backup più recente e salverà l'esportazione in `calls.csv`.
-
-**Opzioni CLI disponibili:**
-```text
---backup-dir PATH    Percorso di una cartella di backup specifica
---output, -o PATH    Percorso del file CSV di output (default: calls.csv)
---passphrase TEXT    Password del backup crittografato
---excel              Formatta il CSV per Excel (separatore punto e virgola, numeri come testo)
-```
+*L'app troverà automaticamente il tuo backup. Inserisci la password, scegli dove salvare il CSV, ed è fatta!*
 
 ---
 
-### 🔑 Configurazione Password di Backup
-La password viene cercata automaticamente seguendo questo ordine di priorità:
-1. Argomento CLI `--passphrase`
-2. Variabile d'ambiente `BACKUP_PASSPHRASE` nel file `.env`
-3. Variabile d'ambiente `OP_BACKUP_REF` (integrazione CLI di 1Password) nel file `.env`
-4. Portachiavi di macOS (Keychain) sotto la voce `ios-backup-passphrase`
-5. Richiesta interattiva da terminale
+### 💻 Guida per Sviluppatori (CLI e Automazione)
 
-#### Come usare il file `.env` o il Portachiavi macOS:
-1. Copia il file di esempio:
-   ```bash
-   cp .env.example .env
-   ```
-2. Modifica il file `.env` decommentando e inserendo la password in `BACKUP_PASSPHRASE` o il link di 1Password in `OP_BACKUP_REF`.
-3. Per memorizzare la password in Keychain (consigliato per script cron/automatici):
+Se preferisci il terminale o vuoi automatizzare l'esportazione, puoi usare direttamente l'interfaccia a riga di comando (CLI).
+
+#### Utilizzo Base della CLI
+```bash
+uv run python export_calls.py
+```
+*Di default, lo script rileva l'ultimo backup e genera un file `calls.csv`.*
+
+#### Opzioni Avanzate
+```text
+--backup-dir PATH    Percorso di un backup specifico
+--output, -o PATH    Percorso di output (default: calls.csv)
+--passphrase TEXT    Password del backup (evita il prompt interattivo)
+--excel              Formatta il CSV appositamente per Excel (usa il punto e virgola)
+```
+
+#### Automazione Password (`.env` o Keychain)
+Per esecuzioni automatiche puoi passare la password silenziosamente:
+1. Variabile `BACKUP_PASSPHRASE` in un file `.env`.
+2. Variabile `OP_BACKUP_REF` (per 1Password) in `.env`.
+3. **Portachiavi di macOS**:
    ```bash
    security add-generic-password -a "$USER" -s "ios-backup-passphrase" -w
    ```
 
+#### Sincronizzazione Webhook (Google Calendar)
+Puoi inviare automaticamente le chiamate risposte a un webhook (es. n8n, Zapier) per sincronizzarle su Google Calendar.
+```bash
+cp .env.example .env
+# Modifica .env e inserisci il tuo WEBHOOK_URL
+uv run python send_to_webhook.py --weeks 4
+```
+
 ---
 
-### 📋 Struttura Campi CSV
+### 📋 Struttura del CSV Esportato
 
 | Colonna | Descrizione |
 |---|---|
-| `id` | Chiave primaria del database |
-| `unique_id` | UUID univoco e stabile del record di chiamata |
-| `start` | Orario inizio chiamata (`YYYY-MM-DD HH:MM:SS`) |
-| `end` | Orario fine chiamata (`YYYY-MM-DD HH:MM:SS`) |
-| `contact_name` | Nome del contatto risolto dalla rubrica |
-| `phone_number` | Numero di telefono o email (per FaceTime) grezzi |
+| `start` / `end` | Orario inizio/fine (`YYYY-MM-DD HH:MM:SS`) |
+| `contact_name` | Nome associato estrapolato dalla rubrica |
+| `phone_number` | Numero o email originale |
 | `country_prefix` | Prefisso internazionale (es. `+39`) |
-| `national_number` | Numero nazionale/locale senza prefisso |
-| `phone_country` | Nazione associata al prefisso del numero |
-| `duration` | Durata formattata leggibile (`HH:MM:SS`) |
-| `duration_seconds` | Durata in secondi (valore intero) |
-| `direction` | Direzione: `Incoming` (entrata), `Outgoing` (uscita), `Missed` (persa) |
-| `call_type` | Tipo chiamata: `Phone`, `FaceTime Video`, `FaceTime Audio`, o nome dell'app (es. `Whatsapp`) |
-| `answered` | Chiamata risposta: `True` o `False` |
-| `country_code` | Codice ISO della nazione del carrier/roaming (es. `IT`, `DE`) |
-| `service_provider` | Bundle ID del servizio chiamante (es. operatore o app) |
-| `location` | Posizione geografica della chiamata se disponibile |
-
----
-
-### ⚙️ Sincronizzazione con Google Calendar
-Puoi sincronizzare le chiamate risposte su Google Calendar inviando i record a un webhook dedicato.
-1. Configura l'URL del webhook nel file `.env`:
-   ```env
-   WEBHOOK_URL=https://tua-istanza.com/webhook/tua-path
-   ```
-2. Esegui l'invio dei dati:
-   ```bash
-   uv run python send_to_webhook.py            # Invia tutte le chiamate risposte
-   uv run python send_to_webhook.py --weeks 4  # Limita l'invio alle ultime 4 settimane
-   uv run python send_to_webhook.py --dry-run  # Mostra un'anteprima senza inviare nulla
-   ```
-*La sincronizzazione evita duplicati su Google Calendar impostando il `unique_id` della chiamata come ID dell'evento sul calendario.*
+| `duration` | Formato leggibile (`HH:MM:SS`) |
+| `direction` | `Incoming` (Entrata), `Outgoing` (Uscita), o `Missed` (Persa) |
+| `call_type` | `Phone`, `FaceTime`, `Whatsapp`, `Teams`, ecc. |
 
 ---
 
 ### ⚠️ Limitazioni
-- **Conservazione Registro**: I registri delle chiamate sono disponibili solo per il periodo conservato da iOS sul dispositivo (solitamente circa 1 anno o 1000 chiamate).
-- **Contatti Eliminati**: Non è possibile risalire al nome dei contatti eliminati prima del backup a meno che il campo `ZNAME` nel database non fosse già popolato.
-- **Chiamate FaceTime di Gruppo**: iOS memorizza i partecipanti alle chiamate di gruppo FaceTime in una tabella separata; pertanto, il numero e il nome contatto principale potrebbero risultare vuoti.
-- **Crittografia Backup Obbligatoria**: È **indispensabile** attivare l'opzione "Crittografa backup locale" in iTunes/Finder. Per motivi di privacy, Apple esclude i database del registro chiamate dai backup non protetti da password.
+- iOS conserva solo le ultime ~1.000 chiamate circa (o circa 1 anno di storico). Le chiamate più vecchie vengono eliminate definitivamente dal sistema operativo.
+- Se un contatto è stato cancellato dalla rubrica prima dell'esecuzione del backup, il suo nome non può essere recuperato.
+- **DEVI obbligatoriamente abilitare il Backup Crittografato.** Per ragioni di privacy, Apple non inserisce i file del registro chiamate nei backup normali (senza password).
