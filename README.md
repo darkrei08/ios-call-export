@@ -24,6 +24,7 @@ Whether you need to archive your calls for billing purposes, legal requirements,
 ### 🌟 Why Choose iOS Call Exporter?
 * 🔒 **100% Privacy-First**: Everything runs locally on your machine. Your backup password and call data never leave your computer.
 * 🔍 **Auto Backup Discovery**: No need to manually hunt for backup folders. The app automatically scans default **iTunes/Finder** and **iMazing** backup paths on macOS and Windows, and presents all detected backups sorted by date.
+* 📂 **File Explorer (Backup & Live)**: A built-in graphical file manager that lets you browse inside your encrypted backups OR directly inside a connected iOS device via Wi-Fi/USB to extract any file on the fly.
 * 📞 **VoIP Support**: It doesn't just export carrier calls. It automatically detects and formats calls from **WhatsApp, Microsoft Teams, FaceTime, Telegram**, and more.
 * 📇 **Smart Contact Matching**: Say goodbye to raw phone numbers. The tool parses your iOS address book to seamlessly attach contact names to each call.
 * 📊 **Excel-Ready**: Generates a rich CSV tailored to avoid annoying scientific notation in Microsoft Excel, including clean human-readable call durations and international country prefixes.
@@ -183,6 +184,7 @@ Che tu abbia bisogno di archiviare le chiamate per scopi di fatturazione, requis
 ### 🌟 Perché Scegliere iOS Call Exporter?
 * 🔒 **Privacy al 100%**: Tutto viene eseguito localmente sul tuo computer. La password del tuo backup e i dati delle tue chiamate non lasciano mai la tua macchina.
 * 🔍 **Rilevamento Automatico dei Backup**: Non serve cercare manualmente le cartelle. L'app scansiona automaticamente i percorsi di default di **iTunes/Finder** e **iMazing** su macOS e Windows, e presenta tutti i backup rilevati ordinati per data.
+* 📂 **File Explorer (Backup & Live)**: Un file manager integrato che ti permette di esplorare l'interno dei tuoi backup crittografati OPPURE direttamente la memoria di un dispositivo iOS collegato via Wi-Fi/USB per estrarre qualsiasi file al volo.
 * 📞 **Supporto VoIP**: Non esporta solo le chiamate standard. Rileva e formatta automaticamente le chiamate di **WhatsApp, Microsoft Teams, FaceTime, Telegram** e molte altre app.
 * 📇 **Riconoscimento Contatti Intelligente**: Dì addio ai numeri di telefono illeggibili. Il tool analizza la tua rubrica iOS per associare il nome corretto a ogni chiamata.
 * 📊 **Ottimizzato per Excel**: Genera un file CSV studiato appositamente per evitare la fastidiosa notazione scientifica di Microsoft Excel, includendo durate leggibili e prefissi internazionali.
