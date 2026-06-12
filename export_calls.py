@@ -65,12 +65,10 @@ def apple_timestamp_to_datetime(timestamp: float | None) -> datetime | None:
 
 def format_duration(seconds: float | None) -> str:
     if seconds is None or seconds <= 0:
-        return "0:00"
+        return "00:00:00"
     m, s = divmod(int(seconds), 60)
     h, m = divmod(m, 60)
-    if h > 0:
-        return f"{h}:{m:02d}:{s:02d}"
-    return f"{m}:{s:02d}"
+    return f"{h:02d}:{m:02d}:{s:02d}"
 
 
 def normalize_phone(number: str) -> str:
@@ -222,8 +220,8 @@ def read_calls_from_db(db_path: str, contacts: dict[str, str]) -> list[dict]:
         calls.append({
             "id": row["Z_PK"],
             "unique_id": row["ZUNIQUE_ID"] if has_unique_id else "",
-            "start": dt_local.isoformat() if dt_local else "",
-            "end": end_local.isoformat() if end_local else "",
+            "start": dt_local.strftime("%Y-%m-%d %H:%M:%S") if dt_local else "",
+            "end": end_local.strftime("%Y-%m-%d %H:%M:%S") if end_local else "",
             "contact_name": contact_name,
             "phone_number": address,
             "duration": format_duration(row["ZDURATION"]),
@@ -285,7 +283,16 @@ def main():
     parser.add_argument("--backup-dir", help="Path to the iOS backup directory")
     parser.add_argument("--output", "-o", default="calls.csv", help="Output CSV path (default: calls.csv)")
     parser.add_argument("--passphrase", help="Backup encryption passphrase (or set BACKUP_PASSPHRASE env var)")
+    parser.add_argument("--excel", action="store_true", help="Format CSV specifically for Excel (semicolon separator, text-formatted phone numbers)")
     args = parser.parse_args()
+
+    output_path = args.output
+    if os.path.isdir(output_path) or output_path.endswith(("/", "\\")):
+        output_path = os.path.join(output_path, "calls.csv")
+
+    parent_dir = os.path.dirname(output_path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
 
     if args.backup_dir:
         backup_dir = args.backup_dir
@@ -342,13 +349,20 @@ def main():
         print("No call records found.", file=sys.stderr)
         sys.exit(1)
 
+    if args.excel:
+        for call in calls:
+            pn = call["phone_number"]
+            if pn and re.sub(r"[+\s\-()]", "", pn).isdigit():
+                call["phone_number"] = f'="{pn}"'
+
     fieldnames = ["id", "unique_id", "start", "end", "contact_name", "phone_number", "duration", "duration_seconds", "direction", "call_type", "answered", "country_code", "service_provider", "location"]
-    with open(args.output, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+    with open(output_path, "w", newline="", encoding="utf-8-sig") as f:
+        delimiter = ";" if args.excel else ","
+        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=delimiter)
         writer.writeheader()
         writer.writerows(calls)
 
-    print(f"Exported {len(calls)} calls to {args.output}")
+    print(f"Exported {len(calls)} calls to {output_path}")
 
 
 if __name__ == "__main__":
