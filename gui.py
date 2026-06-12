@@ -60,15 +60,15 @@ class App(tk.Tk):
         y = (self.winfo_screenheight() // 2) - (height // 2)
         self.geometry(f"{width}x{height}+{x}+{y}")
 
-        # Set up modern TTK styling (Google Material palette style)
-        self.setup_styles()
-
         # State variables
         self.is_dark_mode = False
         self.backups = []
         self.selected_backup_dir = ""
         self.original_stdout = sys.stdout
         self.original_stderr = sys.stderr
+
+        # Set up modern TTK styling (Google Material palette style)
+        self.setup_styles()
 
         # Create GUI layout
         self.create_widgets()
