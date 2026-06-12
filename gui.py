@@ -24,10 +24,12 @@ except ImportError:
 # Try to import the core modules
 try:
     from export_calls import find_backups
+    from logger import app_logger, dump_latest_logs
 except ImportError:
     # Append current directory to path if launched from outside
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from export_calls import find_backups
+    from logger import app_logger, dump_latest_logs
 
 
 class TextRedirector:
@@ -326,7 +328,7 @@ class App(tk.Tk):
         btn_load.pack(side='left')
         
         self.search_calls_var = tk.StringVar()
-        self.search_calls_var.trace("w", lambda *args: self.after(300, self.update_calls_view))
+        self.search_calls_var.trace_add("write", lambda *args: self.after(300, self.update_calls_view))
         search_entry = ttk.Entry(top_frame, textvariable=self.search_calls_var, width=40)
         search_entry.pack(side='right')
         ttk.Label(top_frame, text="Cerca:").pack(side='right', padx=8)
@@ -362,7 +364,7 @@ class App(tk.Tk):
         btn_load.pack(side='left')
         
         self.search_msgs_var = tk.StringVar()
-        self.search_msgs_var.trace("w", lambda *args: self.after(300, self.update_msgs_view))
+        self.search_msgs_var.trace_add("write", lambda *args: self.after(300, self.update_msgs_view))
         search_entry = ttk.Entry(top_frame, textvariable=self.search_msgs_var, width=40)
         search_entry.pack(side='right')
         ttk.Label(top_frame, text="Cerca (Testo o Numero):").pack(side='right', padx=8)
@@ -420,9 +422,9 @@ class App(tk.Tk):
         self.btn_load_files.pack(side='left')
         
         self.btn_up_dir = ttk.Button(self.action_frame, text="⬆️ Su", command=self.go_up_dir)
-        
+        # Search bar for Live File Explorer
         self.search_var = tk.StringVar()
-        self.search_var.trace("w", self.filter_files)
+        self.search_var.trace_add("write", self.filter_files)
         self.search_entry = ttk.Entry(self.action_frame, textvariable=self.search_var, width=30)
         self.search_entry.pack(side='right')
         self.lbl_search = ttk.Label(self.action_frame, text="Cerca:", style="TLabel")
