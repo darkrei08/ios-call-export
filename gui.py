@@ -113,7 +113,7 @@ class App(tk.Tk):
         self.configure(bg=bg_color)
 
         style.configure('TFrame', background=bg_color)
-        style.configure('Card.TFrame', background=card_color, relief='flat')
+        style.configure('Card.TFrame', background=card_color)
         
         # Typography
         title_font = ('Segoe UI', 20, 'bold')
@@ -149,35 +149,35 @@ class App(tk.Tk):
 
     def create_widgets(self):
         # 1. Header (Banner)
-        self.header_frame = tk.Frame(self, bg=self.card_color, bd=0, height=100)
+        self.header_frame = ttk.Frame(self, height=100)
         self.header_frame.pack(fill='x', side='top')
         self.header_frame.pack_propagate(False)
         
         # Material design bottom accent line
-        self.accent_line = tk.Frame(self, bg=self.border_color, height=1)
+        self.accent_line = ttk.Frame(self, height=1)
         self.accent_line.pack(fill='x', side='top')
 
         # Theme toggle button
-        self.btn_theme = ttk.Button(self.header_frame, text="🌙 Tema Scuro", style="Secondary.TButton", command=self.toggle_theme)
+        self.btn_theme = ttk.Button(self.header_frame, text="🌙 Tema Scuro", style="Secondary.TButton", command=self.switch_theme)
         self.btn_theme.pack(side='right', padx=32, pady=32)
 
-        title_label = ttk.Label(self.header_frame, text="iOS Backup Explorer", style="Title.TLabel")
+        title_label = tttk.Label(self.header_frame, text="iOS Backup Explorer", style="Title.TLabel")
         title_label.pack(anchor='w', padx=32, pady=(20, 4))
         
-        subtitle_label = ttk.Label(self.header_frame, text="Esplora ed esporta dati dai tuoi backup iOS crittografati.", style="Subtitle.TLabel")
+        subtitle_label = tttk.Label(self.header_frame, text="Esplora ed esporta dati dai tuoi backup iOS crittografati.", style="Subtitle.TLabel")
         subtitle_label.pack(anchor='w', padx=32)
 
         # Main scrollable container
-        container = ttk.Frame(self, padding=16)
+        container = tttk.Frame(self, padding=16)
         container.pack(fill='both', expand=True)
 
         # Global Credentials Section
-        cred_frame = tk.Frame(container, bg=self.card_color, padx=16, pady=16, bd=1, relief="solid")
-        cred_frame.configure(highlightthickness=0, highlightbackground=self.border_color, bd=0)
+        cred_frame = ttk.Frame(container, padx=16, pady=16)
+        cred_frame.configure(highlightthickness=0)
         cred_frame.pack(fill='x', pady=(0, 16))
         
         lbl_font = ('Segoe UI', 10, 'bold')
-        self.lbl_backup = tk.Label(cred_frame, text="Backup iOS di origine:", bg=self.card_color, fg=self.text_color, font=lbl_font)
+        self.lbl_backup = ttk.Label(cred_frame, text="Backup iOS di origine:", font=lbl_font)
         self.lbl_backup.grid(row=0, column=0, sticky='w', pady=8)
         
         self.backup_var = tk.StringVar()
@@ -188,7 +188,7 @@ class App(tk.Tk):
         btn_browse_backup = ttk.Button(cred_frame, text="Sfoglia...", style="Secondary.TButton", command=self.browse_backup)
         btn_browse_backup.grid(row=0, column=2, pady=8)
 
-        self.lbl_pass = tk.Label(cred_frame, text="Password del backup:", bg=self.card_color, fg=self.text_color, font=lbl_font)
+        self.lbl_pass = ttk.Label(cred_frame, text="Password del backup:", font=lbl_font)
         self.lbl_pass.grid(row=1, column=0, sticky='w', pady=8)
         
         self.pass_var = tk.StringVar()
@@ -196,7 +196,7 @@ class App(tk.Tk):
         self.pass_entry.grid(row=1, column=1, sticky='we', padx=(16, 16), pady=8, ipady=4)
         
         self.show_pass_var = tk.BooleanVar(value=False)
-        self.show_pass_check = tk.Checkbutton(cred_frame, text="Mostra", variable=self.show_pass_var, command=self.toggle_pass_visibility, bg=self.card_color, fg=self.text_color, font=('Segoe UI', 10), activebackground=self.card_color, activeforeground=self.text_color, selectcolor=self.card_color)
+        self.show_pass_check = ttk.Checkbutton(cred_frame, text="Mostra", variable=self.show_pass_var, command=self.toggle_pass_visibility)
         self.show_pass_check.grid(row=1, column=2, sticky='w', pady=8)
         cred_frame.columnconfigure(1, weight=1)
 
@@ -205,11 +205,11 @@ class App(tk.Tk):
         self.notebook.pack(fill='both', expand=True, pady=(0, 16))
         
         # Tab 1: Export
-        self.tab_export = ttk.Frame(self.notebook)
-        self.tab_view_calls = ttk.Frame(self.notebook)
-        self.tab_view_msgs = ttk.Frame(self.notebook)
-        self.tab_explorer = ttk.Frame(self.notebook)
-        self.tab_wifi = ttk.Frame(self.notebook)
+        self.tab_export = tttk.Frame(self.notebook)
+        self.tab_view_calls = tttk.Frame(self.notebook)
+        self.tab_view_msgs = tttk.Frame(self.notebook)
+        self.tab_explorer = tttk.Frame(self.notebook)
+        self.tab_wifi = tttk.Frame(self.notebook)
         
         self.notebook.add(self.tab_export, text="📥 Esportazioni")
         self.notebook.add(self.tab_view_calls, text="📞 Vista Chiamate")
@@ -238,32 +238,32 @@ class App(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def create_export_tab(self):
-        container = tk.Frame(self.tab_export, bg=self.card_color, padx=16, pady=16)
+        container = ttk.Frame(self.tab_export, padx=16, pady=16)
         container.pack(fill='both', expand=True)
 
-        lbl_desc = ttk.Label(container, text="Seleziona i dati da esportare dal tuo backup crittografato.", style="TLabel", background=self.card_color)
+        lbl_desc = tttk.Label(container, text="Seleziona i dati da esportare dal tuo backup crittografato.", style="TLabel")
         lbl_desc.pack(anchor='w', pady=(0, 16))
 
         # Checkboxes for export types
         self.export_calls_var = tk.BooleanVar(value=True)
         self.export_msgs_var = tk.BooleanVar(value=False)
 
-        chk_calls = ttk.Checkbutton(container, text="📞 Cronologia Chiamate (CSV)", variable=self.export_calls_var)
+        chk_calls = tttk.Checkbutton(container, text="📞 Cronologia Chiamate (CSV)", variable=self.export_calls_var)
         chk_calls.pack(anchor='w', pady=(0, 4))
 
-        chk_msgs = ttk.Checkbutton(container, text="💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)", variable=self.export_msgs_var)
+        chk_msgs = tttk.Checkbutton(container, text="💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)", variable=self.export_msgs_var)
         chk_msgs.pack(anchor='w', pady=(0, 16))
 
         # Config Frame
-        config_frame = tk.LabelFrame(container, text="Impostazioni Chiamate", bg=self.card_color, fg=self.text_color, font=('Segoe UI', 10, 'bold'), padx=16, pady=16)
+        config_frame = ttk.LabelFrame(container, text="Impostazioni Chiamate", padx=16, pady=16)
         config_frame.pack(fill='x', pady=(0, 20))
         
         self.excel_var = tk.BooleanVar(value=True)
-        chk_excel = ttk.Checkbutton(config_frame, text="Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)", variable=self.excel_var)
+        chk_excel = tttk.Checkbutton(config_frame, text="Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)", variable=self.excel_var)
         chk_excel.pack(anchor='w')
 
         # Action Bar
-        action_frame = tk.Frame(container, bg=self.card_color)
+        action_frame = ttk.Frame(container)
         action_frame.pack(fill='x', pady=8)
 
         self.btn_export = ttk.Button(action_frame, text="AVVIA ESPORTAZIONE", style="Primary.TButton", command=self.start_export)
@@ -271,10 +271,10 @@ class App(tk.Tk):
 
         self.spinner = ttk.Progressbar(action_frame, mode='indeterminate', length=150)
         
-        lbl_logs = ttk.Label(container, text="Log Operazioni:", style="TLabel", background=self.card_color)
+        lbl_logs = tttk.Label(container, text="Log Operazioni:", style="TLabel")
         lbl_logs.pack(anchor='w', pady=(16, 4))
         
-        self.log_text = ScrolledText(container, height=10, bg='#1e1e1e', fg='#d4d4d4', font=('Consolas', 10), bd=0, padx=8, pady=8)
+        self.log_text = ScrolledText(container, height=10, padx=8, pady=8)
         self.log_text.pack(fill='both', expand=True)
 
     # --- Live Data Viewers ---
@@ -310,10 +310,10 @@ class App(tk.Tk):
         self.update_msgs_view()
 
     def create_view_calls_tab(self):
-        container = tk.Frame(self.tab_view_calls, bg=self.card_color, padx=16, pady=16)
+        container = ttk.Frame(self.tab_view_calls, padx=16, pady=16)
         container.pack(fill='both', expand=True)
         
-        top_frame = tk.Frame(container, bg=self.card_color)
+        top_frame = ttk.Frame(container)
         top_frame.pack(fill='x', pady=(0, 10))
         
         btn_load = ttk.Button(top_frame, text="Carica/Aggiorna Dati dal Backup", command=self.load_db_backend)
@@ -323,7 +323,7 @@ class App(tk.Tk):
         self.search_calls_var.trace("w", lambda *args: self.after(300, self.update_calls_view))
         search_entry = ttk.Entry(top_frame, textvariable=self.search_calls_var, width=40)
         search_entry.pack(side='right')
-        ttk.Label(top_frame, text="Cerca:", background=self.card_color).pack(side='right', padx=8)
+        tttk.Label(top_frame, text="Cerca:").pack(side='right', padx=8)
         
         columns = ("Data", "Contatto/Numero", "Durata", "Direzione", "Servizio")
         self.tree_calls = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse')
@@ -346,10 +346,10 @@ class App(tk.Tk):
             self.tree_calls.insert("", "end", values=r)
 
     def create_view_msgs_tab(self):
-        container = tk.Frame(self.tab_view_msgs, bg=self.card_color, padx=16, pady=16)
+        container = ttk.Frame(self.tab_view_msgs, padx=16, pady=16)
         container.pack(fill='both', expand=True)
         
-        top_frame = tk.Frame(container, bg=self.card_color)
+        top_frame = ttk.Frame(container)
         top_frame.pack(fill='x', pady=(0, 10))
         
         btn_load = ttk.Button(top_frame, text="Carica/Aggiorna Dati dal Backup", command=self.load_db_backend)
@@ -359,7 +359,7 @@ class App(tk.Tk):
         self.search_msgs_var.trace("w", lambda *args: self.after(300, self.update_msgs_view))
         search_entry = ttk.Entry(top_frame, textvariable=self.search_msgs_var, width=40)
         search_entry.pack(side='right')
-        ttk.Label(top_frame, text="Cerca (Testo o Numero):", background=self.card_color).pack(side='right', padx=8)
+        tttk.Label(top_frame, text="Cerca (Testo o Numero):").pack(side='right', padx=8)
         
         columns = ("Data", "Contatto", "Direzione", "Servizio", "Testo")
         self.tree_msgs = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse')
@@ -390,11 +390,11 @@ class App(tk.Tk):
             self.tree_msgs.insert("", "end", values=r)
 
     def create_explorer_tab(self):
-        container = tk.Frame(self.tab_explorer, bg=self.card_color, padx=16, pady=16)
+        container = ttk.Frame(self.tab_explorer, padx=16, pady=16)
         container.pack(fill='both', expand=True)
         
         # Source selector
-        source_frame = tk.Frame(container, bg=self.card_color)
+        source_frame = ttk.Frame(container)
         source_frame.pack(fill='x', pady=(0, 12))
         
         self.source_var = tk.StringVar(value="backup")
@@ -407,7 +407,7 @@ class App(tk.Tk):
         self.live_path_var = tk.StringVar(value="/")
         
         # Action Bar
-        self.action_frame = tk.Frame(container, bg=self.card_color)
+        self.action_frame = ttk.Frame(container)
         self.action_frame.pack(fill='x', pady=(0, 12))
         
         self.btn_load_files = ttk.Button(self.action_frame, text="Carica Lista File", style="Primary.TButton", command=self.load_explorer_data)
@@ -419,11 +419,11 @@ class App(tk.Tk):
         self.search_var.trace("w", self.filter_files)
         self.search_entry = ttk.Entry(self.action_frame, textvariable=self.search_var, width=30)
         self.search_entry.pack(side='right')
-        self.lbl_search = ttk.Label(self.action_frame, text="Cerca:", style="TLabel", background=self.card_color)
+        self.lbl_search = tttk.Label(self.action_frame, text="Cerca:", style="TLabel")
         self.lbl_search.pack(side='right', padx=8)
 
         # Path label for Live mode
-        self.lbl_live_path = ttk.Label(container, text="Percorso: /", style="TLabel", background=self.card_color)
+        self.lbl_live_path = tttk.Label(container, text="Percorso: /", style="TLabel")
 
         columns = ("col1", "col2")
         self.file_tree = ttk.Treeview(container, columns=columns, show='headings', selectmode='browse')
@@ -441,7 +441,7 @@ class App(tk.Tk):
         self.file_tree.pack(side='top', fill='both', expand=True)
         scrollbar.pack(side='right', fill='y')
         
-        btn_frame = tk.Frame(container, bg=self.card_color)
+        btn_frame = ttk.Frame(container)
         btn_frame.pack(fill='x', side='bottom', pady=(12,0))
         
         self.btn_extract_file = ttk.Button(btn_frame, text="Estrai Elemento Selezionato", style="Secondary.TButton", command=self.extract_selected_file)
@@ -450,18 +450,24 @@ class App(tk.Tk):
         self.on_source_changed()
 
     def create_wifi_tab(self):
-        container = tk.Frame(self.tab_wifi, bg=self.card_color, padx=24, pady=24)
+        container = ttk.Frame(self.tab_wifi, padx=24, pady=24)
         container.pack(fill='both', expand=True)
         
-        ttk.Label(container, text="Estrazione Password Wi-Fi (In arrivo)", style="Section.TLabel", background=self.card_color).pack(pady=(0, 16))
+        tttk.Label(container, text="Estrazione Password Wi-Fi (In arrivo)", style="Section.TLabel").pack(pady=(0, 16))
         
         msg = ("Le password del Wi-Fi sono conservate nel Keychain cifrato del dispositivo.\n"
                "L'estrazione del Keychain richiederà una gestione avanzata della decrittografia.\n\n"
                "Questa funzionalità sarà implementata nella prossima versione.")
-        tk.Label(container, text=msg, bg=self.card_color, fg=self.text_color, justify='left').pack(anchor='w')
+        ttk.Label(container, text=msg, justify='left').pack(anchor='w')
 
 
-    def toggle_theme(self):
+    
+    def switch_theme(self):
+        import sv_ttk
+        self.is_dark_mode = not self.is_dark_mode
+        sv_ttk.set_theme('dark' if self.is_dark_mode else 'light')
+
+    def old_toggle_theme(self):
         self.is_dark_mode = not self.is_dark_mode
         self.setup_styles()
         
@@ -470,11 +476,11 @@ class App(tk.Tk):
         self.header_frame.configure(bg=self.card_color)
         self.accent_line.configure(bg=self.border_color)
         
-        self.lbl_backup.configure(bg=self.card_color, fg=self.text_color)
-        self.lbl_pass.configure(bg=self.card_color, fg=self.text_color)
-        self.show_pass_check.configure(bg=self.card_color, fg=self.text_color, activebackground=self.card_color, activeforeground=self.text_color, selectcolor=self.card_color)
+        self.lbl_backup.configure(bg=self.card_color)
+        self.lbl_pass.configure(bg=self.card_color)
+        self.show_pass_check.configure(bg=self.card_color)
         
-        self.log_text.configure(bg=self.log_bg, fg=self.log_fg, insertbackground=self.log_fg, highlightbackground=self.border_color, highlightcolor=self.border_color)
+        self.log_text.configure(bg=self.log_bg)
 
         if self.is_dark_mode:
             self.btn_theme.configure(text="☀️ Tema Chiaro")
@@ -706,7 +712,7 @@ class App(tk.Tk):
             # Add a tag to highlight directories
             self.file_tree.insert("", "end", values=(f["name"], tipo), tags=("dir" if f["is_dir"] else "file", f["path"]))
             
-        self.file_tree.tag_configure("dir", font=('Segoe UI', 10, 'bold'))
+        self.file_tree.tag_configure("dir")
 
     def go_up_dir(self):
         source = self.source_var.get()
