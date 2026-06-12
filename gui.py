@@ -207,7 +207,7 @@ class App(tk.Tk):
         btn_browse_out = ttk.Button(self.inner_form, text="Sfoglia...", style="Secondary.TButton", command=self.browse_output)
         btn_browse_out.grid(row=2, column=2, pady=8)
         
-        inner_form.columnconfigure(1, weight=1)
+        self.inner_form.columnconfigure(1, weight=1)
 
         # Row 4: Options
         options_frame = ttk.Frame(container)
