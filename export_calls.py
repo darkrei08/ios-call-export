@@ -1,4 +1,5 @@
 from logger import app_logger
+
 #!/usr/bin/env python3
 """Extract iPhone call history from an encrypted local backup to CSV."""
 
@@ -13,13 +14,13 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import phonenumbers
-from phonenumbers import geocoder
 from dotenv import load_dotenv
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
+from phonenumbers import geocoder
 
 load_dotenv()
 
@@ -28,15 +29,18 @@ load_dotenv()
 def suppress_size_warnings():
     """Filter out the library's 'WARN: decrypted N bytes' prints, pass everything else through."""
     real_write = sys.stdout.write
+
     def filtered_write(s):
         if not s.startswith("WARN: decrypted"):
             return real_write(s)
         return len(s)
+
     sys.stdout.write = filtered_write
     try:
         yield
     finally:
         sys.stdout.write = real_write
+
 
 APPLE_EPOCH = datetime(2001, 1, 1, tzinfo=timezone.utc)
 
@@ -47,32 +51,41 @@ CALL_TYPES = {
     16: "FaceTime Audio",
 }
 
+
 def find_backups() -> list[Path]:
     backup_dirs = []
     home = Path.home()
     if sys.platform == "darwin":  # macOS
-        backup_dirs.extend([
-            home / "Library" / "Application Support" / "MobileSync" / "Backup",
-            home / "Library" / "Application Support" / "iMazing" / "Backups",
-        ])
+        backup_dirs.extend(
+            [
+                home / "Library" / "Application Support" / "MobileSync" / "Backup",
+                home / "Library" / "Application Support" / "iMazing" / "Backups",
+            ]
+        )
     elif sys.platform == "win32":  # Windows
         appdata = os.environ.get("APPDATA")
         userprofile = os.environ.get("USERPROFILE")
         if appdata:
-            backup_dirs.extend([
-                Path(appdata) / "Apple Computer" / "MobileSync" / "Backup",
-                Path(appdata) / "iMazing" / "Backups",
-            ])
+            backup_dirs.extend(
+                [
+                    Path(appdata) / "Apple Computer" / "MobileSync" / "Backup",
+                    Path(appdata) / "iMazing" / "Backups",
+                ]
+            )
         if userprofile:
-            backup_dirs.extend([
-                Path(userprofile) / "Apple" / "MobileSync" / "Backup",
-                Path(userprofile) / "Apple Computer" / "MobileSync" / "Backup",
-            ])
+            backup_dirs.extend(
+                [
+                    Path(userprofile) / "Apple" / "MobileSync" / "Backup",
+                    Path(userprofile) / "Apple Computer" / "MobileSync" / "Backup",
+                ]
+            )
     else:  # Linux / others
-        backup_dirs.extend([
-            home / "MobileSync" / "Backup",
-            home / "Backups",
-        ])
+        backup_dirs.extend(
+            [
+                home / "MobileSync" / "Backup",
+                home / "Backups",
+            ]
+        )
 
     found_backups = []
     for b_dir in backup_dirs:
@@ -199,7 +212,9 @@ def build_contact_lookup(backup: EncryptedBackup) -> dict[str, str]:
                 dupes += 1
             lookup[key] = name
 
-        app_logger.info(f"  {total_contacts} contacts, {phones} phones, {emails} emails, {dupes} duplicates, {len(lookup)} unique keys")
+        app_logger.info(
+            f"  {total_contacts} contacts, {phones} phones, {emails} emails, {dupes} duplicates, {len(lookup)} unique keys"
+        )
         return lookup
     finally:
         os.unlink(tmp_path)
@@ -282,25 +297,27 @@ def read_calls_from_db(db_path: str, contacts: dict[str, str]) -> list[dict]:
 
         phone_info = parse_phone_info(address)
 
-        calls.append({
-            "id": row["Z_PK"],
-            "unique_id": row["ZUNIQUE_ID"] if has_unique_id else "",
-            "start": dt_local.strftime("%Y-%m-%d %H:%M:%S") if dt_local else "",
-            "end": end_local.strftime("%Y-%m-%d %H:%M:%S") if end_local else "",
-            "contact_name": contact_name,
-            "phone_number": address,
-            "country_prefix": phone_info["country_prefix"],
-            "national_number": phone_info["national_number"],
-            "phone_country": phone_info["phone_country"],
-            "duration": format_duration(row["ZDURATION"]),
-            "duration_seconds": duration_secs,
-            "direction": direction,
-            "call_type": resolve_call_type(row["ZCALLTYPE"], service_provider),
-            "answered": answered,
-            "country_code": (row["ZISO_COUNTRY_CODE"] or "").upper(),
-            "service_provider": service_provider,
-            "location": row["ZLOCATION"] if has_location else "",
-        })
+        calls.append(
+            {
+                "id": row["Z_PK"],
+                "unique_id": row["ZUNIQUE_ID"] if has_unique_id else "",
+                "start": dt_local.strftime("%Y-%m-%d %H:%M:%S") if dt_local else "",
+                "end": end_local.strftime("%Y-%m-%d %H:%M:%S") if end_local else "",
+                "contact_name": contact_name,
+                "phone_number": address,
+                "country_prefix": phone_info["country_prefix"],
+                "national_number": phone_info["national_number"],
+                "phone_country": phone_info["phone_country"],
+                "duration": format_duration(row["ZDURATION"]),
+                "duration_seconds": duration_secs,
+                "direction": direction,
+                "call_type": resolve_call_type(row["ZCALLTYPE"], service_provider),
+                "answered": answered,
+                "country_code": (row["ZISO_COUNTRY_CODE"] or "").upper(),
+                "service_provider": service_provider,
+                "location": row["ZLOCATION"] if has_location else "",
+            }
+        )
 
     conn.close()
     return calls
@@ -371,10 +388,23 @@ def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str,
                 call["national_number"] = f'="{nn}"'
 
     fieldnames = [
-        "id", "unique_id", "start", "end", "contact_name", "phone_number",
-        "country_prefix", "national_number", "phone_country",
-        "duration", "duration_seconds", "direction", "call_type", "answered",
-        "country_code", "service_provider", "location"
+        "id",
+        "unique_id",
+        "start",
+        "end",
+        "contact_name",
+        "phone_number",
+        "country_prefix",
+        "national_number",
+        "phone_country",
+        "duration",
+        "duration_seconds",
+        "direction",
+        "call_type",
+        "answered",
+        "country_code",
+        "service_provider",
+        "location",
     ]
     with open(resolved_path, "w", newline="", encoding="utf-8-sig") as f:
         delimiter = ";" if excel_compat else ","
@@ -397,6 +427,7 @@ def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str,
     answered = sum(1 for c in calls if c["answered"])
 
     from collections import Counter
+
     contact_counter = Counter()
     for c in calls:
         name = c["contact_name"]
@@ -427,7 +458,11 @@ def main():
     parser.add_argument("--backup-dir", help="Path to the iOS backup directory")
     parser.add_argument("--output", "-o", default="calls.csv", help="Output CSV path (default: calls.csv)")
     parser.add_argument("--passphrase", help="Backup encryption passphrase (or set BACKUP_PASSPHRASE env var)")
-    parser.add_argument("--excel", action="store_true", help="Format CSV specifically for Excel (semicolon separator, text-formatted phone numbers)")
+    parser.add_argument(
+        "--excel",
+        action="store_true",
+        help="Format CSV specifically for Excel (semicolon separator, text-formatted phone numbers)",
+    )
     args = parser.parse_args()
 
     if args.backup_dir:
@@ -457,7 +492,9 @@ def main():
             try:
                 result = subprocess.run(
                     ["op", "read", op_ref],
-                    capture_output=True, text=True, timeout=30,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
                 )
                 if result.returncode == 0 and result.stdout.strip():
                     passphrase = result.stdout.strip()
@@ -467,8 +504,18 @@ def main():
     if not passphrase:
         try:
             result = subprocess.run(
-                ["security", "find-generic-password", "-a", os.environ.get("USER", ""), "-s", "ios-backup-passphrase", "-w"],
-                capture_output=True, text=True, timeout=10,
+                [
+                    "security",
+                    "find-generic-password",
+                    "-a",
+                    os.environ.get("USER", ""),
+                    "-s",
+                    "ios-backup-passphrase",
+                    "-w",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
             if result.returncode == 0 and result.stdout.strip():
                 passphrase = result.stdout.strip()

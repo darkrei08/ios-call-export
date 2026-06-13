@@ -1,10 +1,10 @@
-from typing import List, Dict
-
+from typing import Dict, List
 
 try:
+    from pymobiledevice3.exceptions import NoDeviceConnectedError
     from pymobiledevice3.lockdown import create_using_usbmux
     from pymobiledevice3.services.afc import AfcService
-    from pymobiledevice3.exceptions import NoDeviceConnectedError
+
     PYMOBILEDEVICE_AVAILABLE = True
 except ImportError:
     PYMOBILEDEVICE_AVAILABLE = False
@@ -14,14 +14,16 @@ def get_connected_device_info() -> str:
     """Returns the name/identifier of the connected device or raises an error."""
     if not PYMOBILEDEVICE_AVAILABLE:
         raise ImportError("La libreria pymobiledevice3 non è installata.")
-        
+
     try:
         lockdown = create_using_usbmux()
         device_name = lockdown.short_info.get("DeviceName", "iPhone Sconosciuto")
         ios_version = lockdown.short_info.get("ProductVersion", "Sconosciuta")
         return f"{device_name} (iOS {ios_version})"
     except NoDeviceConnectedError:
-        raise Exception("Nessun dispositivo iOS rilevato tramite USB/Wi-Fi. Assicurati che sia collegato e sbloccato ('Autorizza questo computer').")
+        raise Exception(
+            "Nessun dispositivo iOS rilevato tramite USB/Wi-Fi. Assicurati che sia collegato e sbloccato ('Autorizza questo computer')."
+        )
     except Exception as e:
         raise Exception(f"Errore di connessione al dispositivo: {e}")
 
@@ -43,7 +45,7 @@ def list_live_files(path: str = "/") -> List[Dict]:
             for item in items:
                 if item in (".", ".."):
                     continue
-                
+
                 full_path = f"{path}/{item}" if path != "/" else f"/{item}"
                 # afc.stat() gives info. st_ifmt can tell if dir or file, but we can just use afc.resolve_path or check stat dict
                 try:
@@ -51,17 +53,13 @@ def list_live_files(path: str = "/") -> List[Dict]:
                     is_dir = stat_info.get("st_ifmt", "") == "S_IFDIR"
                 except Exception:
                     is_dir = False
-                    
-                files.append({
-                    "name": item,
-                    "path": full_path,
-                    "is_dir": is_dir
-                })
+
+                files.append({"name": item, "path": full_path, "is_dir": is_dir})
     except NoDeviceConnectedError:
         raise Exception("Dispositivo non connesso.")
     except Exception as e:
         raise Exception(f"Errore di lettura percorso {path}: {e}")
-        
+
     # Sort directories first
     files.sort(key=lambda x: (not x["is_dir"], x["name"].lower()))
     return files

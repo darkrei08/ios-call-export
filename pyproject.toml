@@ -15,3 +15,25 @@ dependencies = [
 live = [
     "pymobiledevice3>=2.0.0",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.17",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
+ignore = [
+    "E402",   # Module level import not at top (needed for load_dotenv() pattern)
+    "E501",   # Line too long — GUI code often has long widget configuration lines
+    "B904",   # raise-from — stylistic, not a bug
+    "W291",   # Trailing whitespace in multiline SQL strings
+]
+
+[tool.ruff.lint.per-file-ignores]
+"inject_logger.py" = ["F401"]   # Utility script, imports vary by use
+"refactor_gui.py" = ["F401"]    # One-off script

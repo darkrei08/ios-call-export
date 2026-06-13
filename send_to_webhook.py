@@ -7,7 +7,7 @@ import json
 import os
 import sys
 from datetime import datetime, timedelta
-from urllib.request import urlopen, Request
+from urllib.request import Request, urlopen
 
 from dotenv import load_dotenv
 
