@@ -17,6 +17,11 @@ if ! command -v uv &> /dev/null; then
 fi
 
 # --- Sync dependencies ---
+if [ -d ".venv" ] && [ ! -f ".venv/bin/python" ]; then
+    echo "📦 Rilevato ambiente virtuale non valido (forse cloud-sync da Windows). Ricreazione..."
+    rm -rf .venv
+fi
+
 if [ ! -d ".venv" ] || [ "pyproject.toml" -nt ".venv" ]; then
     echo "📦 Installazione dipendenze..."
     uv sync
