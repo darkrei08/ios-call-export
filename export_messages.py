@@ -73,8 +73,10 @@ def get_messages_data(backup_dir: str, passphrase: str) -> dict:
 
         raw_date = row["date"]
         # Handle iOS 10+ nano seconds timestamp (18 digits) vs iOS 9 seconds
-        if raw_date > 1000000000000000000:
-            timestamp = (raw_date / 1000000000) + APPLE_EPOCH_OFFSET
+        if raw_date > 10**16:
+            timestamp = (raw_date / 1e9) + APPLE_EPOCH_OFFSET
+        elif raw_date > 10**13:
+            timestamp = (raw_date / 1e6) + APPLE_EPOCH_OFFSET
         else:
             timestamp = raw_date + APPLE_EPOCH_OFFSET
 

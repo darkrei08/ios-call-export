@@ -20,16 +20,16 @@ class DataViewerBackend:
         self.calls_db = None
         self.sms_db = None
         self.contact_lookup = {}
-        self.backup = EncryptedBackup(backup_directory=backup_dir, passphrase=passphrase)
 
     def load_databases(self):
         """Extract both databases to the temp folder and build contact lookup."""
-        self.contact_lookup = build_contact_lookup(self.backup)
+        backup = EncryptedBackup(backup_directory=self.backup_dir, passphrase=self.passphrase)
+        self.contact_lookup = build_contact_lookup(backup)
 
         # Extract Calls DB
         calls_path = os.path.join(self.temp_dir, "calls.sqlite")
         try:
-            self.backup.extract_file(relative_path=RelativePath.CALL_HISTORY, output_filename=calls_path)
+            backup.extract_file(relative_path=RelativePath.CALL_HISTORY, output_filename=calls_path)
             self.calls_db = sqlite3.connect(calls_path, check_same_thread=False)
             self.calls_db.row_factory = sqlite3.Row
         except Exception:
@@ -38,11 +38,18 @@ class DataViewerBackend:
         # Extract SMS DB
         sms_path = os.path.join(self.temp_dir, "sms.sqlite")
         try:
-            self.backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=sms_path)
+            backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=sms_path)
             self.sms_db = sqlite3.connect(sms_path, check_same_thread=False)
             self.sms_db.row_factory = sqlite3.Row
         except Exception:
             app_logger.error("Errore estrazione SMS DB per Viewer", exc_info=True)
+
+        # Clean up backup object to avoid cross-thread SQLite issues on __del__
+        try:
+            if hasattr(backup, "_cleanup"):
+                backup._cleanup()
+        except Exception:
+            pass
 
     def search_calls(self, search_term: str = "", limit: int = 100):
         if not self.calls_db:
@@ -96,8 +103,10 @@ class DataViewerBackend:
         for row in rows:
             text = row["text"] or "[Allegato/Vuoto]"
             raw_date = row["date"]
-            if raw_date > 1000000000000000000:
-                ts = (raw_date / 1000000000) + APPLE_EPOCH_OFFSET
+            if raw_date > 10**16:
+                ts = (raw_date / 1e9) + APPLE_EPOCH_OFFSET
+            elif raw_date > 10**13:
+                ts = (raw_date / 1e6) + APPLE_EPOCH_OFFSET
             else:
                 ts = raw_date + APPLE_EPOCH_OFFSET
 
