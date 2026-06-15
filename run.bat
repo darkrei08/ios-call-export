@@ -26,8 +26,9 @@ set "PATH=%USERPROFILE%\.cargo\bin;%PATH%"
 :HAS_UV
 REM --- Validate or Sync dependencies ---
 if exist ".venv" (
-    if not exist ".venv\Scripts\python.exe" (
-        echo [*] Rilevato ambiente virtuale non valido per Windows (forse sincronizzato da cloud). Ricreazione...
+    uv run python -c "pass" >nul 2>&1
+    if errorlevel 1 (
+        echo [*] Ambiente virtuale corrotto (probabile cloud-sync da altro OS). Ricreazione...
         rmdir /s /q .venv
     )
 )
@@ -42,8 +43,9 @@ goto :END
 :TRY_PIP
 REM --- Fallback: use pip + venv ---
 if exist ".venv" (
-    if not exist ".venv\Scripts\python.exe" (
-        echo [*] Rilevato ambiente virtuale non valido per Windows. Ricreazione...
+    .venv\Scripts\python.exe -c "pass" >nul 2>&1
+    if errorlevel 1 (
+        echo [*] Ambiente virtuale corrotto. Ricreazione...
         rmdir /s /q .venv
     )
 )
