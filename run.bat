@@ -24,7 +24,13 @@ set "PATH=%USERPROFILE%\.local\bin;%PATH%"
 set "PATH=%USERPROFILE%\.cargo\bin;%PATH%"
 
 :HAS_UV
-REM --- Sync dependencies ---
+REM --- Validate or Sync dependencies ---
+if exist ".venv" (
+    if not exist ".venv\Scripts\python.exe" (
+        echo [*] Rilevato ambiente virtuale non valido per Windows (forse sincronizzato da cloud). Ricreazione...
+        rmdir /s /q .venv
+    )
+)
 if not exist ".venv" (
     echo [*] Installazione dipendenze...
     uv sync
@@ -35,6 +41,12 @@ goto :END
 
 :TRY_PIP
 REM --- Fallback: use pip + venv ---
+if exist ".venv" (
+    if not exist ".venv\Scripts\python.exe" (
+        echo [*] Rilevato ambiente virtuale non valido per Windows. Ricreazione...
+        rmdir /s /q .venv
+    )
+)
 if not exist ".venv" (
     echo [*] Creazione ambiente virtuale con pip...
     python -m venv .venv
