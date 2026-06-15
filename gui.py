@@ -69,7 +69,10 @@ class App(tk.Tk):
         self.original_stdout = sys.stdout
         self.original_stderr = sys.stderr
 
-        # Set up modern TTK styling (Premium Material Design)
+        # Initialize sv_ttk theme FIRST, then apply custom overrides
+        import sv_ttk
+
+        sv_ttk.set_theme("light")
         self.setup_styles()
 
         # Create GUI layout
@@ -79,14 +82,13 @@ class App(tk.Tk):
         self.detect_backups()
 
     def setup_styles(self):
+        """Apply custom styling overrides on top of the current sv_ttk theme."""
         style = ttk.Style()
-        # Fall back to clam theme for custom styling control across platforms
-        style.theme_use("clam")
 
         # Premium Colors definition
         if getattr(self, "is_dark_mode", False):
-            self.bg_color = "#121212"
-            self.card_color = "#1E1E1E"
+            self.bg_color = "#1c1c1e"
+            self.card_color = "#2c2c2e"
             self.primary_color = "#0A84FF"  # Apple Dark Blue
             self.primary_active = "#409CFF"
             self.text_color = "#F9FAFB"
@@ -105,58 +107,25 @@ class App(tk.Tk):
             self.log_bg = "#1F2937"
             self.log_fg = "#E5E7EB"
 
-        bg_color = self.bg_color
-        card_color = self.card_color
         primary_color = self.primary_color
         primary_active = self.primary_active
         text_color = self.text_color
         sub_text_color = self.sub_text_color
         border_color = self.border_color
 
-        self.configure(bg=bg_color)
-
-        style.configure("TFrame", background=bg_color)
-        style.configure("Card.TFrame", background=card_color)
-
-        # Typography
+        # Typography - these fonts are applied as overrides on top of sv_ttk
         title_font = ("Segoe UI", 20, "bold")
         subtitle_font = ("Segoe UI", 10)
         section_font = ("Segoe UI", 12, "bold")
         label_font = ("Segoe UI", 10)
         btn_font = ("Segoe UI", 10, "bold")
 
-        style.configure("TLabel", background=bg_color, foreground=text_color, font=label_font)
-        style.configure("Title.TLabel", background=card_color, foreground=primary_color, font=title_font)
-        style.configure("Subtitle.TLabel", background=card_color, foreground=sub_text_color, font=subtitle_font)
-        style.configure("Section.TLabel", background=bg_color, foreground=text_color, font=section_font)
+        # Custom style overrides for specific widget classes
+        style.configure("Title.TLabel", foreground=primary_color, font=title_font)
+        style.configure("Subtitle.TLabel", foreground=sub_text_color, font=subtitle_font)
+        style.configure("Section.TLabel", foreground=text_color, font=section_font)
 
-        style.configure("TCheckbutton", background=bg_color, foreground=text_color, font=label_font)
-
-        # Entries
-        style.configure(
-            "TEntry",
-            fieldbackground=card_color,
-            bordercolor=border_color,
-            lightcolor=border_color,
-            darkcolor=border_color,
-            insertcolor=text_color,
-            foreground=text_color,
-            padding=6,
-        )
-
-        # Combobox
-        style.configure(
-            "TCombobox",
-            fieldbackground=card_color,
-            background=card_color,
-            arrowcolor=text_color,
-            bordercolor=border_color,
-            foreground=text_color,
-            padding=6,
-        )
-        style.map("TCombobox", fieldbackground=[("readonly", card_color)])
-
-        # Primary Button (Solid Blue)
+        # Primary Button (Solid Blue) - custom style that sits on top of sv_ttk
         style.configure(
             "Primary.TButton",
             background=primary_color,
@@ -175,15 +144,14 @@ class App(tk.Tk):
         # Secondary Button (Bordered White/Dark)
         style.configure(
             "Secondary.TButton",
-            background=card_color,
             foreground=primary_color,
             font=label_font,
-            borderwidth=1,
-            bordercolor=border_color,
-            focuscolor=card_color,
             padding=6,
         )
-        style.map("Secondary.TButton", background=[("active", border_color)])
+
+        # Update the log_text widget colors if it already exists
+        if hasattr(self, "log_text"):
+            self.log_text.configure(bg=self.log_bg, fg=self.log_fg, insertbackground=self.log_fg)
 
     def create_widgets(self):
         # 1. Header (Banner)
@@ -548,6 +516,8 @@ class App(tk.Tk):
 
         self.is_dark_mode = not self.is_dark_mode
         sv_ttk.set_theme("dark" if self.is_dark_mode else "light")
+        # Re-apply our custom style overrides on top of the new sv_ttk theme
+        self.setup_styles()
         if hasattr(self, "btn_theme"):
             self.btn_theme.configure(text="☀️ Tema Chiaro" if self.is_dark_mode else "🌙 Tema Scuro")
 
