@@ -1,8 +1,9 @@
 [Desktop Entry]
 Name=iOS Backup Explorer
 Comment=Esplora ed esporta dati dai tuoi backup iOS crittografati
-Exec=bash -c 'cd "/mnt/HDD-1/0-Cloud/0-Filen/SW_Repos/Altri repo/ios-call-export" && ./run.sh'
+Exec=bash -c 'cd "$(dirname "%k")" && ./run.sh'
 Icon=phone
 Terminal=false
 Type=Application
 Categories=Utility;
+StartupNotify=true
