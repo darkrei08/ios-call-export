@@ -9,7 +9,9 @@ for line in lines:
     if "def setup_theme(self):" in line:
         new_lines.append(line)
         new_lines.append("        import sv_ttk\n")
-        new_lines.append("        sv_ttk.set_theme('dark' if self.is_dark_mode else 'light')\n")
+        new_lines.append(
+            "        sv_ttk.set_theme('dark' if self.is_dark_mode else 'light')\n"
+        )
         skip = True
         continue
     if skip and "def create_widgets(self):" in line:
@@ -56,6 +58,8 @@ toggle_func = """
         self.is_dark_mode = not self.is_dark_mode
         sv_ttk.set_theme('dark' if self.is_dark_mode else 'light')
 """
-content = content.replace("def toggle_theme(self):", toggle_func + "\n    def old_toggle_theme(self):")
+content = content.replace(
+    "def toggle_theme(self):", toggle_func + "\n    def old_toggle_theme(self):"
+)
 with open("gui.py", "w", encoding="utf-8") as f:
     f.write(content)

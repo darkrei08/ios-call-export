@@ -23,13 +23,17 @@ class DataViewerBackend:
 
     def load_databases(self):
         """Extract both databases to the temp folder and build contact lookup."""
-        backup = EncryptedBackup(backup_directory=self.backup_dir, passphrase=self.passphrase)
+        backup = EncryptedBackup(
+            backup_directory=self.backup_dir, passphrase=self.passphrase
+        )
         self.contact_lookup = build_contact_lookup(backup)
 
         # Extract Calls DB
         calls_path = os.path.join(self.temp_dir, "calls.sqlite")
         try:
-            backup.extract_file(relative_path=RelativePath.CALL_HISTORY, output_filename=calls_path)
+            backup.extract_file(
+                relative_path=RelativePath.CALL_HISTORY, output_filename=calls_path
+            )
             self.calls_db = sqlite3.connect(calls_path, check_same_thread=False)
             self.calls_db.row_factory = sqlite3.Row
         except Exception:
@@ -38,7 +42,9 @@ class DataViewerBackend:
         # Extract SMS DB
         sms_path = os.path.join(self.temp_dir, "sms.sqlite")
         try:
-            backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=sms_path)
+            backup.extract_file(
+                relative_path=RelativePath.TEXT_MESSAGES, output_filename=sms_path
+            )
             self.sms_db = sqlite3.connect(sms_path, check_same_thread=False)
             self.sms_db.row_factory = sqlite3.Row
         except Exception:
@@ -69,14 +75,20 @@ class DataViewerBackend:
         results = []
         for row in rows:
             address = row["ZADDRESS"] or ""
-            dt_str = apple_timestamp_to_datetime(row["ZDATE"]).strftime("%Y-%m-%d %H:%M:%S")
+            dt_str = apple_timestamp_to_datetime(row["ZDATE"]).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
             direction = "Uscente" if row["ZORIGINATED"] else "Entrante/Persa"
             duration = int(row["ZDURATION"] or 0)
             service = row["ZSERVICE_PROVIDER"] or "Telefono"
 
             # Resolve name
             lookup_key = address.replace(" ", "")
-            name = self.contact_lookup.get(lookup_key) or self.contact_lookup.get(address) or address
+            name = (
+                self.contact_lookup.get(lookup_key)
+                or self.contact_lookup.get(address)
+                or address
+            )
 
             results.append((dt_str, name, f"{duration}s", direction, service))
 
@@ -119,7 +131,11 @@ class DataViewerBackend:
 
             # Resolve name
             lookup_key = phone.replace(" ", "")
-            name = self.contact_lookup.get(lookup_key) or self.contact_lookup.get(phone) or phone
+            name = (
+                self.contact_lookup.get(lookup_key)
+                or self.contact_lookup.get(phone)
+                or phone
+            )
 
             results.append((dt_str, name, direction, service, text.replace("\n", " ")))
 

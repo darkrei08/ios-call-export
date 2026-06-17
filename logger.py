@@ -43,7 +43,9 @@ class SQLiteHandler(logging.Handler):
 
     def emit(self, record):
         try:
-            timestamp = datetime.fromtimestamp(record.created).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            timestamp = datetime.fromtimestamp(record.created).strftime(
+                "%Y-%m-%d %H:%M:%S.%f"
+            )[:-3]
             level = record.levelname
             module = record.module
             line = record.lineno
@@ -104,7 +106,8 @@ def dump_latest_logs(limit=100) -> str:
     try:
         with sqlite3.connect(DB_FILE, timeout=5.0) as conn:
             rows = conn.execute(
-                "SELECT timestamp, level, module, line, message, exc_text FROM logs ORDER BY id DESC LIMIT ?", (limit,)
+                "SELECT timestamp, level, module, line, message, exc_text FROM logs ORDER BY id DESC LIMIT ?",
+                (limit,),
             ).fetchall()
 
         dump = []

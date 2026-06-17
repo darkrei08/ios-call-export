@@ -11,7 +11,9 @@ for file in files:
         content = "from logger import app_logger\n" + content
 
     # Replace print(..., file=sys.stderr) with app_logger.error(...)
-    content = re.sub(r"print\((.*?),?\s*file=sys\.stderr\)", r"app_logger.error(\1)", content)
+    content = re.sub(
+        r"print\((.*?),?\s*file=sys\.stderr\)", r"app_logger.error(\1)", content
+    )
 
     # Replace remaining print(...) with app_logger.info(...)
     content = re.sub(r"print\((.*?)\)", r"app_logger.info(\1)", content)

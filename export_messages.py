@@ -27,7 +27,9 @@ def get_messages_data(backup_dir: str, passphrase: str) -> dict:
     try:
         app_logger.info("Extracting sms.db...")
         # Redirect stdout temporarily if library is noisy
-        backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=tmp_path)
+        backup.extract_file(
+            relative_path=RelativePath.TEXT_MESSAGES, output_filename=tmp_path
+        )
     except Exception as e:
         raise Exception(f"Errore durante l'estrazione di sms.db: {e}")
 
@@ -69,7 +71,11 @@ def get_messages_data(backup_dir: str, passphrase: str) -> dict:
         contact_name = contact_lookup.get(lookup_key) or contact_lookup.get(handle_id)
 
         if handle_id not in chat_data:
-            chat_data[handle_id] = {"handle_id": handle_id, "contact_name": contact_name, "messages": []}
+            chat_data[handle_id] = {
+                "handle_id": handle_id,
+                "contact_name": contact_name,
+                "messages": [],
+            }
 
         raw_date = row["date"]
         # Handle iOS 10+ nano seconds timestamp (18 digits) vs iOS 9 seconds
@@ -93,7 +99,11 @@ def get_messages_data(backup_dir: str, passphrase: str) -> dict:
 
 
 def export_messages_to_csv_and_html(
-    backup_dir: str, passphrase: str, output_html: str, output_csv: str, excel_compat: bool = True
+    backup_dir: str,
+    passphrase: str,
+    output_html: str,
+    output_csv: str,
+    excel_compat: bool = True,
 ):
     """Main entry point to build the HTML viewer and the CSV export."""
     app_logger.info("Inizio estrazione messaggi...")
@@ -125,12 +135,27 @@ def export_messages_to_csv_and_html(
         for handle_id, chat in chat_data.items():
             contact_name = chat.get("contact_name") or handle_id
             for msg in chat["messages"]:
-                dt_str = datetime.fromtimestamp(msg["timestamp"]).strftime("%Y-%m-%d %H:%M:%S")
+                dt_str = datetime.fromtimestamp(msg["timestamp"]).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
                 direction = "Sent" if msg["is_from_me"] else "Received"
                 # Prevent excel formula injection for phone numbers
-                phone_out = f'="{handle_id}"' if excel_compat and str(handle_id).startswith("+") else handle_id
+                phone_out = (
+                    f'="{handle_id}"'
+                    if excel_compat and str(handle_id).startswith("+")
+                    else handle_id
+                )
 
-                writer.writerow([contact_name, phone_out, dt_str, direction, msg["service"], msg["text"]])
+                writer.writerow(
+                    [
+                        contact_name,
+                        phone_out,
+                        dt_str,
+                        direction,
+                        msg["service"],
+                        msg["text"],
+                    ]
+                )
     app_logger.info(f"File CSV generato con successo: {output_csv}")
 
     return len(chat_data)

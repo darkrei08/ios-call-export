@@ -16,10 +16,23 @@ load_dotenv()
 
 def main():
     parser = argparse.ArgumentParser(description="Send call history to webhook")
-    parser.add_argument("--csv", default="calls.csv", help="Path to calls CSV (default: calls.csv)")
-    parser.add_argument("--weeks", type=int, default=None, help="Only send calls from the last N weeks (default: all)")
-    parser.add_argument("--webhook-url", help="Webhook URL (or set WEBHOOK_URL env var)")
-    parser.add_argument("--dry-run", action="store_true", help="Print what would be sent without sending")
+    parser.add_argument(
+        "--csv", default="calls.csv", help="Path to calls CSV (default: calls.csv)"
+    )
+    parser.add_argument(
+        "--weeks",
+        type=int,
+        default=None,
+        help="Only send calls from the last N weeks (default: all)",
+    )
+    parser.add_argument(
+        "--webhook-url", help="Webhook URL (or set WEBHOOK_URL env var)"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print what would be sent without sending",
+    )
     args = parser.parse_args()
 
     webhook_url = args.webhook_url or os.environ.get("WEBHOOK_URL", "")
@@ -27,7 +40,11 @@ def main():
         print("Error: --webhook-url or WEBHOOK_URL env var required", file=sys.stderr)
         sys.exit(1)
 
-    cutoff = datetime.now().astimezone() - timedelta(weeks=args.weeks) if args.weeks else None
+    cutoff = (
+        datetime.now().astimezone() - timedelta(weeks=args.weeks)
+        if args.weeks
+        else None
+    )
 
     calls = []
     with open(args.csv, newline="") as f:
@@ -59,7 +76,9 @@ def main():
     if args.dry_run:
         for c in calls[:10]:
             name = c.get("contact_name") or c.get("phone_number") or "Unknown"
-            print(f"  {c['direction']:>8} | {name} | {c['start'][:16]} | {c['duration']}")
+            print(
+                f"  {c['direction']:>8} | {name} | {c['start'][:16]} | {c['duration']}"
+            )
         if len(calls) > 10:
             print(f"  ... and {len(calls) - 10} more")
         return
