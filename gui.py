@@ -113,21 +113,8 @@ class App(tk.Tk):
         style.configure("Subtitle.TLabel", foreground=sub_text_color, font=subtitle_font)
         style.configure("Section.TLabel", foreground=text_color, font=section_font)
 
-        # Primary Button (Solid Blue) - custom style that sits on top of sv_ttk
-        style.configure(
-            "Primary.TButton",
-            background=primary_color,
-            foreground="#ffffff",
-            font=btn_font,
-            borderwidth=0,
-            focuscolor=primary_color,
-            padding=10,
-        )
-        style.map(
-            "Primary.TButton",
-            background=[("active", primary_active), ("disabled", border_color)],
-            foreground=[("disabled", "#9CA3AF")],
-        )
+        # Accent Button provided by sv_ttk handles primary action perfectly.
+
 
         # Secondary Button (Bordered White/Dark)
         style.configure(
@@ -284,7 +271,7 @@ class App(tk.Tk):
         action_frame.pack(fill="x", pady=8)
 
         self.btn_export = ttk.Button(
-            action_frame, text="AVVIA ESPORTAZIONE", style="Primary.TButton", command=self.start_export
+            action_frame, text="AVVIA ESPORTAZIONE", style="Accent.TButton", command=self.start_export
         )
         self.btn_export.pack(side="left")
 

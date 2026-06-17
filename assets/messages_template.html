@@ -1,139 +1,104 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iOS Messages Exporter</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-main: #f3f4f6;
-            --bg-sidebar: #ffffff;
-            --bg-chat: #ffffff;
-            --text-main: #111827;
-            --text-sub: #6b7280;
-            --border: #e5e7eb;
-            --accent: #007aff;
-            --accent-hover: #0056b3;
-            --bubble-sent: #007aff;
-            --bubble-sent-text: #ffffff;
-            --bubble-received: #e5e5ea;
-            --bubble-received-text: #000000;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-main: #000000;
-                --bg-sidebar: #1c1c1e;
-                --bg-chat: #1c1c1e;
-                --text-main: #ffffff;
-                --text-sub: #8e8e93;
-                --border: #38383a;
-                --accent: #0a84ff;
-                --accent-hover: #409cff;
-                --bubble-sent: #0a84ff;
-                --bubble-sent-text: #ffffff;
-                --bubble-received: #3a3a3c;
-                --bubble-received-text: #ffffff;
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "surface-container": "#1e1f23",
+                "surface-container-high": "#292a2e",
+              }
             }
+          }
         }
+    </script>
+    <style>
+        body { background-color: #000000; color: #e3e2e7; font-family: 'Inter', sans-serif; overflow: hidden; }
+        .glass-panel { background: rgba(28, 28, 30, 0.4); backdrop-filter: blur(24px); border-right: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-header { background: rgba(28, 28, 30, 0.7); backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-input { background: #000000; border: 1px solid rgba(255, 255, 255, 0.1); color: #e3e2e7; }
+        .glass-input:focus { border-color: #007AFF; outline: none; }
+        .chat-item-hover:hover { background: rgba(255, 255, 255, 0.05); }
+        .chat-item-active { background: #007AFF !important; color: #ffffff !important; }
+        .chat-item-active .text-on-surface-variant { color: rgba(255,255,255,0.8) !important; }
+        
+        .bubble-sent { background-color: #007AFF; color: #ffffff; border-bottom-right-radius: 4px; }
+        .bubble-received { background-color: #2C2C2E; color: #e3e2e7; border-bottom-left-radius: 4px; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
-
-        /* Sidebar */
-        .sidebar { width: 350px; background-color: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
-        .sidebar-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 10px; }
-        .search-box { width: 100%; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border); background-color: var(--bg-main); color: var(--text-main); font-family: inherit; }
-        
-        .chat-list { flex-grow: 1; overflow-y: auto; }
-        .chat-item { padding: 15px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
-        .chat-item:hover { background-color: var(--bg-main); }
-        .chat-item.active { background-color: var(--accent); color: #fff; }
-        .chat-item.active .chat-preview, .chat-item.active .chat-date { color: rgba(255,255,255,0.8); }
-        
-        .chat-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-        .chat-name { font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
-        .chat-date { font-size: 12px; color: var(--text-sub); }
-        .chat-preview { font-size: 14px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Main Chat Area */
-        .main-area { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--bg-chat); }
-        .chat-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background-color: rgba(255,255,255,0.8); backdrop-filter: blur(10px); }
-        @media (prefers-color-scheme: dark) { .chat-header { background-color: rgba(28,28,30,0.8); } }
-        
-        .header-title { font-size: 20px; font-weight: 600; }
-        .header-subtitle { font-size: 14px; color: var(--text-sub); }
-        
-        .toolbar-btns button { background-color: var(--bg-main); border: 1px solid var(--border); color: var(--accent); padding: 8px 16px; border-radius: 8px; font-weight: 500; cursor: pointer; transition: 0.2s; font-family: inherit; margin-left: 8px;}
-        .toolbar-btns button:hover { background-color: var(--border); }
-
-        .chat-history { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        
-        /* Bubbles */
-        .message { display: flex; flex-direction: column; max-width: 70%; }
-        .msg-sent { align-self: flex-end; align-items: flex-end; }
-        .msg-received { align-self: flex-start; align-items: flex-start; }
-        
-        .bubble { padding: 12px 16px; border-radius: 18px; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
-        .msg-sent .bubble { background-color: var(--bubble-sent); color: var(--bubble-sent-text); border-bottom-right-radius: 4px; }
-        .msg-received .bubble { background-color: var(--bubble-received); color: var(--bubble-received-text); border-bottom-left-radius: 4px; }
-        
-        .msg-time { font-size: 11px; color: var(--text-sub); margin-top: 4px; padding: 0 4px; }
-        
-        /* Empty State */
-        .empty-state { flex-grow: 1; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--text-sub); }
-        .empty-state h2 { font-weight: 500; margin-bottom: 8px; }
-        
-        /* Print Styles */
         @media print {
-            .sidebar, .toolbar-btns { display: none !important; }
-            .main-area { width: 100%; display: block; }
-            .chat-history { overflow: visible; }
+            .sidebar-area, .toolbar-btns { display: none !important; }
+            .chat-area { width: 100% !important; margin: 0; }
+            .glass-header { position: static; }
+            body, .chat-area { overflow: visible !important; height: auto !important; }
+            .bubble-sent { background-color: #e0e0e0 !important; color: #000 !important; border: 1px solid #ccc; }
+            .bubble-received { background-color: #f5f5f5 !important; color: #000 !important; border: 1px solid #ccc; }
+            #chatHistory { display: block !important; overflow: visible !important; }
         }
     </style>
 </head>
-<body>
+<body class="h-screen w-full flex bg-black text-gray-200">
 
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h1>Messaggi</h1>
-            <input type="text" id="searchInput" class="search-box" placeholder="Cerca contatti...">
+    <div class="sidebar-area w-[380px] flex flex-col glass-panel shrink-0 h-full">
+        <div class="p-6 pb-4">
+            <h1 class="text-3xl font-bold text-white mb-6">Messaggi</h1>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+                <input type="text" id="searchInput" placeholder="Cerca contatti o numeri..." class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm transition-all">
+            </div>
         </div>
-        <div class="chat-list" id="chatList">
+        <div class="flex-1 overflow-y-auto px-3 pb-6" id="chatList">
             <!-- Populated by JS -->
         </div>
     </div>
 
-    <div class="main-area" id="mainArea">
-        <div class="empty-state" id="emptyState">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 16px; opacity: 0.5;">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10z"></path>
-            </svg>
-            <h2>Seleziona una conversazione</h2>
-            <p>Scegli una chat dalla barra laterale per visualizzarne il contenuto.</p>
+    <div class="chat-area flex-1 flex flex-col relative bg-[#121214] h-full" id="mainArea">
+        <div id="emptyState" class="flex-1 flex flex-col items-center justify-center text-gray-500">
+            <span class="material-symbols-outlined text-6xl mb-4 opacity-50" style="font-variation-settings: 'FILL' 0;">forum</span>
+            <h2 class="text-xl font-medium text-gray-300 mb-2">Seleziona una conversazione</h2>
+            <p class="text-sm">Scegli una chat dalla barra laterale per leggere i messaggi.</p>
         </div>
         
-        <div class="chat-header" id="chatHeader" style="display: none;">
-            <div>
-                <div class="header-title" id="headerTitle">Contact Name</div>
-                <div class="header-subtitle" id="headerSubtitle">+39 333 1234567</div>
+        <div id="chatContainer" class="hidden flex-1 flex flex-col h-full">
+            <div class="glass-header px-6 py-4 flex items-center justify-between z-10 w-full shrink-0">
+                <div class="flex items-center gap-4">
+                    <div id="headerAvatar" class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center font-bold text-lg text-white">U</div>
+                    <div>
+                        <h2 id="headerTitle" class="text-lg font-semibold text-white">Contact Name</h2>
+                        <p id="headerSubtitle" class="text-sm text-gray-400">+39 333 1234567</p>
+                    </div>
+                </div>
+                <div class="toolbar-btns flex gap-3">
+                    <button onclick="exportCSV()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-sm font-medium border border-white/10 text-white">
+                        <span class="material-symbols-outlined text-sm">download</span> CSV
+                    </button>
+                    <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#007AFF] hover:bg-[#0056b3] transition-colors text-sm font-medium text-white shadow-lg shadow-blue-500/20">
+                        <span class="material-symbols-outlined text-sm">print</span> Stampa
+                    </button>
+                </div>
             </div>
-            <div class="toolbar-btns">
-                <button onclick="exportCSV()">Esporta CSV</button>
-                <button onclick="window.print()">Stampa / PDF</button>
+            
+            <div id="chatHistory" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+                <!-- Populated by JS -->
             </div>
-        </div>
-        
-        <div class="chat-history" id="chatHistory" style="display: none;">
-            <!-- Populated by JS -->
         </div>
     </div>
 
     <!-- INJECT_DATA_HERE -->
     <script>
-        // Placeholder for python injection. DO NOT REMOVE the comment above.
         const CHAT_DATA = {{ CHAT_DATA_JSON }};
         
         let currentChatId = null;
@@ -142,34 +107,58 @@
             const listEl = document.getElementById('chatList');
             listEl.innerHTML = '';
             
-            // Convert to array to sort
-            const chats = Object.values(CHAT_DATA).filter(chat => {
+            let chats = [];
+            if (typeof CHAT_DATA === 'object' && CHAT_DATA !== null) {
+                chats = Object.values(CHAT_DATA);
+            }
+
+            chats = chats.filter(chat => {
                 const name = (chat.contact_name || chat.handle_id || '').toLowerCase();
                 return name.includes(filter.toLowerCase());
             });
 
-            // Sort by most recent message
             chats.sort((a, b) => {
-                const lastA = a.messages.length > 0 ? a.messages[a.messages.length - 1].timestamp : 0;
-                const lastB = b.messages.length > 0 ? b.messages[b.messages.length - 1].timestamp : 0;
-                return lastB - lastA; // descending
+                const lastA = a.messages && a.messages.length > 0 ? a.messages[a.messages.length - 1].timestamp : 0;
+                const lastB = b.messages && b.messages.length > 0 ? b.messages[b.messages.length - 1].timestamp : 0;
+                return lastB - lastA; 
             });
 
             chats.forEach(chat => {
                 const div = document.createElement('div');
-                div.className = `chat-item ${currentChatId === chat.handle_id ? 'active' : ''}`;
+                const isActive = currentChatId === chat.handle_id;
+                div.className = `p-3 mb-1 rounded-xl cursor-pointer transition-all ${isActive ? 'chat-item-active' : 'chat-item-hover'}`;
                 div.onclick = () => selectChat(chat.handle_id);
 
-                const lastMsg = chat.messages[chat.messages.length - 1];
-                const dateStr = lastMsg ? new Date(lastMsg.timestamp * 1000).toLocaleDateString() : '';
-                const preview = lastMsg ? (lastMsg.is_from_me ? 'Tu: ' : '') + lastMsg.text : '';
+                const lastMsg = chat.messages && chat.messages.length > 0 ? chat.messages[chat.messages.length - 1] : null;
+                
+                let dateStr = '';
+                if (lastMsg && lastMsg.timestamp) {
+                    const d = new Date(lastMsg.timestamp * 1000);
+                    const now = new Date();
+                    if (d.toDateString() === now.toDateString()) {
+                        dateStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    } else {
+                        dateStr = d.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: '2-digit' });
+                    }
+                }
+                
+                const preview = lastMsg ? (lastMsg.is_from_me ? 'Tu: ' : '') + (lastMsg.text || 'Allegato') : '';
+                const title = chat.contact_name || chat.handle_id;
+                const initials = title.substring(0, 2).toUpperCase();
 
                 div.innerHTML = `
-                    <div class="chat-item-header">
-                        <div class="chat-name">${chat.contact_name || chat.handle_id}</div>
-                        <div class="chat-date">${dateStr}</div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-full shrink-0 flex items-center justify-center font-bold text-sm bg-surface-container text-white border border-white/5 shadow-inner">
+                            ${initials}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-baseline mb-0.5">
+                                <h3 class="font-semibold text-base truncate pr-2 text-white">${title}</h3>
+                                <span class="text-xs text-on-surface-variant shrink-0">${dateStr}</span>
+                            </div>
+                            <p class="text-sm text-on-surface-variant truncate">${escapeHtml(preview)}</p>
+                        </div>
                     </div>
-                    <div class="chat-preview">${escapeHtml(preview)}</div>
                 `;
                 listEl.appendChild(div);
             });
@@ -180,31 +169,56 @@
             renderChatList(document.getElementById('searchInput').value);
             
             const chat = CHAT_DATA[handleId];
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('chatHeader').style.display = 'flex';
-            document.getElementById('chatHistory').style.display = 'flex';
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('chatContainer').classList.remove('hidden');
             
-            document.getElementById('headerTitle').textContent = chat.contact_name || chat.handle_id;
-            document.getElementById('headerSubtitle').textContent = chat.contact_name ? chat.handle_id : 'Sconosciuto';
+            const title = chat.contact_name || chat.handle_id;
+            document.getElementById('headerTitle').textContent = title;
+            document.getElementById('headerSubtitle').textContent = chat.contact_name ? chat.handle_id : 'ID Sconosciuto';
+            document.getElementById('headerAvatar').textContent = title.substring(0, 2).toUpperCase();
 
             const historyEl = document.getElementById('chatHistory');
             historyEl.innerHTML = '';
 
-            chat.messages.forEach(msg => {
+            let lastDateStr = '';
+
+            (chat.messages || []).forEach(msg => {
+                // Date separator logic
+                const dateObj = new Date(msg.timestamp * 1000);
+                const currDateStr = dateObj.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                if (currDateStr !== lastDateStr) {
+                    const sep = document.createElement('div');
+                    sep.className = 'w-full flex justify-center my-4';
+                    sep.innerHTML = `<span class="px-3 py-1 bg-surface-container rounded-full text-xs font-medium text-gray-400 border border-white/5">${currDateStr}</span>`;
+                    historyEl.appendChild(sep);
+                    lastDateStr = currDateStr;
+                }
+
                 const wrapper = document.createElement('div');
-                wrapper.className = `message ${msg.is_from_me ? 'msg-sent' : 'msg-received'}`;
+                const isMe = msg.is_from_me;
+                wrapper.className = `flex flex-col w-full max-w-[75%] ${isMe ? 'self-end items-end' : 'self-start items-start'} mb-1`;
                 
-                const dateStr = new Date(msg.timestamp * 1000).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+                const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 
+                const bubbleClass = isMe ? 'bubble-sent' : 'bubble-received';
+                const text = escapeHtml(msg.text || '[Nessun testo / Allegato]').replace(/\n/g, '<br>');
+
                 wrapper.innerHTML = `
-                    <div class="bubble">${escapeHtml(msg.text || '[Nessun testo / Allegato]')}</div>
-                    <div class="msg-time">${dateStr}</div>
+                    <div class="px-4 py-2.5 rounded-[20px] text-[15px] leading-[1.4] break-words shadow-sm ${bubbleClass} max-w-full">
+                        ${text}
+                    </div>
+                    <div class="text-[11px] text-gray-500 mt-1 px-1 flex items-center gap-1">
+                        ${timeStr}
+                        ${msg.service ? `<span class="opacity-50">· ${msg.service}</span>` : ''}
+                    </div>
                 `;
                 historyEl.appendChild(wrapper);
             });
 
             // Scroll to bottom
-            historyEl.scrollTop = historyEl.scrollHeight;
+            setTimeout(() => {
+                historyEl.scrollTop = historyEl.scrollHeight;
+            }, 10);
         }
 
         function escapeHtml(unsafe) {
@@ -223,7 +237,7 @@
             
             let csvContent = "data:text/csv;charset=utf-8,Data,Mittente,Testo\n";
             
-            chat.messages.forEach(msg => {
+            (chat.messages || []).forEach(msg => {
                 const dateStr = new Date(msg.timestamp * 1000).toISOString().replace('T', ' ').substring(0, 19);
                 const sender = msg.is_from_me ? "Tu" : (chat.contact_name || chat.handle_id);
                 const text = (msg.text || "").replace(/"/g, '""');
@@ -244,10 +258,14 @@
         });
 
         // Initial render
-        if (Object.keys(CHAT_DATA).length > 0) {
+        if (typeof CHAT_DATA === 'object' && Object.keys(CHAT_DATA).length > 0) {
             renderChatList();
         } else {
-            document.getElementById('emptyState').innerHTML = "<h2>Nessun messaggio trovato nel backup.</h2>";
+            document.getElementById('emptyState').innerHTML = `
+                <span class="material-symbols-outlined text-6xl mb-4 opacity-50" style="font-variation-settings: 'FILL' 0;">warning</span>
+                <h2 class="text-xl font-medium text-gray-300 mb-2">Nessun messaggio trovato</h2>
+                <p class="text-sm text-gray-500">Il backup non contiene messaggi o sono crittografati.</p>
+            `;
         }
     </script>
 </body>
