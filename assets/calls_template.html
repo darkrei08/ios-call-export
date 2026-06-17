@@ -457,6 +457,779 @@
                     btnEn.className = "px-3 py-1 rounded-md text-sm font-bold bg-primary-container text-on-primary-container transition-all";
                     btnIt.className = "px-3 py-1 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all";
                 }
+                renderFilters();
+                renderAll();
+            }
+
+            btnIt.addEventListener("click", () => { currentLang = "it"; updateLangUI(); });
+            btnEn.addEventListener("click", () => { currentLang = "en"; updateLangUI(); });
+
+            if (searchInput) {
+                searchInput.addEventListener("input", (e) => {
+                    currentSearchQuery = e.target.value.toLowerCase();
+                    renderAll();
+                });
+            }
+
+            document.querySelectorAll("th[data-sort]").forEach(th => {
+                th.addEventListener("click", () => {
+                    const col = th.getAttribute("data-sort");
+                    if (currentSortColumn === col) {
+                        currentSortAsc = !currentSortAsc;
+                    } else {
+                        currentSortColumn = col;
+                        currentSortAsc = col === "date" ? false : true;
+                    }
+                    renderAll();
+                });
+            });
+
+            // CSV Download
+            document.getElementById("btn-export-csv").addEventListener("click", () => {
+                if (!CALLS_DATA || !CALLS_DATA.length) return;
+                const headers = Object.keys(CALLS_DATA[0]);
+                const csvRows = [headers.join(",")];
+                CALLS_DATA.forEach(row => {
+                    const values = headers.map(header => {
+                        const val = row[header] === null || row[header] === undefined ? "" : row[header];
+                        return `"${String(val).replace(/"/g, '""')}"`;
+                    });
+                    csvRows.push(values.join(","));
+                });
+                const csvData = csvRows.join("\n");
+                const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "calls_export.csv";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
+            let uniqueServices = new Set();
+            let uniqueDirections = new Set();
+            
+            if (Array.isArray(CALLS_DATA)) {
+                CALLS_DATA.forEach(c => {
+                    if (c.call_type) uniqueServices.add(c.call_type);
+                    if (c.direction) uniqueDirections.add(c.direction);
+                });
+            }
+            uniqueServices = Array.from(uniqueServices).sort();
+            uniqueDirections = Array.from(uniqueDirections).sort();
+
+            const serviceIcons = {
+                "Phone": "phone",
+                "Whatsapp": "chat",
+                "FaceTime Video": "video_chat",
+                "FaceTime Audio": "call",
+                "Telegram": "send",
+                "Skype": "video_call",
+            };
+            const serviceColors = {
+                "Phone": "text-blue-400 bg-blue-400/10 border-blue-400/20",
+                "Whatsapp": "text-green-500 bg-green-500/10 border-green-500/20",
+                "FaceTime Video": "text-blue-500 bg-blue-500/10 border-blue-500/20",
+                "FaceTime Audio": "text-blue-500 bg-blue-500/10 border-blue-500/20",
+                "Telegram": "text-cyan-400 bg-cyan-400/10 border-cyan-400/20",
+            };
+            const dirIcons = {
+                "Incoming": "call_received",
+                "Outgoing": "call_made",
+                "Missed": "call_missed"
+            };
+            const dirColors = {
+                "Incoming": "text-green-400",
+                "Outgoing": "text-blue-400",
+                "Missed": "text-red-400"
+            };
+
+            function translateDir(d) {
+                if (currentLang === "en") return d;
+                if (d === "Incoming") return "In Entrata";
+                if (d === "Outgoing") return "In Uscita";
+                if (d === "Missed") return "Perse";
+                return d;
+            }
+
+            function translateService(s) {
+                if (currentLang === "en") return s;
+                if (s === "Phone") return "Telefono";
+                return s;
+            }
+
+            function buildFilterButton(label, icon, type, origVal, iconColor) {
+                return `
+                <button data-type="${type}" data-val="${origVal}" class="filter-btn flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
+                    <span class="material-symbols-outlined text-lg ${iconColor}" style="font-variation-settings: 'FILL' 1;">${icon}</span>
+                    <span class="font-label-md text-label-md flex-1 filter-label">${label}</span>
+                </button>`;
+            }
+
+            function renderFilters() {
+                if (!dynamicFiltersContainer) return;
+                let html = '';
+                uniqueServices.forEach(s => {
+                    const colorCls = (serviceColors[s] || "text-on-surface-variant").split(' ')[0];
+                    html += buildFilterButton(translateService(s), serviceIcons[s] || "apps", "service", s, colorCls);
+                });
+                html += '<div class="h-px bg-outline-variant/10 my-xs"></div>';
+                uniqueDirections.forEach(d => {
+                    html += buildFilterButton(translateDir(d), dirIcons[d] || "call", "direction", d, getDirColor(d));
+                });
+                dynamicFiltersContainer.innerHTML = html;
+                
+                // Reattach listeners
+                document.querySelectorAll(".filter-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const type = btn.getAttribute("data-type");
+                        const val = btn.getAttribute("data-val");
+                        
+                        if (type === "service") {
+                            currentFilterService = currentFilterService === val ? null : val;
+                        } else if (type === "direction") {
+                            currentFilterDirection = currentFilterDirection === val ? null : val;
+                        }
+                        
+                        document.querySelectorAll(`.filter-btn[data-type="${type}"]`).forEach(b => {
+                            b.classList.remove("bg-primary-container", "text-on-primary-container", "font-semibold");
+                            b.classList.add("text-on-surface-variant");
+                        });
+                        
+                        if ((type === "service" && currentFilterService) || (type === "direction" && currentFilterDirection)) {
+                            btn.classList.add("bg-primary-container", "text-on-primary-container", "font-semibold");
+                            btn.classList.remove("text-on-surface-variant");
+                        }
+                        renderAll();
+                    });
+                    
+                    // Set active states based on current selection
+                    const t = btn.getAttribute("data-type");
+                    const v = btn.getAttribute("data-val");
+                    if ((t === "service" && currentFilterService === v) || (t === "direction" && currentFilterDirection === v)) {
+                        btn.classList.add("bg-primary-container", "text-on-primary-container", "font-semibold");
+                        btn.classList.remove("text-on-surface-variant");
+                    }
+                });
+            }
+
+            function formatDuration(seconds) {
+                if (!seconds) return "00h 00m 00s";
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+                return `${h.toString().padStart(2,'0')}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2,'0')}s`;
+            }
+
+            function formatDirIcon(direction) {
+                return dirIcons[direction] || "call";
+            }
+
+            function getDirColor(direction) {
+                return dirColors[direction] || "text-on-surface";
+            }
+            
+            function getServiceColor(service) {
+                return serviceColors[service] || "text-on-surface-variant bg-surface-container border-outline-variant/20";
+            }
+
+            function renderAll() {
+                let filtered = CALLS_DATA;
+                const t = translations[currentLang];
+                
+                if (!Array.isArray(filtered)) {
+                    filtered = []; 
+                } else {
+                    filtered = filtered.filter(c => {
+                        let matchSearch = true;
+                        if (currentSearchQuery) {
+                            const name = (c.contact_name || "").toLowerCase();
+                            const num = (c.phone_number || "").toLowerCase();
+                            matchSearch = name.includes(currentSearchQuery) || num.includes(currentSearchQuery);
+                        }
+
+                        let matchService = true;
+                        if (currentFilterService) {
+                            matchService = (c.call_type || c.service) === currentFilterService;
+                        }
+
+                        let matchDir = true;
+                        if (currentFilterDirection) {
+                            matchDir = c.direction === currentFilterDirection;
+                        }
+
+                        return matchSearch && matchService && matchDir;
+                    });
+                    
+                    filtered.sort((a, b) => {
+                        let valA, valB;
+                        switch (currentSortColumn) {
+                            case "contact":
+                                valA = (a.contact_name || a.phone_number || t.unknown).toLowerCase();
+                                valB = (b.contact_name || b.phone_number || t.unknown).toLowerCase();
+                                break;
+                            case "number":
+                                valA = (a.phone_number || "").toLowerCase();
+                                valB = (b.phone_number || "").toLowerCase();
+                                break;
+                            case "duration":
+                                valA = a.duration_seconds || 0;
+                                valB = b.duration_seconds || 0;
+                                break;
+                            case "dir":
+                                valA = (a.direction || "").toLowerCase();
+                                valB = (b.direction || "").toLowerCase();
+                                break;
+                            case "service":
+                                valA = (a.call_type || a.service || "").toLowerCase();
+                                valB = (b.call_type || b.service || "").toLowerCase();
+                                break;
+                            case "date":
+                            default:
+                                valA = new Date(a.start || 0).getTime();
+                                valB = new Date(b.start || 0).getTime();
+                                break;
+                        }
+                        if (valA < valB) return currentSortAsc ? -1 : 1;
+                        if (valA > valB) return currentSortAsc ? 1 : -1;
+                        return 0;
+                    });
+                }
+
+                document.querySelectorAll("th[data-sort]").forEach(th => {
+                    const icon = th.querySelector(".sort-icon");
+                    if (th.getAttribute("data-sort") === currentSortColumn) {
+                        icon.innerHTML = currentSortAsc ? "arrow_upward" : "arrow_downward";
+                        icon.classList.remove("opacity-0", "group-hover:opacity-50");
+                        icon.classList.add("opacity-100", "text-primary");
+                    } else {
+                        icon.innerHTML = "swap_vert";
+                        icon.classList.remove("opacity-100", "text-primary");
+                        icon.classList.add("opacity-0", "group-hover:opacity-50");
+                    }
+                });
+
+                if (totalCallsEl) {
+                    totalCallsEl.innerHTML = filtered.length.toLocaleString();
+                }
+
+                if (totalDurationEl) {
+                    const totalSec = filtered.reduce((acc, c) => acc + (c.duration_seconds || 0), 0);
+                    const h = Math.floor(totalSec / 3600);
+                    const m = Math.floor((totalSec % 3600) / 60);
+                    const s = Math.floor(totalSec % 60);
+                    totalDurationEl.innerHTML = `${h}<span class="text-on-surface-variant text-2xl ml-1">h</span> ${m}<span class="text-on-surface-variant text-2xl ml-1">m</span> ${s}<span class="text-on-surface-variant text-2xl ml-1">s</span>`;
+                }
+
+                if (topContactsContainer) {
+                    const contactCounts = {};
+                    filtered.forEach(c => {
+                        const name = c.contact_name || c.phone_number || t.unknown;
+                        contactCounts[name] = (contactCounts[name] || 0) + 1;
+                    });
+
+                    const sortedContacts = Object.entries(contactCounts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+                    
+                    topContactsContainer.innerHTML = sortedContacts.map(sc => {
+                        const initials = sc[0].substring(0, 2).toUpperCase();
+                        return `
+                        <div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+                            <div class="flex items-center gap-sm">
+                                <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold text-on-surface">${initials}</div>
+                                <span class="font-body-md text-body-md text-on-surface">${sc[0]}</span>
+                            </div>
+                            <span class="font-label-md text-label-md text-on-surface-variant">${sc[1]} ${t.callsText}</span>
+                        </div>`;
+                    }).join("");
+                }
+
+                if (tbody) {
+                    tbody.innerHTML = filtered.map(c => {
+                        const dispName = c.contact_name || t.unknown;
+                        const initials = dispName.substring(0, 2).toUpperCase();
+                        const iconColor = getDirColor(c.direction);
+                        const dateStr = c.start || '';
+                        const servLabel = c.call_type || c.service || t.unknown;
+                        const servClass = getServiceColor(c.call_type || c.service);
+                        
+                        return `
+                        <tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+                            <td class="py-md px-lg">
+                                <div class="flex items-center gap-sm">
+                                    <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-sm text-on-surface">${initials}</div>
+                                    <span class="font-medium text-on-surface">${dispName}</span>
+                                </div>
+                            </td>
+                            <td class="py-md px-lg text-on-surface-variant">${c.phone_number || ''}</td>
+                            <td class="py-md px-lg text-on-surface">${formatDuration(c.duration_seconds)}</td>
+                            <td class="py-md px-lg">
+                                <span class="material-symbols-outlined ${iconColor} text-lg" title="${translateDir(c.direction)}" style="font-variation-settings: 'FILL' 1;">${formatDirIcon(c.direction)}</span>
+                            </td>
+                            <td class="py-md px-lg text-on-surface-variant">${dateStr}</td>
+                            <td class="py-md px-lg">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full font-label-sm text-label-sm border ${servClass}">${translateService(servLabel)}</span>
+                            </td>
+                        </tr>`;
+                    }).join("");
+                }
+            }
+
+            updateLangUI();
+        });
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#121317",
+                    "error": "#ffb4ab",
+                    "on-background": "#e3e2e7",
+                    "on-secondary-fixed-variant": "#00531c",
+                    "outline-variant": "#414755",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-primary-container": "#00285c",
+                    "surface-container-low": "#1a1b1f",
+                    "inverse-on-surface": "#2f3034",
+                    "outline": "#8b90a0",
+                    "on-tertiary-fixed-variant": "#930005",
+                    "background": "#121317",
+                    "on-primary-fixed-variant": "#004493",
+                    "surface-container-high": "#292a2e",
+                    "surface-container": "#1e1f23",
+                    "tertiary-fixed": "#ffdad5",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#343539",
+                    "tertiary-container": "#ff5545",
+                    "on-primary": "#002e69",
+                    "tertiary": "#ffb4aa",
+                    "secondary": "#53e16f",
+                    "surface-variant": "#343539",
+                    "on-tertiary": "#690003",
+                    "surface-dim": "#121317",
+                    "inverse-surface": "#e3e2e7",
+                    "on-primary-fixed": "#001a41",
+                    "secondary-fixed": "#72fe88",
+                    "tertiary-fixed-dim": "#ffb4aa",
+                    "primary": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "secondary-fixed-dim": "#53e16f",
+                    "on-tertiary-fixed": "#410001",
+                    "on-tertiary-container": "#5c0002",
+                    "inverse-primary": "#005bc1",
+                    "secondary-container": "#05b046",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#003911",
+                    "on-secondary-container": "#003a11",
+                    "surface-tint": "#adc6ff",
+                    "surface-container-lowest": "#0d0e12",
+                    "primary-container": "#4b8eff",
+                    "on-surface-variant": "#c1c6d7",
+                    "surface-bright": "#38393d",
+                    "on-surface": "#e3e2e7",
+                    "on-secondary-fixed": "#002107"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "sm": "12px",
+                    "xl": "32px",
+                    "gutter": "16px",
+                    "xxl": "48px",
+                    "md": "16px",
+                    "lg": "24px",
+                    "container-margin": "20px",
+                    "xs": "8px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            color: #e3e2e7;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(28, 28, 30, 0.5);
+        }
+
+        .glass-input {
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e3e2e7;
+        }
+        
+        .glass-input:focus {
+            border-color: #007AFF;
+            outline: none;
+        }
+
+        .table-row-hover:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex text-on-surface">
+<!-- SideNavBar -->
+<nav class="fixed left-0 h-full w-64 z-40 bg-surface dark:bg-surface-dim border-r border-outline-variant/10 flex flex-col gap-base p-md pt-xxl hidden md:flex">
+<div class="mb-lg px-sm pt-xl">
+<h2 id="lbl-filters" class="font-headline-md text-headline-md font-bold text-on-surface">Filters</h2>
+<p id="lbl-refine" class="font-label-md text-label-md text-on-surface-variant mt-xs">Refine call logs</p>
+</div>
+<div class="flex flex-col gap-xs flex-1 px-sm" id="dynamic-filters-container">
+<!-- Filters injected by JS -->
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-64 relative min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] z-50 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/10 flex justify-between items-center px-lg py-sm">
+<div class="flex items-center gap-md">
+<h1 id="title-main" class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">Call Analytics</h1>
+<div class="flex items-center gap-xs ml-4 bg-surface-container rounded-lg p-1">
+    <button id="lang-it" class="px-3 py-1 rounded-md text-sm font-bold bg-primary-container text-on-primary-container transition-all">IT</button>
+    <button id="lang-en" class="px-3 py-1 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all">EN</button>
+</div>
+</div>
+<div class="hidden sm:flex flex-1 max-w-md mx-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">search</span>
+<input id="search-input" class="glass-input w-full rounded-full py-2 pl-10 pr-4 font-body-md text-body-md transition-colors placeholder:text-on-surface-variant/50 focus:border-[#007AFF]" placeholder="Search contacts, numbers..." type="text"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 pt-[100px] px-container-margin pb-container-margin md:pt-[100px] md:px-xl md:pb-xl flex flex-col gap-xl">
+<!-- KPIs Section -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- KPI 1 -->
+<div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
+<div class="flex justify-between items-start">
+<span id="lbl-total-calls" class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Calls</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">phone_in_talk</span>
+</div>
+</div>
+<div class="mt-md">
+<div class="flex items-baseline gap-sm">
+<span class="font-display-lg text-display-lg text-on-surface">1,284</span>
+<span class="font-label-sm text-label-sm text-secondary flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                                12%
+                            </span>
+</div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
+<div class="flex justify-between items-start">
+<span id="lbl-total-duration" class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Duration</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">schedule</span>
+</div>
+</div>
+<div class="mt-md">
+<div class="flex items-baseline gap-sm">
+<span class="font-display-lg text-display-lg text-on-surface">42<span class="text-on-surface-variant text-2xl ml-1">h</span> 15<span class="text-on-surface-variant text-2xl ml-1">m</span></span>
+</div>
+</div>
+</div>
+<!-- KPI 3: Top Contacts List -->
+<div class="glass-panel rounded-xl p-md flex flex-col transition-all duration-300">
+<div class="flex justify-between items-center mb-sm px-xs">
+<span id="lbl-top-contacts" class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Top Contacts</span>
+</div>
+<div class="flex flex-col gap-xs">
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-container to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">SJ</div>
+<span class="font-body-md text-body-md text-on-surface">Sarah Jenkins</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">142 calls</span>
+</div>
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-high to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">MK</div>
+<span class="font-body-md text-body-md text-on-surface">Mike Ross</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">89 calls</span>
+</div>
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-high to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">EL</div>
+<span class="font-body-md text-body-md text-on-surface">Emma Lin</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">64 calls</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Activity Table Section -->
+<section class="glass-panel rounded-xl overflow-hidden flex flex-col flex-1 border border-outline-variant/10">
+<div class="p-lg border-b border-outline-variant/10 flex justify-between items-center">
+<h3 id="lbl-recent-activity" class="font-headline-md text-headline-md font-semibold text-on-surface">Recent Activity</h3>
+<button id="btn-export-csv" class="font-label-sm text-label-sm text-[#007AFF] hover:text-primary transition-colors flex items-center gap-1">
+    <span class="material-symbols-outlined text-[16px]">file_download</span>
+    <span id="lbl-open-csv">Apri CSV</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead>
+<tr class="border-b border-outline-variant/10 bg-surface/30">
+<th data-sort="contact" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span class="th-label" data-th="contact">Contact</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="number" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span class="th-label" data-th="number">Number</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="duration" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span class="th-label" data-th="duration">Duration</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="dir" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span class="th-label" data-th="dir">Dir</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="date" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span class="th-label" data-th="date">Date</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="service" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span class="th-label" data-th="service">Service</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A portrait of a young woman smiling slightly, used as an avatar in a premium dark UI dashboard. The image is cropped to a circle and blends well with the deep black and subtle gray tones of the surrounding glassmorphic elements." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJgpVG-ENijVHYdEi99xnH6MhX2LEX3iG8mkY8DY930zv1_3q1cJ1F7H6LWSu6M7oBTr4HdrLvf9vFafSJesULKV8OSxqzU2cAmXLpTjoLrFA04d6WLGzaUhhX3x-EXcXQZ0unmVu-0mxu9hPUYw67F3Scv1dBe-Filuam6uX2UaF5Pm6jvcYpNcARqX2kf4fNMuT9CGk1an1kQGTmznWfNXlcIh_mtG6mrE2kwxorCznQk51a3DcdI-FnOKSlb92whS9Lx76wC4UP"/>
+</div>
+<span class="font-medium text-on-surface">Sarah Jenkins</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (555) 019-2834</td>
+<td class="py-md px-lg text-on-surface">45m 12s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-secondary text-lg" style="font-variation-settings: 'FILL' 1;">call_received</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">2h ago</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">FaceTime</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                                            MR
+                                        </div>
+<span class="font-medium text-on-surface">Mike Ross</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (555) 234-9876</td>
+<td class="py-md px-lg text-on-surface">1h 12m</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_made</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">5h ago</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">Mobile</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A male user avatar portrait with neutral expression and modern styling. The circular crop fits perfectly within the dark-mode aesthetic of a sleek communication dashboard. The lighting is crisp, enhancing the premium feel of the interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFQziGDF4L2ZSqND9aMV0YH82lt7Zfb6fmla6LMtD2937cFWITRR82KGRwI6I-PqBriCUGNr0qf8OkkieE-AdytwRfvyP8KMAY3VJp6Qi8iW_HD4bAJQUukans1T6Dladd5Gs8BSr6H-ENpcYfgUJWj3YOxYo-QOsf4Ff2W6JIoX5E7oHvd4kkmr6hpkCly2P_CuT6mGgcImmk6tVNam5lHNb2uSMW5zOtzc-JiHqsjyQiK7LiRzI2XzUhBOQjOEVPia2qCfxQu0PE"/>
+</div>
+<span class="font-medium text-on-surface">David Chen</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+44 7700 900077</td>
+<td class="py-md px-lg text-on-surface">02m 45s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_missed_outgoing</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Yesterday</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">WhatsApp</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold text-sm">
+                                            U
+                                        </div>
+<span class="font-medium text-on-surface">Unknown</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (800) 555-0199</td>
+<td class="py-md px-lg text-on-surface">00m 00s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_missed</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Yesterday</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">Mobile</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+</div>
+
+    <!-- INJECT_DATA_HERE -->
+    <script>
+        // Placeholder for python injection. DO NOT REMOVE the comment above.
+        const CALLS_DATA = {{ CALLS_DATA_JSON }};
+
+        const translations = {
+            en: {
+                filters: "Filters",
+                refine: "Refine call logs",
+                search: "Search contacts, numbers...",
+                totalCalls: "Total Calls",
+                totalDuration: "Total Duration",
+                topContacts: "Top Contacts",
+                recentActivity: "Recent Activity",
+                openCsv: "Download CSV",
+                thContact: "Contact",
+                thNumber: "Number",
+                thDuration: "Duration",
+                thDir: "Dir",
+                thDate: "Date",
+                thService: "Service",
+                callsText: "calls",
+                unknown: "Unknown",
+                dirIncoming: "Incoming",
+                dirOutgoing: "Outgoing",
+                dirMissed: "Missed",
+            },
+            it: {
+                filters: "Filtri",
+                refine: "Filtra cronologia chiamate",
+                search: "Cerca contatti, numeri...",
+                totalCalls: "Chiamate Totali",
+                totalDuration: "Durata Totale",
+                topContacts: "Contatti Frequenti",
+                recentActivity: "Attività Recente",
+                openCsv: "Apri CSV",
+                thContact: "Contatto",
+                thNumber: "Numero",
+                thDuration: "Durata",
+                thDir: "Direz",
+                thDate: "Data",
+                thService: "Servizio",
+                callsText: "chiamate",
+                unknown: "Sconosciuto",
+                dirIncoming: "In Entrata",
+                dirOutgoing: "In Uscita",
+                dirMissed: "Perse",
+            }
+        };
+        
+        let currentLang = "it";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let currentFilterService = null;
+            let currentFilterDirection = null;
+            let currentSearchQuery = "";
+            let currentSortColumn = "date";
+            let currentSortAsc = false;
+
+            const tbody = document.querySelector("tbody");
+            const totalCallsEl = document.querySelectorAll(".font-display-lg")[0];
+            const totalDurationEl = document.querySelectorAll(".font-display-lg")[1];
+            const topContactsContainer = document.querySelector(".glass-panel .flex-col.gap-xs");
+            const dynamicFiltersContainer = document.getElementById("dynamic-filters-container");
+            const searchInput = document.getElementById("search-input");
+
+            // Language toggle
+            const btnIt = document.getElementById("lang-it");
+            const btnEn = document.getElementById("lang-en");
+            
+            function updateLangUI() {
+                const t = translations[currentLang];
+                document.getElementById("lbl-filters").innerText = t.filters;
+                document.getElementById("lbl-refine").innerText = t.refine;
+                if (searchInput) searchInput.placeholder = t.search;
+                document.getElementById("lbl-total-calls").innerText = t.totalCalls;
+                document.getElementById("lbl-total-duration").innerText = t.totalDuration;
+                document.getElementById("lbl-top-contacts").innerText = t.topContacts;
+                document.getElementById("lbl-recent-activity").innerText = t.recentActivity;
+                document.getElementById("lbl-open-csv").innerText = t.openCsv;
+                
+                document.querySelector('[data-th="contact"]').innerText = t.thContact;
+                document.querySelector('[data-th="number"]').innerText = t.thNumber;
+                document.querySelector('[data-th="duration"]').innerText = t.thDuration;
+                document.querySelector('[data-th="dir"]').innerText = t.thDir;
+                document.querySelector('[data-th="date"]').innerText = t.thDate;
+                document.querySelector('[data-th="service"]').innerText = t.thService;
+
+                if (currentLang === "it") {
+                    btnIt.className = "px-3 py-1 rounded-md text-sm font-bold bg-primary-container text-on-primary-container transition-all";
+                    btnEn.className = "px-3 py-1 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all";
+                } else {
+                    btnEn.className = "px-3 py-1 rounded-md text-sm font-bold bg-primary-container text-on-primary-container transition-all";
+                    btnIt.className = "px-3 py-1 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all";
+                }
                 renderAll();
             }
 

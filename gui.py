@@ -110,6 +110,13 @@ TRANSLATIONS = {
     }
 }
 CURRENT_LANG = "it"
+try:
+    with open("lang_prefs.txt", "r") as f:
+        CURRENT_LANG = f.read().strip()
+        if CURRENT_LANG not in TRANSLATIONS:
+            CURRENT_LANG = "it"
+except Exception:
+    pass
 
 def t(text):
     return TRANSLATIONS[CURRENT_LANG].get(text, text)
@@ -704,12 +711,47 @@ class App(tk.Tk):
 
     def switch_language(self):
         global CURRENT_LANG
+        old_lang = CURRENT_LANG
         CURRENT_LANG = "en" if CURRENT_LANG == "it" else "it"
-        from tkinter import messagebox
-        msg = "Riavvia l'applicazione per applicare la nuova lingua." if CURRENT_LANG == "en" else "Restart the application to apply the new language."
-        messagebox.showinfo("Language Changed", msg)
-        self.btn_lang.configure(text=t("🇬🇧 English"))
-        self.btn_theme.configure(text=t("☀️ Tema Chiaro" if self.is_dark_mode else "🌙 Tema Scuro"))
+        
+        try:
+            with open("lang_prefs.txt", "w") as f:
+                f.write(CURRENT_LANG)
+        except Exception:
+            pass
+            
+        inverse_map = {v: k for k, v in TRANSLATIONS[old_lang].items()}
+        
+        def update_widget(widget):
+            try:
+                txt = widget.cget("text")
+                if txt in inverse_map:
+                    widget.configure(text=t(inverse_map[txt]))
+            except Exception:
+                pass
+                
+            try:
+                if isinstance(widget, ttk.Notebook):
+                    for tab_id in widget.tabs():
+                        txt = widget.tab(tab_id, "text")
+                        if txt in inverse_map:
+                            widget.tab(tab_id, text=t(inverse_map[txt]))
+            except Exception:
+                pass
+                
+            try:
+                if isinstance(widget, ttk.Treeview):
+                    for col in widget["columns"]:
+                        txt = widget.heading(col, "text")
+                        if txt in inverse_map:
+                            widget.heading(col, text=t(inverse_map[txt]))
+            except Exception:
+                pass
+                
+            for child in widget.winfo_children():
+                update_widget(child)
+
+        update_widget(self)
 
     def switch_theme(self):
         import sv_ttk

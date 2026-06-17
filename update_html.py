@@ -103,6 +103,7 @@ new_script = r'''<script>
                     btnEn.className = "px-3 py-1 rounded-md text-sm font-bold bg-primary-container text-on-primary-container transition-all";
                     btnIt.className = "px-3 py-1 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all";
                 }
+                renderFilters();
                 renderAll();
             }
 
@@ -204,10 +205,10 @@ new_script = r'''<script>
                 return s;
             }
 
-            function buildFilterButton(label, icon, type, origVal) {
+            function buildFilterButton(label, icon, type, origVal, iconColor) {
                 return `
                 <button data-type="${type}" data-val="${origVal}" class="filter-btn flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
-                    <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0;">${icon}</span>
+                    <span class="material-symbols-outlined text-lg ${iconColor}" style="font-variation-settings: 'FILL' 1;">${icon}</span>
                     <span class="font-label-md text-label-md flex-1 filter-label">${label}</span>
                 </button>`;
             }
@@ -216,11 +217,12 @@ new_script = r'''<script>
                 if (!dynamicFiltersContainer) return;
                 let html = '';
                 uniqueServices.forEach(s => {
-                    html += buildFilterButton(translateService(s), serviceIcons[s] || "apps", "service", s);
+                    const colorCls = (serviceColors[s] || "text-on-surface-variant").split(' ')[0];
+                    html += buildFilterButton(translateService(s), serviceIcons[s] || "apps", "service", s, colorCls);
                 });
                 html += '<div class="h-px bg-outline-variant/10 my-xs"></div>';
                 uniqueDirections.forEach(d => {
-                    html += buildFilterButton(translateDir(d), dirIcons[d] || "call", "direction", d);
+                    html += buildFilterButton(translateDir(d), dirIcons[d] || "call", "direction", d, getDirColor(d));
                 });
                 dynamicFiltersContainer.innerHTML = html;
                 
@@ -279,7 +281,6 @@ new_script = r'''<script>
             }
 
             function renderAll() {
-                renderFilters();
                 let filtered = CALLS_DATA;
                 const t = translations[currentLang];
                 
