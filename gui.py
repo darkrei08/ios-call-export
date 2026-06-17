@@ -2,6 +2,118 @@
 """Cross-platform GUI for the iOS Call Exporter."""
 
 import os
+
+import json
+
+TRANSLATIONS = {
+    "it": {
+        "🌙 Tema Scuro": "🌙 Tema Scuro",
+        "☀️ Tema Chiaro": "☀️ Tema Chiaro",
+        "🇬🇧 English": "🇬🇧 English",
+        "🇮🇹 Italiano": "🇮🇹 Italiano",
+        "iOS Backup Explorer": "iOS Backup Explorer",
+        "Esplora ed esporta dati dai tuoi backup iOS crittografati.": "Esplora ed esporta dati dai tuoi backup iOS crittografati.",
+        "Backup iOS di origine:": "Backup iOS di origine:",
+        "Sfoglia...": "Sfoglia...",
+        "Password del backup:": "Password del backup:",
+        "Mostra": "Mostra",
+        "Nascondi": "Nascondi",
+        "📥 Esportazioni": "📥 Esportazioni",
+        "📞 Vista Chiamate": "📞 Vista Chiamate",
+        "💬 Vista Messaggi": "💬 Vista Messaggi",
+        "📂 File Explorer": "📂 File Explorer",
+        "📶 Wi-Fi Passwords": "📶 Wi-Fi Passwords",
+        "Seleziona i dati da esportare dal tuo backup crittografato.": "Seleziona i dati da esportare dal tuo backup crittografato.",
+        "📞 Cronologia Chiamate (CSV)": "📞 Cronologia Chiamate (CSV)",
+        "📞 Cronologia Chiamate (HTML Viewer Interattivo)": "📞 Cronologia Chiamate (HTML Viewer Interattivo)",
+        "💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)": "💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)",
+        "Impostazioni Chiamate": "Impostazioni Chiamate",
+        "Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)": "Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)",
+        "AVVIA ESPORTAZIONE": "AVVIA ESPORTAZIONE",
+        "Log Operazioni:": "Log Operazioni:",
+        "📋 Copia Log (Debug)": "📋 Copia Log (Debug)",
+        "Carica/Aggiorna Dati dal Backup": "Carica/Aggiorna Dati dal Backup",
+        "Cerca:": "Cerca:",
+        "Cerca (Testo o Numero):": "Cerca (Testo o Numero):",
+        "Data": "Data",
+        "Contatto": "Contatto",
+        "Direzione": "Direzione",
+        "Servizio": "Servizio",
+        "Testo del Messaggio": "Testo del Messaggio",
+        "📁 Backup Locale": "📁 Backup Locale",
+        "📱 Dispositivo Collegato (Live)": "📱 Dispositivo Collegato (Live)",
+        "Carica Lista File": "Carica Lista File",
+        "⬆️ Su": "⬆️ Su",
+        "Percorso: /": "Percorso: /",
+        "Dominio / Nome": "Dominio / Nome",
+        "Percorso File / Tipo": "Percorso File / Tipo",
+        "Estrai Elemento Selezionato": "Estrai Elemento Selezionato",
+        "Estrazione Password Wi-Fi (In arrivo)": "Estrazione Password Wi-Fi (In arrivo)",
+        "Dominio (App)": "Dominio (App)",
+        "Percorso File": "Percorso File",
+        "Nome": "Nome",
+        "Tipo": "Tipo",
+        "Caricamento in corso...": "Caricamento in corso...",
+        "Connessione in corso...": "Connessione in corso...",
+        "Nessun file selezionato.": "Nessun file selezionato."
+    },
+    "en": {
+        "🌙 Tema Scuro": "🌙 Dark Theme",
+        "☀️ Tema Chiaro": "☀️ Light Theme",
+        "🇬🇧 English": "🇮🇹 Italiano",
+        "🇮🇹 Italiano": "🇬🇧 English",
+        "iOS Backup Explorer": "iOS Backup Explorer",
+        "Esplora ed esporta dati dai tuoi backup iOS crittografati.": "Explore and export data from encrypted iOS backups.",
+        "Backup iOS di origine:": "Source iOS Backup:",
+        "Sfoglia...": "Browse...",
+        "Password del backup:": "Backup Password:",
+        "Mostra": "Show",
+        "Nascondi": "Hide",
+        "📥 Esportazioni": "📥 Exports",
+        "📞 Vista Chiamate": "📞 Calls View",
+        "💬 Vista Messaggi": "💬 Messages View",
+        "📂 File Explorer": "📂 File Explorer",
+        "📶 Wi-Fi Passwords": "📶 Wi-Fi Passwords",
+        "Seleziona i dati da esportare dal tuo backup crittografato.": "Select data to export from your encrypted backup.",
+        "📞 Cronologia Chiamate (CSV)": "📞 Call History (CSV)",
+        "📞 Cronologia Chiamate (HTML Viewer Interattivo)": "📞 Call History (Interactive HTML Viewer)",
+        "💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)": "💬 SMS & iMessage (Interactive HTML Viewer)",
+        "Impostazioni Chiamate": "Call Settings",
+        "Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)": "Optimize CSV for Microsoft Excel (use semicolon as separator)",
+        "AVVIA ESPORTAZIONE": "START EXPORT",
+        "Log Operazioni:": "Operation Logs:",
+        "📋 Copia Log (Debug)": "📋 Copy Logs (Debug)",
+        "Carica/Aggiorna Dati dal Backup": "Load/Update Backup Data",
+        "Cerca:": "Search:",
+        "Cerca (Testo o Numero):": "Search (Text or Number):",
+        "Data": "Date",
+        "Contatto": "Contact",
+        "Direzione": "Direction",
+        "Servizio": "Service",
+        "Testo del Messaggio": "Message Text",
+        "📁 Backup Locale": "📁 Local Backup",
+        "📱 Dispositivo Collegato (Live)": "📱 Connected Device (Live)",
+        "Carica Lista File": "Load File List",
+        "⬆️ Su": "⬆️ Up",
+        "Percorso: /": "Path: /",
+        "Dominio / Nome": "Domain / Name",
+        "Percorso File / Tipo": "File Path / Type",
+        "Estrai Elemento Selezionato": "Extract Selected Item",
+        "Estrazione Password Wi-Fi (In arrivo)": "Wi-Fi Password Extraction (Coming soon)",
+        "Dominio (App)": "Domain (App)",
+        "Percorso File": "File Path",
+        "Nome": "Name",
+        "Tipo": "Type",
+        "Caricamento in corso...": "Loading...",
+        "Connessione in corso...": "Connecting...",
+        "Nessun file selezionato.": "No file selected."
+    }
+}
+CURRENT_LANG = "it"
+
+def t(text):
+    return TRANSLATIONS[CURRENT_LANG].get(text, text)
+
 import sys
 import threading
 from datetime import datetime
@@ -139,22 +251,33 @@ class App(tk.Tk):
         self.accent_line.pack(fill="x", side="top")
 
         # Theme toggle button
-        self.btn_theme = ttk.Button(
+
+        # Language toggle button
+        self.btn_lang = ttk.Button(
             self.header_frame,
-            text="🌙 Tema Scuro",
+            text=t("🇬🇧 English"),
+            style="Secondary.TButton",
+            command=self.switch_language,
+        )
+        self.btn_lang.pack(side="right", padx=(0, 16), pady=32)
+
+        self.btn_theme = ttk.Button(
+
+            self.header_frame,
+            text=t("🌙 Tema Scuro"),
             style="Secondary.TButton",
             command=self.switch_theme,
         )
         self.btn_theme.pack(side="right", padx=32, pady=32)
 
         title_label = ttk.Label(
-            self.header_frame, text="iOS Backup Explorer", style="Title.TLabel"
+            self.header_frame, text=t("iOS Backup Explorer"), style="Title.TLabel"
         )
         title_label.pack(anchor="w", padx=32, pady=(20, 4))
 
         subtitle_label = ttk.Label(
             self.header_frame,
-            text="Esplora ed esporta dati dai tuoi backup iOS crittografati.",
+            text=t("Esplora ed esporta dati dai tuoi backup iOS crittografati."),
             style="Subtitle.TLabel",
         )
         subtitle_label.pack(anchor="w", padx=32)
@@ -169,7 +292,7 @@ class App(tk.Tk):
 
         lbl_font = ("Segoe UI", 10, "bold")
         self.lbl_backup = ttk.Label(
-            cred_frame, text="Backup iOS di origine:", font=lbl_font
+            cred_frame, text=t("Backup iOS di origine:"), font=lbl_font
         )
         self.lbl_backup.grid(row=0, column=0, sticky="w", pady=8)
 
@@ -184,14 +307,14 @@ class App(tk.Tk):
 
         btn_browse_backup = ttk.Button(
             cred_frame,
-            text="Sfoglia...",
+            text=t("Sfoglia..."),
             style="Secondary.TButton",
             command=self.browse_backup,
         )
         btn_browse_backup.grid(row=0, column=2, pady=8)
 
         self.lbl_pass = ttk.Label(
-            cred_frame, text="Password del backup:", font=lbl_font
+            cred_frame, text=t("Password del backup:"), font=lbl_font
         )
         self.lbl_pass.grid(row=1, column=0, sticky="w", pady=8)
 
@@ -224,11 +347,11 @@ class App(tk.Tk):
         self.tab_explorer = ttk.Frame(self.notebook)
         self.tab_wifi = ttk.Frame(self.notebook)
 
-        self.notebook.add(self.tab_export, text="📥 Esportazioni")
-        self.notebook.add(self.tab_view_calls, text="📞 Vista Chiamate")
-        self.notebook.add(self.tab_view_msgs, text="💬 Vista Messaggi")
-        self.notebook.add(self.tab_explorer, text="📂 File Explorer")
-        self.notebook.add(self.tab_wifi, text="📶 Wi-Fi Passwords")
+        self.notebook.add(self.tab_export, text=t("📥 Esportazioni"))
+        self.notebook.add(self.tab_view_calls, text=t("📞 Vista Chiamate"))
+        self.notebook.add(self.tab_view_msgs, text=t("💬 Vista Messaggi"))
+        self.notebook.add(self.tab_explorer, text=t("📂 File Explorer"))
+        self.notebook.add(self.tab_wifi, text=t("📶 Wi-Fi Passwords"))
 
         # --- TAB 1: Esportazioni ---
         self.create_export_tab()
@@ -256,7 +379,7 @@ class App(tk.Tk):
 
         lbl_desc = ttk.Label(
             container,
-            text="Seleziona i dati da esportare dal tuo backup crittografato.",
+            text=t("Seleziona i dati da esportare dal tuo backup crittografato."),
             style="TLabel",
         )
         lbl_desc.pack(anchor="w", pady=(0, 16))
@@ -267,7 +390,7 @@ class App(tk.Tk):
 
         chk_calls = ttk.Checkbutton(
             container,
-            text="📞 Cronologia Chiamate (CSV)",
+            text=t("📞 Cronologia Chiamate (CSV)"),
             variable=self.export_calls_var,
         )
         chk_calls.pack(anchor="w", pady=(0, 4))
@@ -275,28 +398,28 @@ class App(tk.Tk):
         self.export_calls_html_var = tk.BooleanVar(value=True)
         chk_calls_html = ttk.Checkbutton(
             container,
-            text="📞 Cronologia Chiamate (HTML Viewer Interattivo)",
+            text=t("📞 Cronologia Chiamate (HTML Viewer Interattivo)"),
             variable=self.export_calls_html_var,
         )
         chk_calls_html.pack(anchor="w", pady=(0, 4))
 
         chk_msgs = ttk.Checkbutton(
             container,
-            text="💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)",
+            text=t("💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)"),
             variable=self.export_msgs_var,
         )
         chk_msgs.pack(anchor="w", pady=(0, 16))
 
         # Config Frame
         config_frame = ttk.LabelFrame(
-            container, text="Impostazioni Chiamate", padding=16
+            container, text=t("Impostazioni Chiamate"), padding=16
         )
         config_frame.pack(fill="x", pady=(0, 20))
 
         self.excel_var = tk.BooleanVar(value=True)
         chk_excel = ttk.Checkbutton(
             config_frame,
-            text="Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)",
+            text=t("Ottimizza CSV per Microsoft Excel (usa punto e virgola come separatore)"),
             variable=self.excel_var,
         )
         chk_excel.pack(anchor="w")
@@ -307,7 +430,7 @@ class App(tk.Tk):
 
         self.btn_export = ttk.Button(
             action_frame,
-            text="AVVIA ESPORTAZIONE",
+            text=t("AVVIA ESPORTAZIONE"),
             style="Accent.TButton",
             command=self.start_export,
         )
@@ -318,11 +441,11 @@ class App(tk.Tk):
         log_header_frame = ttk.Frame(container)
         log_header_frame.pack(fill="x", pady=(16, 4))
 
-        lbl_logs = ttk.Label(log_header_frame, text="Log Operazioni:", style="TLabel")
+        lbl_logs = ttk.Label(log_header_frame, text=t("Log Operazioni:"), style="TLabel")
         lbl_logs.pack(side="left")
 
         btn_copy_log = ttk.Button(
-            log_header_frame, text="📋 Copia Log (Debug)", command=self.copy_debug_log
+            log_header_frame, text=t("📋 Copia Log (Debug)"), command=self.copy_debug_log
         )
         btn_copy_log.pack(side="right")
 
@@ -378,7 +501,7 @@ class App(tk.Tk):
 
         btn_load = ttk.Button(
             top_frame,
-            text="Carica/Aggiorna Dati dal Backup",
+            text=t("Carica/Aggiorna Dati dal Backup"),
             command=self.load_db_backend,
         )
         btn_load.pack(side="left")
@@ -391,7 +514,7 @@ class App(tk.Tk):
             top_frame, textvariable=self.search_calls_var, width=40
         )
         search_entry.pack(side="right")
-        ttk.Label(top_frame, text="Cerca:").pack(side="right", padx=8)
+        ttk.Label(top_frame, text=t("Cerca:")).pack(side="right", padx=8)
 
         columns = ("Data", "Contatto/Numero", "Durata", "Direzione", "Servizio")
         self.tree_calls = ttk.Treeview(
@@ -426,7 +549,7 @@ class App(tk.Tk):
 
         btn_load = ttk.Button(
             top_frame,
-            text="Carica/Aggiorna Dati dal Backup",
+            text=t("Carica/Aggiorna Dati dal Backup"),
             command=self.load_db_backend,
         )
         btn_load.pack(side="left")
@@ -437,17 +560,17 @@ class App(tk.Tk):
         )
         search_entry = ttk.Entry(top_frame, textvariable=self.search_msgs_var, width=40)
         search_entry.pack(side="right")
-        ttk.Label(top_frame, text="Cerca (Testo o Numero):").pack(side="right", padx=8)
+        ttk.Label(top_frame, text=t("Cerca (Testo o Numero):")).pack(side="right", padx=8)
 
         columns = ("Data", "Contatto", "Direzione", "Servizio", "Testo")
         self.tree_msgs = ttk.Treeview(
             container, columns=columns, show="headings", selectmode="browse"
         )
-        self.tree_msgs.heading("Data", text="Data")
-        self.tree_msgs.heading("Contatto", text="Contatto")
-        self.tree_msgs.heading("Direzione", text="Direzione")
-        self.tree_msgs.heading("Servizio", text="Servizio")
-        self.tree_msgs.heading("Testo", text="Testo del Messaggio")
+        self.tree_msgs.heading("Data", text=t("Data"))
+        self.tree_msgs.heading("Contatto", text=t("Contatto"))
+        self.tree_msgs.heading("Direzione", text=t("Direzione"))
+        self.tree_msgs.heading("Servizio", text=t("Servizio"))
+        self.tree_msgs.heading("Testo", text=t("Testo del Messaggio"))
 
         self.tree_msgs.column("Data", width=150, stretch=False)
         self.tree_msgs.column("Contatto", width=150, stretch=False)
@@ -482,7 +605,7 @@ class App(tk.Tk):
         self.source_var = tk.StringVar(value="backup")
         rb_backup = ttk.Radiobutton(
             source_frame,
-            text="📁 Backup Locale",
+            text=t("📁 Backup Locale"),
             variable=self.source_var,
             value="backup",
             command=self.on_source_changed,
@@ -491,7 +614,7 @@ class App(tk.Tk):
 
         rb_live = ttk.Radiobutton(
             source_frame,
-            text="📱 Dispositivo Collegato (Live)",
+            text=t("📱 Dispositivo Collegato (Live)"),
             variable=self.source_var,
             value="live",
             command=self.on_source_changed,
@@ -506,14 +629,14 @@ class App(tk.Tk):
 
         self.btn_load_files = ttk.Button(
             self.action_frame,
-            text="Carica Lista File",
+            text=t("Carica Lista File"),
             style="Primary.TButton",
             command=self.load_explorer_data,
         )
         self.btn_load_files.pack(side="left")
 
         self.btn_up_dir = ttk.Button(
-            self.action_frame, text="⬆️ Su", command=self.go_up_dir
+            self.action_frame, text=t("⬆️ Su"), command=self.go_up_dir
         )
         # Search bar for Live File Explorer
         self.search_var = tk.StringVar()
@@ -522,18 +645,18 @@ class App(tk.Tk):
             self.action_frame, textvariable=self.search_var, width=30
         )
         self.search_entry.pack(side="right")
-        self.lbl_search = ttk.Label(self.action_frame, text="Cerca:", style="TLabel")
+        self.lbl_search = ttk.Label(self.action_frame, text=t("Cerca:"), style="TLabel")
         self.lbl_search.pack(side="right", padx=8)
 
         # Path label for Live mode
-        self.lbl_live_path = ttk.Label(container, text="Percorso: /", style="TLabel")
+        self.lbl_live_path = ttk.Label(container, text=t("Percorso: /"), style="TLabel")
 
         columns = ("col1", "col2")
         self.file_tree = ttk.Treeview(
             container, columns=columns, show="headings", selectmode="browse"
         )
-        self.file_tree.heading("col1", text="Dominio / Nome")
-        self.file_tree.heading("col2", text="Percorso File / Tipo")
+        self.file_tree.heading("col1", text=t("Dominio / Nome"))
+        self.file_tree.heading("col2", text=t("Percorso File / Tipo"))
         self.file_tree.column("col1", width=200, stretch=False)
         self.file_tree.column("col2", width=400, stretch=True)
 
@@ -553,7 +676,7 @@ class App(tk.Tk):
 
         self.btn_extract_file = ttk.Button(
             btn_frame,
-            text="Estrai Elemento Selezionato",
+            text=t("Estrai Elemento Selezionato"),
             style="Secondary.TButton",
             command=self.extract_selected_file,
         )
@@ -567,7 +690,7 @@ class App(tk.Tk):
 
         ttk.Label(
             container,
-            text="Estrazione Password Wi-Fi (In arrivo)",
+            text=t("Estrazione Password Wi-Fi (In arrivo)"),
             style="Section.TLabel",
         ).pack(pady=(0, 16))
 
@@ -578,6 +701,16 @@ class App(tk.Tk):
         )
         ttk.Label(container, text=msg, justify="left").pack(anchor="w")
 
+
+    def switch_language(self):
+        global CURRENT_LANG
+        CURRENT_LANG = "en" if CURRENT_LANG == "it" else "it"
+        from tkinter import messagebox
+        msg = "Riavvia l'applicazione per applicare la nuova lingua." if CURRENT_LANG == "en" else "Restart the application to apply the new language."
+        messagebox.showinfo("Language Changed", msg)
+        self.btn_lang.configure(text=t("🇬🇧 English"))
+        self.btn_theme.configure(text=t("☀️ Tema Chiaro" if self.is_dark_mode else "🌙 Tema Scuro"))
+
     def switch_theme(self):
         import sv_ttk
 
@@ -587,7 +720,7 @@ class App(tk.Tk):
         self.setup_styles()
         if hasattr(self, "btn_theme"):
             self.btn_theme.configure(
-                text="☀️ Tema Chiaro" if self.is_dark_mode else "🌙 Tema Scuro"
+                text=t("☀️ Tema Chiaro") if self.is_dark_mode else "🌙 Tema Scuro"
             )
 
     def toggle_pass_visibility(self):
@@ -797,13 +930,13 @@ class App(tk.Tk):
         if source == "backup":
             self.lbl_live_path.pack_forget()
             self.btn_up_dir.pack_forget()
-            self.file_tree.heading("col1", text="Dominio (App)")
-            self.file_tree.heading("col2", text="Percorso File")
+            self.file_tree.heading("col1", text=t("Dominio (App)"))
+            self.file_tree.heading("col2", text=t("Percorso File"))
         else:
             self.lbl_live_path.pack(side="top", fill="x", pady=4)
             self.btn_up_dir.pack(side="left", padx=8)
-            self.file_tree.heading("col1", text="Nome")
-            self.file_tree.heading("col2", text="Tipo")
+            self.file_tree.heading("col1", text=t("Nome"))
+            self.file_tree.heading("col2", text=t("Tipo"))
 
         self.file_tree.delete(*self.file_tree.get_children())
         self.all_files = []
@@ -832,7 +965,7 @@ class App(tk.Tk):
             ):
                 return
 
-        self.btn_load_files.configure(state="disabled", text="Caricamento in corso...")
+        self.btn_load_files.configure(state="disabled", text=t("Caricamento in corso..."))
         self.file_tree.delete(*self.file_tree.get_children())
         self.all_files = []
 
@@ -854,7 +987,7 @@ class App(tk.Tk):
             self.after(0, self._populate_backup_tree, [], str(e))
 
     def _populate_backup_tree(self, files, error_msg):
-        self.btn_load_files.configure(state="normal", text="Carica Lista File")
+        self.btn_load_files.configure(state="normal", text=t("Carica Lista File"))
         if error_msg:
             messagebox.showerror(
                 "Errore di Caricamento", f"Impossibile leggere il backup:\n{error_msg}"
@@ -868,7 +1001,7 @@ class App(tk.Tk):
         self.log_message(f"📁 File Explorer: Caricati {len(files)} file dal backup.\n")
 
     def load_live_files(self):
-        self.btn_load_files.configure(state="disabled", text="Connessione in corso...")
+        self.btn_load_files.configure(state="disabled", text=t("Connessione in corso..."))
         self.file_tree.delete(*self.file_tree.get_children())
         self.all_files = []
 
@@ -902,7 +1035,7 @@ class App(tk.Tk):
             )
 
     def _populate_live_tree(self, info, files, error_msg):
-        self.btn_load_files.configure(state="normal", text="Carica Lista File")
+        self.btn_load_files.configure(state="normal", text=t("Carica Lista File"))
         if error_msg:
             messagebox.showerror(
                 "Errore di Connessione",
