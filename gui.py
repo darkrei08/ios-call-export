@@ -32,22 +32,6 @@ except ImportError:
     from logger import app_logger, dump_latest_logs
 
 
-class TextRedirector:
-    """Redirects stdout/stderr to a Tkinter Text widget."""
-
-    def __init__(self, text_widget):
-        self.text_widget = text_widget
-
-    def write(self, string):
-        self.text_widget.configure(state="normal")
-        self.text_widget.insert("end", string)
-        self.text_widget.see("end")
-        self.text_widget.configure(state="disabled")
-
-    def flush(self):
-        pass
-
-
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -56,8 +40,13 @@ class App(tk.Tk):
 
         # Center the window on the screen
         self.update_idletasks()
+        # Fallback to the requested geometry dimensions if winfo width is 1 (unmapped in Linux/macOS)
         width = self.winfo_width()
         height = self.winfo_height()
+        if width <= 1:
+            width = 760
+        if height <= 1:
+            height = 740
         x = (self.winfo_screenwidth() // 2) - (width // 2)
         y = (self.winfo_screenheight() // 2) - (height // 2)
         self.geometry(f"{width}x{height}+{x}+{y}")
@@ -66,8 +55,7 @@ class App(tk.Tk):
         self.is_dark_mode = False
         self.backups = []
         self.selected_backup_dir = ""
-        self.original_stdout = sys.stdout
-        self.original_stderr = sys.stderr
+        self.selected_backup_dir = ""
 
         # Initialize sv_ttk theme FIRST, then apply custom overrides
         import sv_ttk
@@ -267,6 +255,12 @@ class App(tk.Tk):
 
         chk_calls = ttk.Checkbutton(container, text="📞 Cronologia Chiamate (CSV)", variable=self.export_calls_var)
         chk_calls.pack(anchor="w", pady=(0, 4))
+
+        self.export_calls_html_var = tk.BooleanVar(value=True)
+        chk_calls_html = ttk.Checkbutton(
+            container, text="📞 Cronologia Chiamate (HTML Viewer Interattivo)", variable=self.export_calls_html_var
+        )
+        chk_calls_html.pack(anchor="w", pady=(0, 4))
 
         chk_msgs = ttk.Checkbutton(
             container, text="💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)", variable=self.export_msgs_var
@@ -574,10 +568,14 @@ class App(tk.Tk):
 
     def log_message(self, message):
         app_logger.info(message.strip())
-        self.log_text.configure(state="normal")
-        self.log_text.insert("end", message)
-        self.log_text.see("end")
-        self.log_text.configure(state="disabled")
+
+        def _insert():
+            self.log_text.configure(state="normal")
+            self.log_text.insert("end", message)
+            self.log_text.see("end")
+            self.log_text.configure(state="disabled")
+
+        self.after(0, _insert)
 
     def copy_debug_log(self):
         """Copies the comprehensive SQLite debug log (with stack traces) to clipboard."""
@@ -626,29 +624,43 @@ class App(tk.Tk):
                 self.excel_var.get(),
                 self.export_calls_var.get(),
                 self.export_msgs_var.get(),
+                self.export_calls_html_var.get(),
             ),
             daemon=True,
         )
         thread.start()
 
-    def _run_export(self, backup_dir, passphrase, use_excel, do_calls, do_msgs):
+    def get_export_dir(self):
+        desktop = Path.home() / "Desktop"
+        return desktop if desktop.exists() else Path.home()
+
+    def _run_export(self, backup_dir, passphrase, use_excel, do_calls, do_msgs, do_calls_html):
         try:
-            if do_calls:
+            export_dir = self.get_export_dir()
+
+            if do_calls or do_calls_html:
                 from export_calls import process_and_export_calls
 
-                out_csv = str(Path.home() / "Desktop" / "calls.csv")
+                out_csv = str(export_dir / "calls.csv") if do_calls else None
+                out_html = str(export_dir / "Calls_Viewer.html") if do_calls_html else None
+
                 self.log_message("📞 Avvio estrazione Chiamate...\n")
-                process_and_export_calls(backup_dir, passphrase, out_csv, use_excel)
-                self.log_message(f"✅ Chiamate esportate con successo in:\n{out_csv}\n\n")
+                process_and_export_calls(backup_dir, passphrase, out_csv, use_excel, output_html=out_html)
+                if do_calls:
+                    self.log_message(f"✅ Chiamate esportate con successo in:\n{out_csv}\n")
+                if do_calls_html:
+                    self.log_message(f"✅ HTML Viewer Chiamate esportato in:\n{out_html}\n")
+                self.log_message("\n")
 
             if do_msgs:
-                from export_messages import export_messages_to_html
+                from export_messages import export_messages_to_csv_and_html
 
-                out_html = str(Path.home() / "Desktop" / "Messages_Viewer.html")
+                out_html = str(export_dir / "Messages_Viewer.html")
+                out_csv_msgs = str(export_dir / "messages.csv")
                 self.log_message("💬 Avvio estrazione Messaggi (SMS & iMessage)...\n")
-                count = export_messages_to_html(backup_dir, passphrase, out_html)
+                count = export_messages_to_csv_and_html(backup_dir, passphrase, out_html, out_csv_msgs, use_excel)
                 self.log_message(f"✅ Trovate {count} conversazioni.\n")
-                self.log_message(f"✅ Messaggi esportati con successo nel Visualizzatore HTML in:\n{out_html}\n\n")
+                self.log_message(f"✅ Messaggi esportati con successo in:\n{out_html}\n{out_csv_msgs}\n\n")
 
             self.after(0, self._export_success)
         except Exception as e:
@@ -659,10 +671,8 @@ class App(tk.Tk):
         self.spinner.stop()
         self.spinner.pack_forget()
         self.btn_export.configure(state="normal")
-        self.log_message(
-            "✅ Tutte le operazioni di esportazione sono state completate!\nControlla i file sul Desktop.\n"
-        )
-        messagebox.showinfo("Successo", "Esportazione completata!\nControlla i file sul Desktop.")
+        self.log_message("✅ Tutte le operazioni di esportazione sono state completate!\nControlla i file esportati.\n")
+        messagebox.showinfo("Successo", "Esportazione completata!\nControlla i file esportati.")
 
     def _export_failure(self, error_msg):
         self.spinner.stop()

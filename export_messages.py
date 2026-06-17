@@ -146,6 +146,8 @@ if __name__ == "__main__":
 
     backup_dir = str(backups[0])
     passphrase = input("Inserisci password del backup: ")
-    out_html = str(Path.home() / "Desktop" / "Messages_Viewer.html")
-    out_csv = str(Path.home() / "Desktop" / "messages.csv")
+    desktop = Path.home() / "Desktop"
+    export_dir = desktop if desktop.exists() else Path.home()
+    out_html = str(export_dir / "Messages_Viewer.html")
+    out_csv = str(export_dir / "messages.csv")
     export_messages_to_csv_and_html(backup_dir, passphrase, out_html, out_csv)

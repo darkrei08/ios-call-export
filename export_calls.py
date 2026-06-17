@@ -363,57 +363,76 @@ def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
     return all_calls
 
 
-def process_and_export_calls(backup_dir: str, passphrase: str, output_path: str, excel_compat: bool) -> tuple[int, str]:
+def process_and_export_calls(
+    backup_dir: str, passphrase: str, output_path: str, excel_compat: bool, output_html: str = None
+) -> tuple[int, str]:
     app_logger.info("Decrypting backup...")
     calls = extract_calls(backup_dir, passphrase)
 
     if not calls:
         raise ValueError("No call records found.")
 
-    resolved_path = output_path
-    if os.path.isdir(resolved_path) or resolved_path.endswith(("/", "\\")):
-        resolved_path = os.path.join(resolved_path, "calls.csv")
+    if output_path:
+        resolved_path = output_path
+        if os.path.isdir(resolved_path) or resolved_path.endswith(("/", "\\")):
+            resolved_path = os.path.join(resolved_path, "calls.csv")
 
-    parent_dir = os.path.dirname(resolved_path)
-    if parent_dir:
-        os.makedirs(parent_dir, exist_ok=True)
+        parent_dir = os.path.dirname(resolved_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
 
-    if excel_compat:
-        for call in calls:
-            pn = call["phone_number"]
-            if pn and re.sub(r"[+\s\-()]", "", pn).isdigit():
-                call["phone_number"] = f'="{pn}"'
-            nn = call["national_number"]
-            if nn and nn.isdigit():
-                call["national_number"] = f'="{nn}"'
+        if excel_compat:
+            for call in calls:
+                pn = call["phone_number"]
+                if pn and re.sub(r"[+\s\-()]", "", pn).isdigit():
+                    call["phone_number"] = f'="{pn}"'
+                nn = call["national_number"]
+                if nn and nn.isdigit():
+                    call["national_number"] = f'="{nn}"'
 
-    fieldnames = [
-        "id",
-        "unique_id",
-        "start",
-        "end",
-        "contact_name",
-        "phone_number",
-        "country_prefix",
-        "national_number",
-        "phone_country",
-        "duration",
-        "duration_seconds",
-        "direction",
-        "call_type",
-        "answered",
-        "country_code",
-        "service_provider",
-        "location",
-    ]
-    with open(resolved_path, "w", newline="", encoding="utf-8-sig") as f:
-        delimiter = ";" if excel_compat else ","
-        writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=delimiter)
-        writer.writeheader()
-        writer.writerows(calls)
+        fieldnames = [
+            "id",
+            "unique_id",
+            "start",
+            "end",
+            "contact_name",
+            "phone_number",
+            "country_prefix",
+            "national_number",
+            "phone_country",
+            "duration",
+            "duration_seconds",
+            "direction",
+            "call_type",
+            "answered",
+            "country_code",
+            "service_provider",
+            "location",
+        ]
+        with open(resolved_path, "w", newline="", encoding="utf-8-sig") as f:
+            delimiter = ";" if excel_compat else ","
+            writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter=delimiter)
+            writer.writeheader()
+            writer.writerows(calls)
 
-    app_logger.info(f"Exported {len(calls)} calls to {resolved_path}")
+        app_logger.info(f"Exported {len(calls)} calls to {resolved_path}")
 
+    if output_html:
+        import json
+
+        template_path = os.path.join(os.path.dirname(__file__), "assets", "calls_template.html")
+        if os.path.exists(template_path):
+            with open(template_path, "r", encoding="utf-8") as f:
+                html_template = f.read()
+
+            calls_json = json.dumps(calls)
+            html_output = html_template.replace("{{ CALLS_DATA_JSON }}", calls_json)
+
+            with open(output_html, "w", encoding="utf-8") as f:
+                f.write(html_output)
+            app_logger.info(f"HTML Viewer generated at {output_html}")
+        else:
+            app_logger.error("calls_template.html not found. Skipping HTML generation.")
     # Print statistics summary
     total_calls = len(calls)
     total_secs = sum(c["duration_seconds"] for c in calls)

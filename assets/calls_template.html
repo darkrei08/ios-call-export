@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Call Analytics Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#121317",
+                    "error": "#ffb4ab",
+                    "on-background": "#e3e2e7",
+                    "on-secondary-fixed-variant": "#00531c",
+                    "outline-variant": "#414755",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-primary-container": "#00285c",
+                    "surface-container-low": "#1a1b1f",
+                    "inverse-on-surface": "#2f3034",
+                    "outline": "#8b90a0",
+                    "on-tertiary-fixed-variant": "#930005",
+                    "background": "#121317",
+                    "on-primary-fixed-variant": "#004493",
+                    "surface-container-high": "#292a2e",
+                    "surface-container": "#1e1f23",
+                    "tertiary-fixed": "#ffdad5",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#343539",
+                    "tertiary-container": "#ff5545",
+                    "on-primary": "#002e69",
+                    "tertiary": "#ffb4aa",
+                    "secondary": "#53e16f",
+                    "surface-variant": "#343539",
+                    "on-tertiary": "#690003",
+                    "surface-dim": "#121317",
+                    "inverse-surface": "#e3e2e7",
+                    "on-primary-fixed": "#001a41",
+                    "secondary-fixed": "#72fe88",
+                    "tertiary-fixed-dim": "#ffb4aa",
+                    "primary": "#adc6ff",
+                    "primary-fixed": "#d8e2ff",
+                    "secondary-fixed-dim": "#53e16f",
+                    "on-tertiary-fixed": "#410001",
+                    "on-tertiary-container": "#5c0002",
+                    "inverse-primary": "#005bc1",
+                    "secondary-container": "#05b046",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#003911",
+                    "on-secondary-container": "#003a11",
+                    "surface-tint": "#adc6ff",
+                    "surface-container-lowest": "#0d0e12",
+                    "primary-container": "#4b8eff",
+                    "on-surface-variant": "#c1c6d7",
+                    "surface-bright": "#38393d",
+                    "on-surface": "#e3e2e7",
+                    "on-secondary-fixed": "#002107"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "sm": "12px",
+                    "xl": "32px",
+                    "gutter": "16px",
+                    "xxl": "48px",
+                    "md": "16px",
+                    "lg": "24px",
+                    "container-margin": "20px",
+                    "xs": "8px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            color: #e3e2e7;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(28, 28, 30, 0.5);
+        }
+
+        .glass-input {
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e3e2e7;
+        }
+        
+        .glass-input:focus {
+            border-color: #007AFF;
+            outline: none;
+        }
+
+        .table-row-hover:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex text-on-surface">
+<!-- SideNavBar -->
+<nav class="fixed left-0 h-full w-64 z-40 bg-surface dark:bg-surface-dim border-r border-outline-variant/10 flex flex-col gap-base p-md pt-xxl hidden md:flex">
+<div class="mb-lg px-sm pt-xl">
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Filters</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-xs">Refine call logs</p>
+</div>
+<div class="flex flex-col gap-xs flex-1">
+<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
+<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">calendar_today</span>
+<span class="font-label-md text-label-md flex-1">Date Range</span>
+<span class="material-symbols-outlined text-on-surface-variant/50 text-sm">chevron_right</span>
+</button>
+<div class="h-px bg-outline-variant/10 my-xs"></div>
+<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
+<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">video_chat</span>
+<span class="font-label-md text-label-md flex-1">FaceTime</span>
+</button>
+<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
+<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">phone</span>
+<span class="font-label-md text-label-md flex-1">Mobile</span>
+</button>
+<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
+<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">chat</span>
+<span class="font-label-md text-label-md flex-1">WhatsApp</span>
+</button>
+<div class="h-px bg-outline-variant/10 my-xs"></div>
+<button class="flex items-center gap-md px-md py-sm rounded-lg bg-primary-container text-on-primary-container font-semibold active:translate-x-1 duration-150 w-full text-left">
+<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 1;">call_received</span>
+<span class="font-label-md text-label-md flex-1">Incoming</span>
+</button>
+<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
+<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">call_made</span>
+<span class="font-label-md text-label-md flex-1">Outgoing</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-64 relative min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full md:w-[calc(100%-16rem)] z-50 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/10 flex justify-between items-center px-lg py-sm">
+<div class="flex items-center gap-md">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">Call Analytics</h1>
+</div>
+<div class="hidden sm:flex flex-1 max-w-md mx-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="glass-input w-full rounded-full py-2 pl-10 pr-4 font-body-md text-body-md transition-colors placeholder:text-on-surface-variant/50 focus:border-[#007AFF]" placeholder="Search contacts, numbers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 rounded-full hover:bg-white/5 transition-colors active:scale-95 duration-200 flex items-center justify-center text-on-surface-variant font-medium">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+</button>
+<button class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/20 hover:border-outline-variant/50 transition-colors active:scale-95 duration-200">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a person, used as a user profile avatar in a premium dark-mode application. The lighting is balanced and highlights the subject clearly against a neutral background. The aesthetic matches the clean, high-end design of the Obsidian Glass system. This is a small circular thumbnail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAASmjHAgp2L80UT97hx23d13VGMwPCEvQEcZsn9WZG54PvXVEHgLNmX8wbWtI6qqZXMJr52Cn0Ya70b_x-ZdR0mIK8fZ-qlxPzq0G3cAOaRqNQZqw7uav4A3ghv4a2PXfeECcR0RDnJviEWqYPcSaA6HKsRpz5QnpUflYe2mtzXuAJyHHYm0vmR7O3rNOubMPcNZS-wKZXEw1XzmKPX272CKbJBVBR8XUoZOc_fyL3hxM1KR-H03NFylT9RQJEG8Y45_VlIoCxRVzn"/>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 pt-[72px] p-container-margin md:p-xl flex flex-col gap-xl">
+<!-- KPIs Section -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- KPI 1 -->
+<div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Calls</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">phone_in_talk</span>
+</div>
+</div>
+<div class="mt-md">
+<div class="flex items-baseline gap-sm">
+<span class="font-display-lg text-display-lg text-on-surface">1,284</span>
+<span class="font-label-sm text-label-sm text-secondary flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                                12%
+                            </span>
+</div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Duration</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">schedule</span>
+</div>
+</div>
+<div class="mt-md">
+<div class="flex items-baseline gap-sm">
+<span class="font-display-lg text-display-lg text-on-surface">42<span class="text-on-surface-variant text-2xl ml-1">h</span> 15<span class="text-on-surface-variant text-2xl ml-1">m</span></span>
+</div>
+</div>
+</div>
+<!-- KPI 3: Top Contacts List -->
+<div class="glass-panel rounded-xl p-md flex flex-col transition-all duration-300">
+<div class="flex justify-between items-center mb-sm px-xs">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Top Contacts</span>
+</div>
+<div class="flex flex-col gap-xs">
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-container to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">SJ</div>
+<span class="font-body-md text-body-md text-on-surface">Sarah Jenkins</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">142 calls</span>
+</div>
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-high to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">MK</div>
+<span class="font-body-md text-body-md text-on-surface">Mike Ross</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">89 calls</span>
+</div>
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-high to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">EL</div>
+<span class="font-body-md text-body-md text-on-surface">Emma Lin</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">64 calls</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Activity Table Section -->
+<section class="glass-panel rounded-xl overflow-hidden flex flex-col flex-1 border border-outline-variant/10">
+<div class="p-lg border-b border-outline-variant/10 flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface">Recent Activity</h3>
+<button class="font-label-sm text-label-sm text-[#007AFF] hover:text-primary transition-colors">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead>
+<tr class="border-b border-outline-variant/10 bg-surface/30">
+<th class="py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Contact</th>
+<th class="py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Number</th>
+<th class="py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Duration</th>
+<th class="py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Dir</th>
+<th class="py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Date</th>
+<th class="py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium">Service</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A portrait of a young woman smiling slightly, used as an avatar in a premium dark UI dashboard. The image is cropped to a circle and blends well with the deep black and subtle gray tones of the surrounding glassmorphic elements." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJgpVG-ENijVHYdEi99xnH6MhX2LEX3iG8mkY8DY930zv1_3q1cJ1F7H6LWSu6M7oBTr4HdrLvf9vFafSJesULKV8OSxqzU2cAmXLpTjoLrFA04d6WLGzaUhhX3x-EXcXQZ0unmVu-0mxu9hPUYw67F3Scv1dBe-Filuam6uX2UaF5Pm6jvcYpNcARqX2kf4fNMuT9CGk1an1kQGTmznWfNXlcIh_mtG6mrE2kwxorCznQk51a3DcdI-FnOKSlb92whS9Lx76wC4UP"/>
+</div>
+<span class="font-medium text-on-surface">Sarah Jenkins</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (555) 019-2834</td>
+<td class="py-md px-lg text-on-surface">45m 12s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-secondary text-lg" style="font-variation-settings: 'FILL' 1;">call_received</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">2h ago</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">FaceTime</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                                            MR
+                                        </div>
+<span class="font-medium text-on-surface">Mike Ross</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (555) 234-9876</td>
+<td class="py-md px-lg text-on-surface">1h 12m</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_made</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">5h ago</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">Mobile</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A male user avatar portrait with neutral expression and modern styling. The circular crop fits perfectly within the dark-mode aesthetic of a sleek communication dashboard. The lighting is crisp, enhancing the premium feel of the interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFQziGDF4L2ZSqND9aMV0YH82lt7Zfb6fmla6LMtD2937cFWITRR82KGRwI6I-PqBriCUGNr0qf8OkkieE-AdytwRfvyP8KMAY3VJp6Qi8iW_HD4bAJQUukans1T6Dladd5Gs8BSr6H-ENpcYfgUJWj3YOxYo-QOsf4Ff2W6JIoX5E7oHvd4kkmr6hpkCly2P_CuT6mGgcImmk6tVNam5lHNb2uSMW5zOtzc-JiHqsjyQiK7LiRzI2XzUhBOQjOEVPia2qCfxQu0PE"/>
+</div>
+<span class="font-medium text-on-surface">David Chen</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+44 7700 900077</td>
+<td class="py-md px-lg text-on-surface">02m 45s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_missed_outgoing</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Yesterday</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">WhatsApp</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold text-sm">
+                                            U
+                                        </div>
+<span class="font-medium text-on-surface">Unknown</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (800) 555-0199</td>
+<td class="py-md px-lg text-on-surface">00m 00s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_missed</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Yesterday</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">Mobile</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+</div>
+
+    <!-- INJECT_DATA_HERE -->
+    <script>
+        // Placeholder for python injection. DO NOT REMOVE the comment above.
+        const CALLS_DATA = {{ CALLS_DATA_JSON }};
+
+        document.addEventListener("DOMContentLoaded", () => {
+            let currentFilterService = null;
+            let currentFilterDirection = null;
+            let currentSearchQuery = "";
+
+            const tbody = document.querySelector("tbody");
+            const totalCallsEl = document.querySelectorAll(".font-display-lg")[0];
+            const totalDurationEl = document.querySelectorAll(".font-display-lg")[1];
+            const topContactsContainer = document.querySelector(".glass-panel .flex-col.gap-xs");
+
+            const searchInput = document.querySelector("input[type='text']");
+            if (searchInput) {
+                searchInput.addEventListener("input", (e) => {
+                    currentSearchQuery = e.target.value.toLowerCase();
+                    renderAll();
+                });
+            }
+
+            const buttons = document.querySelectorAll("nav button");
+            buttons.forEach(btn => {
+                const text = btn.innerText.trim();
+                btn.addEventListener("click", () => {
+                    if (["FaceTime", "Mobile", "WhatsApp"].includes(text)) {
+                        currentFilterService = currentFilterService === text ? null : text;
+                    } else if (["Incoming", "Outgoing"].includes(text)) {
+                        currentFilterDirection = currentFilterDirection === text ? null : text;
+                    }
+                    renderAll();
+                });
+            });
+
+            function formatDuration(seconds) {
+                if (!seconds) return "00m 00s";
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+                if (h > 0) return `${h}h ${m}m`;
+                return `${m}m ${s}s`;
+            }
+
+            function formatDirIcon(direction) {
+                if (direction === "Outgoing") return "call_made";
+                if (direction === "Incoming") return "call_received";
+                return "call_missed";
+            }
+
+            function renderAll() {
+                let filtered = CALLS_DATA;
+                
+                if (!Array.isArray(filtered)) {
+                    // if template injection fails, render empty or default
+                    filtered = []; 
+                } else {
+                    filtered = filtered.filter(c => {
+                        let matchSearch = true;
+                        if (currentSearchQuery) {
+                            const name = (c.contact_name || "").toLowerCase();
+                            const num = (c.phone_number || "").toLowerCase();
+                            matchSearch = name.includes(currentSearchQuery) || num.includes(currentSearchQuery);
+                        }
+
+                        let matchService = true;
+                        if (currentFilterService) {
+                            matchService = c.service === currentFilterService;
+                        }
+
+                        let matchDir = true;
+                        if (currentFilterDirection) {
+                            matchDir = c.direction === currentFilterDirection;
+                        }
+
+                        return matchSearch && matchService && matchDir;
+                    });
+                }
+
+                if (totalCallsEl) {
+                    totalCallsEl.innerHTML = filtered.length.toLocaleString();
+                }
+
+                if (totalDurationEl) {
+                    const totalSec = filtered.reduce((acc, c) => acc + (c.duration || 0), 0);
+                    const h = Math.floor(totalSec / 3600);
+                    const m = Math.floor((totalSec % 3600) / 60);
+                    totalDurationEl.innerHTML = `${h}<span class="text-on-surface-variant text-2xl ml-1">h</span> ${m}<span class="text-on-surface-variant text-2xl ml-1">m</span>`;
+                }
+
+                if (topContactsContainer) {
+                    const contactCounts = {};
+                    filtered.forEach(c => {
+                        const name = c.contact_name || c.phone_number || "Unknown";
+                        contactCounts[name] = (contactCounts[name] || 0) + 1;
+                    });
+
+                    const sortedContacts = Object.entries(contactCounts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+                    
+                    topContactsContainer.innerHTML = sortedContacts.map(sc => {
+                        const initials = sc[0].substring(0, 2).toUpperCase();
+                        return `
+                        <div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+                            <div class="flex items-center gap-sm">
+                                <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold text-on-surface">${initials}</div>
+                                <span class="font-body-md text-body-md text-on-surface">${sc[0]}</span>
+                            </div>
+                            <span class="font-label-md text-label-md text-on-surface-variant">${sc[1]} calls</span>
+                        </div>`;
+                    }).join("");
+                }
+
+                if (tbody) {
+                    tbody.innerHTML = filtered.map(c => {
+                        const initials = (c.contact_name || c.phone_number || "U").substring(0, 2).toUpperCase();
+                        const iconColor = c.direction === 'Outgoing' ? 'text-secondary' : (c.direction === 'Incoming' ? 'text-primary' : 'text-error');
+                        
+                        // Parse date string like "2024-05-10 14:20:00" if possible
+                        const dateStr = c.start || '';
+                        
+                        return `
+                        <tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+                            <td class="py-md px-lg">
+                                <div class="flex items-center gap-sm">
+                                    <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-sm text-on-surface">${initials}</div>
+                                    <span class="font-medium text-on-surface">${c.contact_name || 'Unknown'}</span>
+                                </div>
+                            </td>
+                            <td class="py-md px-lg text-on-surface-variant">${c.phone_number || ''}</td>
+                            <td class="py-md px-lg text-on-surface">${formatDuration(c.duration)}</td>
+                            <td class="py-md px-lg">
+                                <span class="material-symbols-outlined ${iconColor} text-lg" style="font-variation-settings: 'FILL' 1;">${formatDirIcon(c.direction)}</span>
+                            </td>
+                            <td class="py-md px-lg text-on-surface-variant">${dateStr}</td>
+                            <td class="py-md px-lg">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">${c.service || 'Mobile'}</span>
+                            </td>
+                        </tr>`;
+                    }).join("");
+                }
+            }
+
+            renderAll();
+        });
+    </script>
+</body>
+</html>
