@@ -1,6 +1,6 @@
 [project]
 name = "ios-call-export"
-version = "1.5.5"
+version = "1.5.6"
 description = "Export iPhone call history from encrypted local backups to CSV"
 readme = "README.md"
 requires-python = ">=3.10"

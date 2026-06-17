@@ -169,7 +169,7 @@
 <!-- Main Content Wrapper -->
 <div class="flex-1 md:ml-64 relative min-h-screen flex flex-col">
 <!-- TopNavBar -->
-<header class="fixed top-0 w-full md:w-[calc(100%-16rem)] z-50 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/10 flex justify-between items-center px-lg py-sm">
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] z-50 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/10 flex justify-between items-center px-lg py-sm">
 <div class="flex items-center gap-md">
 <h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">Call Analytics</h1>
 </div>
@@ -416,7 +416,7 @@
             function buildFilterButton(label, icon, type) {
                 return `
                 <button data-type="${type}" data-val="${label}" class="filter-btn flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
-                    <span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">${icon}</span>
+                    <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0;">${icon}</span>
                     <span class="font-label-md text-label-md flex-1">${label}</span>
                 </button>`;
             }
