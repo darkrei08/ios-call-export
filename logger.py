@@ -93,6 +93,8 @@ def get_logger(name="ios_export"):
     logger.addHandler(sqlite_handler)
 
     # Console Handler for real-time terminal debug
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(formatter)
