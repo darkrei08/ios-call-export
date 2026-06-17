@@ -162,34 +162,8 @@
 <h2 class="font-headline-md text-headline-md font-bold text-on-surface">Filters</h2>
 <p class="font-label-md text-label-md text-on-surface-variant mt-xs">Refine call logs</p>
 </div>
-<div class="flex flex-col gap-xs flex-1">
-<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
-<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">calendar_today</span>
-<span class="font-label-md text-label-md flex-1">Date Range</span>
-<span class="material-symbols-outlined text-on-surface-variant/50 text-sm">chevron_right</span>
-</button>
-<div class="h-px bg-outline-variant/10 my-xs"></div>
-<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
-<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">video_chat</span>
-<span class="font-label-md text-label-md flex-1">FaceTime</span>
-</button>
-<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
-<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">phone</span>
-<span class="font-label-md text-label-md flex-1">Mobile</span>
-</button>
-<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
-<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">chat</span>
-<span class="font-label-md text-label-md flex-1">WhatsApp</span>
-</button>
-<div class="h-px bg-outline-variant/10 my-xs"></div>
-<button class="flex items-center gap-md px-md py-sm rounded-lg bg-primary-container text-on-primary-container font-semibold active:translate-x-1 duration-150 w-full text-left">
-<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 1;">call_received</span>
-<span class="font-label-md text-label-md flex-1">Incoming</span>
-</button>
-<button class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-surface-container-high transition-all text-on-surface-variant hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
-<span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">call_made</span>
-<span class="font-label-md text-label-md flex-1">Outgoing</span>
-</button>
+<div class="flex flex-col gap-xs flex-1 px-sm" id="dynamic-filters-container">
+<!-- Filters injected by JS -->
 </div>
 </nav>
 <!-- Main Content Wrapper -->
@@ -403,6 +377,7 @@
             const totalCallsEl = document.querySelectorAll(".font-display-lg")[0];
             const totalDurationEl = document.querySelectorAll(".font-display-lg")[1];
             const topContactsContainer = document.querySelector(".glass-panel .flex-col.gap-xs");
+            const dynamicFiltersContainer = document.getElementById("dynamic-filters-container");
 
             const searchInput = document.querySelector("input[type='text']");
             if (searchInput) {
@@ -412,26 +387,82 @@
                 });
             }
 
-            const buttons = document.querySelectorAll("nav button");
-            buttons.forEach(btn => {
-                const text = btn.innerText.trim();
+            let uniqueServices = new Set();
+            let uniqueDirections = new Set();
+            
+            if (Array.isArray(CALLS_DATA)) {
+                CALLS_DATA.forEach(c => {
+                    if (c.call_type) uniqueServices.add(c.call_type);
+                    if (c.direction) uniqueDirections.add(c.direction);
+                });
+            }
+            uniqueServices = Array.from(uniqueServices).sort();
+            uniqueDirections = Array.from(uniqueDirections).sort();
+
+            const serviceIcons = {
+                "Phone": "phone",
+                "Whatsapp": "chat",
+                "FaceTime Video": "video_chat",
+                "FaceTime Audio": "call",
+                "Telegram": "send",
+                "Skype": "video_call",
+            };
+            const dirIcons = {
+                "Incoming": "call_received",
+                "Outgoing": "call_made",
+                "Missed": "call_missed"
+            };
+
+            function buildFilterButton(label, icon, type) {
+                return `
+                <button data-type="${type}" data-val="${label}" class="filter-btn flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
+                    <span class="material-symbols-outlined font-label-md text-label-md" style="font-variation-settings: 'FILL' 0;">${icon}</span>
+                    <span class="font-label-md text-label-md flex-1">${label}</span>
+                </button>`;
+            }
+
+            if (dynamicFiltersContainer) {
+                let html = '';
+                uniqueServices.forEach(s => {
+                    html += buildFilterButton(s, serviceIcons[s] || "apps", "service");
+                });
+                html += '<div class="h-px bg-outline-variant/10 my-xs"></div>';
+                uniqueDirections.forEach(d => {
+                    html += buildFilterButton(d, dirIcons[d] || "call", "direction");
+                });
+                dynamicFiltersContainer.innerHTML = html;
+            }
+
+            document.querySelectorAll(".filter-btn").forEach(btn => {
                 btn.addEventListener("click", () => {
-                    if (["FaceTime", "Mobile", "WhatsApp"].includes(text)) {
-                        currentFilterService = currentFilterService === text ? null : text;
-                    } else if (["Incoming", "Outgoing"].includes(text)) {
-                        currentFilterDirection = currentFilterDirection === text ? null : text;
+                    const type = btn.getAttribute("data-type");
+                    const val = btn.getAttribute("data-val");
+                    
+                    if (type === "service") {
+                        currentFilterService = currentFilterService === val ? null : val;
+                    } else if (type === "direction") {
+                        currentFilterDirection = currentFilterDirection === val ? null : val;
+                    }
+                    
+                    document.querySelectorAll(`.filter-btn[data-type="${type}"]`).forEach(b => {
+                        b.classList.remove("bg-primary-container", "text-on-primary-container", "font-semibold");
+                        b.classList.add("text-on-surface-variant");
+                    });
+                    
+                    if ((type === "service" && currentFilterService) || (type === "direction" && currentFilterDirection)) {
+                        btn.classList.add("bg-primary-container", "text-on-primary-container", "font-semibold");
+                        btn.classList.remove("text-on-surface-variant");
                     }
                     renderAll();
                 });
             });
 
             function formatDuration(seconds) {
-                if (!seconds) return "00m 00s";
+                if (!seconds) return "00h 00m 00s";
                 const h = Math.floor(seconds / 3600);
                 const m = Math.floor((seconds % 3600) / 60);
                 const s = Math.floor(seconds % 60);
-                if (h > 0) return `${h}h ${m}m`;
-                return `${m}m ${s}s`;
+                return `${h.toString().padStart(2,'0')}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2,'0')}s`;
             }
 
             function formatDirIcon(direction) {
@@ -444,7 +475,6 @@
                 let filtered = CALLS_DATA;
                 
                 if (!Array.isArray(filtered)) {
-                    // if template injection fails, render empty or default
                     filtered = []; 
                 } else {
                     filtered = filtered.filter(c => {
@@ -457,7 +487,7 @@
 
                         let matchService = true;
                         if (currentFilterService) {
-                            matchService = c.service === currentFilterService;
+                            matchService = (c.call_type || c.service) === currentFilterService;
                         }
 
                         let matchDir = true;
@@ -474,10 +504,11 @@
                 }
 
                 if (totalDurationEl) {
-                    const totalSec = filtered.reduce((acc, c) => acc + (c.duration || 0), 0);
+                    const totalSec = filtered.reduce((acc, c) => acc + (c.duration_seconds || 0), 0);
                     const h = Math.floor(totalSec / 3600);
                     const m = Math.floor((totalSec % 3600) / 60);
-                    totalDurationEl.innerHTML = `${h}<span class="text-on-surface-variant text-2xl ml-1">h</span> ${m}<span class="text-on-surface-variant text-2xl ml-1">m</span>`;
+                    const s = Math.floor(totalSec % 60);
+                    totalDurationEl.innerHTML = `${h}<span class="text-on-surface-variant text-2xl ml-1">h</span> ${m}<span class="text-on-surface-variant text-2xl ml-1">m</span> ${s}<span class="text-on-surface-variant text-2xl ml-1">s</span>`;
                 }
 
                 if (topContactsContainer) {
@@ -506,8 +537,6 @@
                     tbody.innerHTML = filtered.map(c => {
                         const initials = (c.contact_name || c.phone_number || "U").substring(0, 2).toUpperCase();
                         const iconColor = c.direction === 'Outgoing' ? 'text-secondary' : (c.direction === 'Incoming' ? 'text-primary' : 'text-error');
-                        
-                        // Parse date string like "2024-05-10 14:20:00" if possible
                         const dateStr = c.start || '';
                         
                         return `
@@ -519,13 +548,13 @@
                                 </div>
                             </td>
                             <td class="py-md px-lg text-on-surface-variant">${c.phone_number || ''}</td>
-                            <td class="py-md px-lg text-on-surface">${formatDuration(c.duration)}</td>
+                            <td class="py-md px-lg text-on-surface">${formatDuration(c.duration_seconds)}</td>
                             <td class="py-md px-lg">
                                 <span class="material-symbols-outlined ${iconColor} text-lg" style="font-variation-settings: 'FILL' 1;">${formatDirIcon(c.direction)}</span>
                             </td>
                             <td class="py-md px-lg text-on-surface-variant">${dateStr}</td>
                             <td class="py-md px-lg">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">${c.service || 'Mobile'}</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">${c.call_type || c.service || 'Unknown'}</span>
                             </td>
                         </tr>`;
                     }).join("");
