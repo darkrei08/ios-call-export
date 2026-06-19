@@ -14,36 +14,36 @@
         theme: {
           extend: {
             "colors": {
-                    "surface": "#121317",
-                    "error": "#ffb4ab",
+                    "surface": "var(--surface)",
+                    "error": "var(--error)",
                     "on-background": "#e3e2e7",
                     "on-secondary-fixed-variant": "#00531c",
-                    "outline-variant": "#414755",
+                    "outline-variant": "var(--outline-variant)",
                     "primary-fixed-dim": "#adc6ff",
-                    "on-primary-container": "#00285c",
+                    "on-primary-container": "var(--on-primary-container)",
                     "surface-container-low": "#1a1b1f",
                     "inverse-on-surface": "#2f3034",
                     "outline": "#8b90a0",
                     "on-tertiary-fixed-variant": "#930005",
                     "background": "#121317",
                     "on-primary-fixed-variant": "#004493",
-                    "surface-container-high": "#292a2e",
-                    "surface-container": "#1e1f23",
+                    "surface-container-high": "var(--surface-container-high)",
+                    "surface-container": "var(--surface-container)",
                     "tertiary-fixed": "#ffdad5",
                     "error-container": "#93000a",
                     "surface-container-highest": "#343539",
                     "tertiary-container": "#ff5545",
                     "on-primary": "#002e69",
                     "tertiary": "#ffb4aa",
-                    "secondary": "#53e16f",
+                    "secondary": "var(--secondary)",
                     "surface-variant": "#343539",
                     "on-tertiary": "#690003",
-                    "surface-dim": "#121317",
+                    "surface-dim": "var(--surface-dim)",
                     "inverse-surface": "#e3e2e7",
                     "on-primary-fixed": "#001a41",
                     "secondary-fixed": "#72fe88",
                     "tertiary-fixed-dim": "#ffb4aa",
-                    "primary": "#adc6ff",
+                    "primary": "var(--primary)",
                     "primary-fixed": "#d8e2ff",
                     "secondary-fixed-dim": "#53e16f",
                     "on-tertiary-fixed": "#410001",
@@ -56,10 +56,10 @@
                     "on-secondary-container": "#003a11",
                     "surface-tint": "#adc6ff",
                     "surface-container-lowest": "#0d0e12",
-                    "primary-container": "#4b8eff",
-                    "on-surface-variant": "#c1c6d7",
+                    "primary-container": "var(--primary-container)",
+                    "on-surface-variant": "var(--on-surface-variant)",
                     "surface-bright": "#38393d",
-                    "on-surface": "#e3e2e7",
+                    "on-surface": "var(--on-surface)",
                     "on-secondary-fixed": "#002107"
             },
             "borderRadius": {
@@ -104,6 +104,36 @@
       }
     </script>
 <style>
+
+        :root {
+            --surface: #ffffff;
+            --on-surface: #111827;
+            --on-surface-variant: #4b5563;
+            --surface-container: #f3f4f6;
+            --surface-container-high: #e5e7eb;
+            --primary: #007AFF;
+            --primary-container: #dbeafe;
+            --on-primary-container: #1e3a8a;
+            --secondary: #16a34a;
+            --error: #dc2626;
+            --outline-variant: #d1d5db;
+            --surface-dim: #f9fafb;
+        }
+        html.dark {
+            --surface: #121317;
+            --on-surface: #e3e2e7;
+            --on-surface-variant: #c1c6d7;
+            --surface-container: #1e1f23;
+            --surface-container-high: #292a2e;
+            --primary: #adc6ff;
+            --primary-container: #4b8eff;
+            --on-primary-container: #00285c;
+            --secondary: #53e16f;
+            --error: #ffb4ab;
+            --outline-variant: #414755;
+            --surface-dim: #121317;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;

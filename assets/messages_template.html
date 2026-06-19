@@ -13,14 +13,44 @@
           theme: {
             extend: {
               "colors": {
-                "surface-container": "#1e1f23",
-                "surface-container-high": "#292a2e",
+                "surface-container": "var(--surface-container)",
+                "surface-container-high": "var(--surface-container-high)",
               }
             }
           }
         }
     </script>
     <style>
+
+        :root {
+            --surface: #ffffff;
+            --on-surface: #111827;
+            --on-surface-variant: #4b5563;
+            --surface-container: #f3f4f6;
+            --surface-container-high: #e5e7eb;
+            --primary: #007AFF;
+            --primary-container: #dbeafe;
+            --on-primary-container: #1e3a8a;
+            --secondary: #16a34a;
+            --error: #dc2626;
+            --outline-variant: #d1d5db;
+            --surface-dim: #f9fafb;
+        }
+        html.dark {
+            --surface: #121317;
+            --on-surface: #e3e2e7;
+            --on-surface-variant: #c1c6d7;
+            --surface-container: #1e1f23;
+            --surface-container-high: #292a2e;
+            --primary: #adc6ff;
+            --primary-container: #4b8eff;
+            --on-primary-container: #00285c;
+            --secondary: #53e16f;
+            --error: #ffb4ab;
+            --outline-variant: #414755;
+            --surface-dim: #121317;
+        }
+
         body { font-family: 'Inter', sans-serif; overflow: hidden; }
         
         .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(24px); border-right: 1px solid rgba(0, 0, 0, 0.05); }

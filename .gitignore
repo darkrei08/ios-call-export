@@ -23,3 +23,13 @@ AGENTS.md
 CLAUDE.md
 GEMINI.md
 graphify-out/
+
+# Local UI/execution outputs
+mock_calls.html
+mock_messages.html
+generate_mocks.py
+patch_colors.py
+calls.html
+messages.html
+*.sqlite
+*.db

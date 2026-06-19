@@ -40,6 +40,15 @@ A sleek, dark-mode-ready interface that automatically detects your iPhone backup
   <img src="assets/gui_mockup.png" width="600" alt="iOS Call Exporter GUI Mockup">
 </p>
 
+#### Interactive Web Dashboards
+Beautifully generated offline web pages to browse, filter, and export your calls and messages with built-in Light and Dark themes.
+<p align="center">
+  <img src="assets/calls_dark.png" width="650" alt="Calls Web Dashboard (Dark Mode)">
+</p>
+<p align="center">
+  <img src="assets/messages_light.png" width="650" alt="Messages Web Dashboard (Light Mode)">
+</p>
+
 #### Clean Excel Output
 Beautifully parsed data ready for pivot tables or billing reports.
 <p align="center">
@@ -198,6 +207,15 @@ Che tu abbia bisogno di archiviare le chiamate per scopi di fatturazione, requis
 Un'interfaccia elegante (con tema scuro integrato) che rileva automaticamente i tuoi backup. Inserisci la password ed esporta!
 <p align="center">
   <img src="assets/gui_mockup.png" width="600" alt="Mockup dell'interfaccia di iOS Call Exporter">
+</p>
+
+#### Dashboard Web Interattive
+Pagine web offline interattive per esplorare, filtrare ed esportare chiamate e messaggi con temi Chiaro e Scuro integrati.
+<p align="center">
+  <img src="assets/calls_dark.png" width="650" alt="Dashboard Web Chiamate (Modalità Scura)">
+</p>
+<p align="center">
+  <img src="assets/messages_light.png" width="650" alt="Dashboard Web Messaggi (Modalità Chiara)">
 </p>
 
 #### File Excel Pulito e Ordinato
