@@ -105,25 +105,36 @@
     </script>
 <style>
         body {
-            background-color: #000000;
-            color: #e3e2e7;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
         }
         
         .glass-panel {
-            background: rgba(28, 28, 30, 0.4);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        html.dark .glass-panel {
+            background: rgba(28, 28, 30, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .glass-panel:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        html.dark .glass-panel:hover {
             border-color: rgba(255, 255, 255, 0.15);
             background: rgba(28, 28, 30, 0.5);
         }
 
         .glass-input {
+            background: #f3f4f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #000000;
+        }
+        html.dark .glass-input {
             background: #000000;
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #e3e2e7;
@@ -135,32 +146,39 @@
         }
 
         .table-row-hover:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        html.dark .table-row-hover:hover {
             background: rgba(255, 255, 255, 0.03);
         }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #000000;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
+        html.dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.3); }
+        html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+        @media print {
+            nav, header .toolbar-btns, .print-hide { display: none !important; }
+            .md\:ml-64 { margin-left: 0 !important; }
+            main { padding-top: 20px !important; }
+            body { background: white !important; color: black !important; }
         }
     </style>
 </head>
-<body class="antialiased min-h-screen flex text-on-surface">
+<body class="antialiased min-h-screen flex bg-[#f8f9fa] text-black dark:bg-[#000000] dark:text-gray-200 transition-colors duration-300">
 <!-- SideNavBar -->
 <nav class="fixed left-0 h-full w-64 z-40 bg-surface dark:bg-surface-dim border-r border-outline-variant/10 flex flex-col gap-base p-md pt-xxl hidden md:flex">
 <div class="mb-lg px-sm pt-xl">
-<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Filters</h2>
-<p class="font-label-md text-label-md text-on-surface-variant mt-xs">Refine call logs</p>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface" data-i18n="filtersTitle">Filters</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-xs" data-i18n="filtersSubtitle">Refine call logs</p>
+<div class="mt-4 flex flex-col gap-2">
+    <label class="font-label-sm text-label-sm text-on-surface-variant" data-i18n="dateFrom">From</label>
+    <input type="date" id="dateFrom" class="glass-input rounded-md px-2 py-1 text-sm w-full">
+    <label class="font-label-sm text-label-sm text-on-surface-variant mt-1" data-i18n="dateTo">To</label>
+    <input type="date" id="dateTo" class="glass-input rounded-md px-2 py-1 text-sm w-full">
+</div>
 </div>
 <div class="flex flex-col gap-xs flex-1 px-sm" id="dynamic-filters-container">
 <!-- Filters injected by JS -->
@@ -171,13 +189,20 @@
 <!-- TopNavBar -->
 <header class="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] z-50 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/10 flex justify-between items-center px-lg py-sm">
 <div class="flex items-center gap-md">
-<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">Call Analytics</h1>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface" data-i18n="appTitle">Call Analytics</h1>
 </div>
-<div class="hidden sm:flex flex-1 max-w-md mx-xl">
+<div class="hidden sm:flex flex-1 max-w-md mx-xl print-hide">
 <div class="relative w-full">
 <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">search</span>
-<input class="glass-input w-full rounded-full py-2 pl-10 pr-4 font-body-md text-body-md transition-colors placeholder:text-on-surface-variant/50 focus:border-[#007AFF]" placeholder="Search contacts, numbers..." type="text"/>
+<input class="glass-input w-full rounded-full py-2 pl-10 pr-4 font-body-md text-body-md transition-colors placeholder:text-on-surface-variant/50 focus:border-[#007AFF]" placeholder="Search contacts, numbers..." type="text" data-i18n-placeholder="searchPlaceholder"/>
 </div>
+</div>
+<div class="flex items-center gap-sm toolbar-btns">
+    <button id="themeToggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+        <span class="material-symbols-outlined dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+    </button>
+    <button id="langToggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-bold text-sm">IT</button>
 </div>
 </header>
 <!-- Main Canvas -->
@@ -187,7 +212,7 @@
 <!-- KPI 1 -->
 <div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
 <div class="flex justify-between items-start">
-<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Calls</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" data-i18n="totalCalls">Total Calls</span>
 <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
 <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">phone_in_talk</span>
 </div>
@@ -205,7 +230,7 @@
 <!-- KPI 2 -->
 <div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
 <div class="flex justify-between items-start">
-<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Duration</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" data-i18n="totalDuration">Total Duration</span>
 <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
 <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">schedule</span>
 </div>
@@ -219,7 +244,7 @@
 <!-- KPI 3: Top Contacts List -->
 <div class="glass-panel rounded-xl p-md flex flex-col transition-all duration-300">
 <div class="flex justify-between items-center mb-sm px-xs">
-<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Top Contacts</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" data-i18n="topContacts">Top Contacts</span>
 </div>
 <div class="flex flex-col gap-xs">
 <!-- Contact Item -->
@@ -252,19 +277,26 @@
 <!-- Recent Activity Table Section -->
 <section class="glass-panel rounded-xl overflow-hidden flex flex-col flex-1 border border-outline-variant/10">
 <div class="p-lg border-b border-outline-variant/10 flex justify-between items-center">
-<h3 class="font-headline-md text-headline-md font-semibold text-on-surface">Recent Activity</h3>
-<button class="font-label-sm text-label-sm text-[#007AFF] hover:text-primary transition-colors">View All</button>
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface" data-i18n="recentActivity">Recent Activity</h3>
+<div class="toolbar-btns flex gap-3">
+    <button onclick="exportCSV()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-sm font-medium border border-white/10 text-black dark:text-white">
+        <span class="material-symbols-outlined text-sm">download</span> <span data-i18n="exportCsv">CSV</span>
+    </button>
+    <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#007AFF] hover:bg-[#0056b3] transition-colors text-sm font-medium text-white shadow-lg shadow-blue-500/20">
+        <span class="material-symbols-outlined text-sm">print</span> <span data-i18n="printBtn">Print</span>
+    </button>
+</div>
 </div>
 <div class="overflow-x-auto">
 <table class="w-full text-left border-collapse min-w-[800px]">
 <thead>
 <tr class="border-b border-outline-variant/10 bg-surface/30">
-<th data-sort="contact" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1">Contact <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
-<th data-sort="number" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1">Number <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
-<th data-sort="duration" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1">Duration <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
-<th data-sort="dir" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1">Dir <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
-<th data-sort="date" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1">Date <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
-<th data-sort="service" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1">Service <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="contact" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thContact">Contact</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="number" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thNumber">Number</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="duration" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thDuration">Duration</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="dir" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thDir">Dir</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="date" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thDate">Date</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="service" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thService">Service</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
 </tr>
 </thead>
 <tbody class="font-body-md text-body-md">
@@ -359,8 +391,104 @@
     <script>
         // Placeholder for python injection. DO NOT REMOVE the comment above.
         const CALLS_DATA = {{ CALLS_DATA_JSON }};
+        const I18N = {
+            en: {
+                appTitle: "Call Analytics",
+                searchPlaceholder: "Search contacts, numbers...",
+                filtersTitle: "Filters",
+                filtersSubtitle: "Refine call logs",
+                dateFrom: "From",
+                dateTo: "To",
+                totalCalls: "Total Calls",
+                totalDuration: "Total Duration",
+                topContacts: "Top Contacts",
+                recentActivity: "Recent Activity",
+                exportCsv: "CSV",
+                printBtn: "Print",
+                thContact: "Contact",
+                thNumber: "Number",
+                thDuration: "Duration",
+                thDir: "Dir",
+                thDate: "Date",
+                thService: "Service",
+                callsLabel: "calls"
+            },
+            it: {
+                appTitle: "Analisi Chiamate",
+                searchPlaceholder: "Cerca contatti, numeri...",
+                filtersTitle: "Filtri",
+                filtersSubtitle: "Affina le chiamate",
+                dateFrom: "Dal",
+                dateTo: "Al",
+                totalCalls: "Totale Chiamate",
+                totalDuration: "Durata Totale",
+                topContacts: "Top Contatti",
+                recentActivity: "Attività Recente",
+                exportCsv: "CSV",
+                printBtn: "Stampa",
+                thContact: "Contatto",
+                thNumber: "Numero",
+                thDuration: "Durata",
+                thDir: "Dir",
+                thDate: "Data",
+                thService: "Servizio",
+                callsLabel: "chiamate"
+            }
+        };
+        let currentLang = "it";
+
+        function updateI18n() {
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (I18N[currentLang][key]) {
+                    el.innerText = I18N[currentLang][key];
+                }
+            });
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                if (I18N[currentLang][key]) {
+                    el.setAttribute("placeholder", I18N[currentLang][key]);
+                }
+            });
+            document.getElementById("langToggle").innerText = currentLang.toUpperCase() === "EN" ? "IT" : "EN";
+        }
+
 
         document.addEventListener("DOMContentLoaded", () => {
+            
+            const dateFromInput = document.getElementById('dateFrom');
+            const dateToInput = document.getElementById('dateTo');
+            
+            document.getElementById('langToggle').addEventListener('click', () => {
+                currentLang = currentLang === 'it' ? 'en' : 'it';
+                updateI18n();
+                renderAll();
+            });
+
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+            
+            updateI18n();
+
+            dateFromInput.addEventListener('change', renderAll);
+            dateToInput.addEventListener('change', renderAll);
+
+            // Clean up phone numbers and Whatsapp label
+            if (Array.isArray(CALLS_DATA)) {
+                CALLS_DATA.forEach(c => {
+                    if (c.phone_number && c.phone_number.startsWith('="')) {
+                        c.phone_number = c.phone_number.replace(/^="(.*)"$/, '$1');
+                    }
+                    if (c.contact_name && c.contact_name.startsWith('="')) {
+                        c.contact_name = c.contact_name.replace(/^="(.*)"$/, '$1');
+                    }
+                    if (c.call_type && c.call_type.toLowerCase() === 'whatsappsmb') {
+                        c.call_type = 'WhatsApp';
+                    }
+                });
+            }
+
             let currentFilterService = null;
             let currentFilterDirection = null;
             let currentSearchQuery = "";
@@ -408,11 +536,13 @@
 
             const serviceIcons = {
                 "Phone": "phone",
-                "Whatsapp": "chat",
+                "WhatsApp": "chat",
                 "FaceTime Video": "video_chat",
                 "FaceTime Audio": "call",
                 "Telegram": "send",
                 "Skype": "video_call",
+                "Teams": "groups",
+                "Unknown": "help"
             };
             const dirIcons = {
                 "Incoming": "call_received",
@@ -501,8 +631,23 @@
                         if (currentFilterDirection) {
                             matchDir = c.direction === currentFilterDirection;
                         }
+                        
+                        let matchDate = true;
+                        if (c.start) {
+                            const callDate = new Date(c.start);
+                            if (dateFromInput.value) {
+                                const dFrom = new Date(dateFromInput.value);
+                                dFrom.setHours(0,0,0,0);
+                                if (callDate < dFrom) matchDate = false;
+                            }
+                            if (dateToInput.value) {
+                                const dTo = new Date(dateToInput.value);
+                                dTo.setHours(23,59,59,999);
+                                if (callDate > dTo) matchDate = false;
+                            }
+                        }
 
-                        return matchSearch && matchService && matchDir;
+                        return matchSearch && matchService && matchDir && matchDate;
                     });
                     
                     filtered.sort((a, b) => {
@@ -582,7 +727,7 @@
                                 <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold text-on-surface">${initials}</div>
                                 <span class="font-body-md text-body-md text-on-surface">${sc[0]}</span>
                             </div>
-                            <span class="font-label-md text-label-md text-on-surface-variant">${sc[1]} calls</span>
+                            <span class="font-label-md text-label-md text-on-surface-variant">${sc[1]} <span data-i18n="callsLabel">${I18N[currentLang].callsLabel}</span></span>
                         </div>`;
                     }).join("");
                 }
@@ -617,6 +762,66 @@
 
             renderAll();
         });
-    </script>
+    
+        function exportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Date,Contact,Number,Duration,Direction,Service\n";
+            
+            // Re-run filtering to get current visible data
+            let filtered = CALLS_DATA.filter(c => {
+                let matchSearch = true;
+                if (currentSearchQuery) {
+                    const name = (c.contact_name || "").toLowerCase();
+                    const num = (c.phone_number || "").toLowerCase();
+                    matchSearch = name.includes(currentSearchQuery) || num.includes(currentSearchQuery);
+                }
+                let matchService = true;
+                if (currentFilterService) matchService = (c.call_type || c.service) === currentFilterService;
+                let matchDir = true;
+                if (currentFilterDirection) matchDir = c.direction === currentFilterDirection;
+                
+                let matchDate = true;
+                if (c.start) {
+                    const callDate = new Date(c.start);
+                    if (document.getElementById('dateFrom').value) {
+                        const dFrom = new Date(document.getElementById('dateFrom').value);
+                        dFrom.setHours(0,0,0,0);
+                        if (callDate < dFrom) matchDate = false;
+                    }
+                    if (document.getElementById('dateTo').value) {
+                        const dTo = new Date(document.getElementById('dateTo').value);
+                        dTo.setHours(23,59,59,999);
+                        if (callDate > dTo) matchDate = false;
+                    }
+                }
+                return matchSearch && matchService && matchDir && matchDate;
+            });
+
+            filtered.forEach(c => {
+                const dateStr = c.start || "";
+                const name = (c.contact_name || "").replace(/"/g, '""');
+                const num = c.phone_number || "";
+                const duration = formatDurationForCsv(c.duration_seconds || 0);
+                const dir = c.direction || "";
+                const service = c.call_type || c.service || "";
+                csvContent += `"${dateStr}","${name}","${num}","${duration}","${dir}","${service}"\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "calls_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function formatDurationForCsv(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+</script>
 </body>
 </html>
