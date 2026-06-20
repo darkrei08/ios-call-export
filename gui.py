@@ -862,6 +862,7 @@ class App(tk.Tk):
                 self.backup_combobox.configure(values=options)
                 self.backup_combobox.current(0)
                 self.selected_backup_dir = str(self.backups[0])
+                self._update_device_name()
                 self.log_message(
                     f"✅ Rilevati automaticamente {len(self.backups)} backup sul sistema.\nSelezionato il più recente.\n\n"
                 )
@@ -871,6 +872,7 @@ class App(tk.Tk):
                 )
                 self.backup_combobox.current(0)
                 self.selected_backup_dir = ""
+                self._update_device_name()
                 self.log_message(
                     "⚠️ AVVISO: Nessun backup iOS rilevato nelle cartelle di default.\nSeleziona manualmente la cartella del backup cliccando su 'Sfoglia...'.\n\n"
                 )
