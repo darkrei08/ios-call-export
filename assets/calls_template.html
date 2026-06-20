@@ -194,11 +194,17 @@
             .md\:ml-64 { margin-left: 0 !important; }
             main { padding-top: 20px !important; }
             body { background: #ffffff !important; color: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            
+            /* FIX: Make header relative to avoid overlapping content */
+            header { position: relative !important; width: 100% !important; background: none !important; border: none !important; padding: 0 0 20px 0 !important; }
+            
             html.dark body { background: #ffffff !important; color: #000000 !important; }
-            html.dark * { color: #000000 !important; border-color: #cccccc !important; }
+            /* Prevent dark mode classes from keeping text white */
+            html.dark .text-on-surface, html.dark .text-on-surface-variant, html.dark .text-gray-200 { color: #000000 !important; }
+            
             .glass-panel { background: #ffffff !important; border: 1px solid #cccccc !important; box-shadow: none !important; }
             table thead tr { background: #f0f0f0 !important; }
-            td, th { color: #000000 !important; }
+            td, th { color: #000000 !important; border-bottom: 1px solid #eeeeee !important; }
         }
 
         /* ===== FILTER BUTTONS AS CHIP-BOXES ===== */

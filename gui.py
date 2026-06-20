@@ -752,12 +752,14 @@ class App(tk.Tk):
         self, backup_dir, passphrase, use_excel, do_calls, do_msgs, do_calls_html
     ):
         try:
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y-%m-%d")
             export_dir = self.get_export_dir(backup_dir)
 
             if do_calls or do_calls_html:
                 from export_calls import process_and_export_calls
 
-                out_csv = str(export_dir / "calls.csv") if do_calls else None
+                out_csv = str(export_dir / f"calls_export_{timestamp}.csv") if do_calls else None
                 out_html = (
                     str(export_dir / "Calls_Viewer.html") if do_calls_html else None
                 )
@@ -780,7 +782,7 @@ class App(tk.Tk):
                 from export_messages import export_messages_to_csv_and_html
 
                 out_html = str(export_dir / "Messages_Viewer.html")
-                out_csv_msgs = str(export_dir / "messages.csv")
+                out_csv_msgs = str(export_dir / f"messages_export_{timestamp}.csv")
                 self.log_message("💬 Avvio estrazione Messaggi (SMS & iMessage)...\n")
                 count = export_messages_to_csv_and_html(
                     backup_dir, passphrase, out_html, out_csv_msgs, use_excel
