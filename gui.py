@@ -214,6 +214,17 @@ class App(tk.Tk):
             command=self.toggle_pass_visibility,
         )
         self.show_pass_check.grid(row=1, column=2, sticky="w", pady=8)
+        
+        self.lbl_device_title = ttk.Label(
+            cred_frame, text="Dispositivo Rilevato:", font=lbl_font
+        )
+        self.lbl_device_title.grid(row=2, column=0, sticky="w", pady=(0, 8))
+        
+        self.lbl_device_value = ttk.Label(
+            cred_frame, text="Dispositivo Sconosciuto", font=("Segoe UI", 10, "bold"), foreground=self.primary_color
+        )
+        self.lbl_device_value.grid(row=2, column=1, sticky="w", padx=(16, 16), pady=(0, 8))
+
         cred_frame.columnconfigure(1, weight=1)
 
         # Notebook for Tabs
@@ -911,6 +922,8 @@ class App(tk.Tk):
             self.log_message(f"📱 Dispositivo rilevato: {self.current_device_name}\n")
             if hasattr(self, 'lbl_excl_device'):
                 self.lbl_excl_device.configure(text=f"Dispositivo Corrente: {self.current_device_name}")
+            if hasattr(self, 'lbl_device_value'):
+                self.lbl_device_value.configure(text=self.current_device_name)
             self.load_exclusions_to_gui()
 
     def log_message(self, message):
