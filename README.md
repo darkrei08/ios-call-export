@@ -162,6 +162,42 @@ uv run python send_to_webhook.py --weeks 4
 
 ---
 
+### 🚫 Excluding Contacts from Reports
+
+You can exclude specific contacts or phone numbers from all exported reports (CSV and HTML). There are **two methods** that work together:
+
+#### Method 1: Text File (Recommended for Bulk Editing)
+Create a plain text file in the `0-Exportes/` folder named `exclusions_<DeviceName>.txt`.  
+Or simply click **"📄 Apri File Esclusioni"** in the GUI — it will create the file for you and open it in your default editor.
+
+```text
+# Lines starting with # are comments
+# One entry per line
+# Names are matched partially (case-insensitive)
+
+Mario Rossi
+Anna Bianchi
+
+# Phone numbers use the TEL: prefix
+TEL:+393471234567
+TEL:800123456
+```
+
+> 💡 **Tip:** Partial matching is used. Writing `Rossi` will exclude all contacts containing "Rossi" (e.g., "Maria Rossi", "Luca Rossini"). Same for phone numbers — `TEL:347` will match any number containing `347`.
+
+#### Method 2: GUI (Interactive Selection)
+In the **"⚙️ Filtri & Esclusioni"** tab:
+1. Click **"🔄 Carica dal Backup"** to load all contacts from your backup
+2. Use the **search bar** to quickly find contacts
+3. **Single-click** on any row to toggle exclusion on/off
+4. Click **"💾 Salva Esclusioni"** to save
+
+> Both methods are automatically **merged** — entries from the text file and the GUI settings are combined and deduplicated.
+
+See [`0-Exportes/exclusions_example.txt`](0-Exportes/exclusions_example.txt) for a full annotated example.
+
+---
+
 ### 📋 Exported CSV Fields
 
 | Column | Description |
@@ -328,6 +364,42 @@ cp .env.example .env
 # Modifica .env e inserisci il tuo WEBHOOK_URL
 uv run python send_to_webhook.py --weeks 4
 ```
+
+---
+
+### 🚫 Escludere Contatti dai Report
+
+Puoi escludere contatti specifici o numeri di telefono da tutti i report esportati (CSV e HTML). Ci sono **due metodi** che funzionano insieme:
+
+#### Metodo 1: File di Testo (Consigliato per Modifiche in Blocco)
+Crea un file di testo nella cartella `0-Exportes/` con il nome `exclusions_<NomeDispositivo>.txt`.  
+Oppure clicca semplicemente **"📄 Apri File Esclusioni"** nella GUI — creerà il file per te e lo aprirà nell'editor predefinito.
+
+```text
+# Le righe che iniziano con # sono commenti
+# Una voce per riga
+# I nomi vengono cercati parzialmente (senza distinguere maiuscole/minuscole)
+
+Mario Rossi
+Anna Bianchi
+
+# I numeri di telefono usano il prefisso TEL:
+TEL:+393471234567
+TEL:800123456
+```
+
+> 💡 **Suggerimento:** Il matching è parziale. Scrivere `Rossi` escluderà tutti i contatti che contengono "Rossi" (es. "Maria Rossi", "Luca Rossini"). Lo stesso vale per i numeri — `TEL:347` escluderà qualsiasi numero che contiene `347`.
+
+#### Metodo 2: GUI (Selezione Interattiva)
+Nella scheda **"⚙️ Filtri & Esclusioni"**:
+1. Clicca **"🔄 Carica dal Backup"** per caricare tutti i contatti dal backup
+2. Usa la **barra di ricerca** per trovare velocemente i contatti
+3. **Clicca una volta** su qualsiasi riga per attivare/disattivare l'esclusione
+4. Clicca **"💾 Salva Esclusioni"** per salvare
+
+> Entrambi i metodi vengono automaticamente **uniti** — le voci del file di testo e le impostazioni della GUI vengono combinate e deduplicate.
+
+Vedi [`0-Exportes/exclusions_example.txt`](0-Exportes/exclusions_example.txt) per un esempio completo con annotazioni.
 
 ---
 
