@@ -25,6 +25,11 @@ from phonenumbers import geocoder
 load_dotenv()
 
 
+class IncorrectPassphraseError(Exception):
+    """Raised when backup decryption fails due to an incorrect passphrase."""
+    pass
+
+
 @contextlib.contextmanager
 def suppress_size_warnings():
     """Filter out the library's 'WARN: decrypted N bytes' prints, pass everything else through."""
@@ -345,17 +350,31 @@ def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
 
     seen_unique_ids: set[str] = set()
     all_calls: list[dict] = []
+    passphrase_failures: int = 0
+    files_attempted: int = 0
 
     for rel_path in CALL_HISTORY_PATHS:
         label = rel_path.rsplit("/", 1)[-1]
         tmp_path = tempfile.mktemp(suffix=".sqlite")
+        files_attempted += 1
         try:
             with suppress_size_warnings():
                 backup.extract_file(relative_path=rel_path, output_filename=tmp_path)
         except FileNotFoundError:
             continue
         except Exception as e:
-            app_logger.error(f"  Skipping {label}: {e}")
+            err_lower = str(e).lower()
+            is_passphrase_error = (
+                "incorrect passphrase" in err_lower
+                or "failed to decrypt" in err_lower
+                or "wrong password" in err_lower
+                or "bad decrypt" in err_lower
+            )
+            if is_passphrase_error:
+                passphrase_failures += 1
+                app_logger.error(f"  Skipping {label}: {e}")
+            else:
+                app_logger.error(f"  Skipping {label}: {e}")
             continue
 
         try:
@@ -372,6 +391,14 @@ def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
             app_logger.info(f"  {label}: {new_count} calls")
         finally:
             os.unlink(tmp_path)
+
+    # If all call-history files failed due to passphrase errors, raise specific error
+    if not all_calls and passphrase_failures > 0 and passphrase_failures >= files_attempted:
+        raise IncorrectPassphraseError(
+            "La password di decrittazione inserita non è corretta.\n"
+            "Impossibile decrittare i file del backup.\n\n"
+            "Verifica la password e riprova."
+        )
 
     all_calls.sort(key=lambda c: c["start"])
     return all_calls

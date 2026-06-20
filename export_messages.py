@@ -9,7 +9,7 @@ from pathlib import Path
 
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
 
-from export_calls import build_contact_lookup
+from export_calls import build_contact_lookup, IncorrectPassphraseError
 from logger import app_logger
 
 # iOS dates are typically measured in seconds from Jan 1, 2001
@@ -31,6 +31,18 @@ def get_messages_data(backup_dir: str, passphrase: str) -> dict:
             relative_path=RelativePath.TEXT_MESSAGES, output_filename=tmp_path
         )
     except Exception as e:
+        err_lower = str(e).lower()
+        if (
+            "incorrect passphrase" in err_lower
+            or "failed to decrypt" in err_lower
+            or "wrong password" in err_lower
+            or "bad decrypt" in err_lower
+        ):
+            raise IncorrectPassphraseError(
+                "La password di decrittazione inserita non è corretta.\n"
+                "Impossibile decrittare i messaggi del backup.\n\n"
+                "Verifica la password e riprova."
+            ) from e
         raise Exception(f"Errore durante l'estrazione di sms.db: {e}")
 
     try:
