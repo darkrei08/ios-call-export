@@ -438,9 +438,13 @@ class App(tk.Tk):
                 self.db_backend.load_databases()
                 
                 # Fetch unique contacts from CallHistory
-                conn = self.db_backend.conn
-                cursor = conn.execute("SELECT DISTINCT ZNAME, ZADDRESS FROM ZCALLRECORD")
-                unique_contacts = cursor.fetchall()
+                unique_contacts = []
+                if self.db_backend.calls_db:
+                    cursor = self.db_backend.calls_db.execute("SELECT DISTINCT ZADDRESS FROM ZCALLRECORD WHERE ZADDRESS IS NOT NULL")
+                    for row in cursor.fetchall():
+                        addr = row[0]
+                        name = self.db_backend.contact_lookup.get(addr.replace(" ", "")) or self.db_backend.contact_lookup.get(addr) or ""
+                        unique_contacts.append((name, addr))
                 
                 self.after(0, self._on_contacts_loaded, unique_contacts)
             except Exception as e:
