@@ -449,8 +449,16 @@ class App(tk.Tk):
             "names": names,
             "numbers": numbers
         })
-        messagebox.showinfo("Salvato", f"Esclusioni salvate per il dispositivo:\n{self.current_device_name}")
         self._refresh_tree_excl_checks()
+        
+        if messagebox.askyesno(
+            "Esportazione Dinamica", 
+            f"Esclusioni salvate per il dispositivo:\n{self.current_device_name}\n\n"
+            "Vuoi rigenerare i file esportati (CSV/HTML) per applicare subito i nuovi filtri?"
+        ):
+            self.notebook.select(self.tab_export)
+            self.start_export()
+
 
     def load_contacts_for_exclusions(self):
         if not self.selected_backup_dir:
