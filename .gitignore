@@ -22,7 +22,6 @@ wheels/
 AGENTS.md
 CLAUDE.md
 GEMINI.md
-graphify-out/
 
 # Local UI/execution outputs
 mock_calls.html
@@ -33,3 +32,5 @@ calls.html
 messages.html
 *.sqlite
 *.db
+uv.lock
+app_debug.sqlite
