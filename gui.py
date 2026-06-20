@@ -57,7 +57,8 @@ class App(tk.Tk):
         self.is_dark_mode = False
         self.backups = []
         self.selected_backup_dir = ""
-        self.selected_backup_dir = ""
+        self.db_backend = None
+        self.current_device_name = "Dispositivo Sconosciuto"
 
         # Initialize sv_ttk theme FIRST, then apply custom overrides
         import sv_ttk
@@ -252,10 +253,6 @@ class App(tk.Tk):
 
         # Log Section
         # Log is now in the first tab
-
-        # Viewer Backend
-        self.db_backend = None
-        self.current_device_name = "Dispositivo Sconosciuto"
         
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
