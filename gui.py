@@ -369,13 +369,30 @@ class App(tk.Tk):
         paned.add(right_frame, weight=2)
         
         right_header = ttk.Frame(right_frame)
-        right_header.pack(fill="x", pady=(0, 8))
+        right_header.pack(fill="x", pady=(0, 4))
         
         ttk.Label(right_header, text="Seleziona Contatti dal Backup", style="Section.TLabel").pack(side="left")
         btn_load_contacts = ttk.Button(right_header, text="🔄 Carica dal Backup", command=self.load_contacts_for_exclusions)
         btn_load_contacts.pack(side="right")
         
-        self.tree_excl = ttk.Treeview(right_frame, columns=("Escludi", "Nome", "Numero"), show="headings", selectmode="browse")
+        # Search bar for filtering contacts
+        search_frame = ttk.Frame(right_frame)
+        search_frame.pack(fill="x", pady=(0, 8))
+        ttk.Label(search_frame, text="🔍 Cerca:").pack(side="left", padx=(0, 6))
+        self.excl_search_var = tk.StringVar()
+        self.excl_search_var.trace_add("write", lambda *_: self._filter_excl_contacts())
+        excl_search_entry = ttk.Entry(search_frame, textvariable=self.excl_search_var)
+        excl_search_entry.pack(side="left", fill="x", expand=True)
+        btn_clear_search = ttk.Button(search_frame, text="✕", width=3, command=lambda: self.excl_search_var.set(""))
+        btn_clear_search.pack(side="left", padx=(4, 0))
+        
+        # Internal storage for all loaded contacts (for filtering)
+        self._excl_all_contacts = []
+        
+        tree_frame = ttk.Frame(right_frame)
+        tree_frame.pack(fill="both", expand=True)
+        
+        self.tree_excl = ttk.Treeview(tree_frame, columns=("Escludi", "Nome", "Numero"), show="headings", selectmode="browse")
         self.tree_excl.heading("Escludi", text="[ ]")
         self.tree_excl.heading("Nome", text="Nome")
         self.tree_excl.heading("Numero", text="Numero")
@@ -385,7 +402,7 @@ class App(tk.Tk):
         
         self.tree_excl.bind("<Double-1>", self.on_excl_tree_click)
         
-        scroll = ttk.Scrollbar(right_frame, orient="vertical", command=self.tree_excl.yview)
+        scroll = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree_excl.yview)
         self.tree_excl.configure(yscrollcommand=scroll.set)
         self.tree_excl.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")
@@ -457,14 +474,9 @@ class App(tk.Tk):
 
     def _on_contacts_loaded(self, contacts):
         self.log_message("✅ Contatti caricati. Puoi ora selezionarli dalla lista.\n")
-        self.tree_excl.delete(*self.tree_excl.get_children())
         
-        # We need AddressBook contacts for better names
-        from export_calls import EncryptedBackup, build_contact_lookup, suppress_size_warnings
-        # Since we just need the names, and db_backend might not have AddressBook logic directly...
-        # ZNAME from CallHistory and ZADDRESS are available.
-        # We will just show ZNAME and ZADDRESS.
-        
+        # Store all contacts for search filtering
+        self._excl_all_contacts = []
         added = set()
         for row in contacts:
             name = row[0] or ""
@@ -474,10 +486,32 @@ class App(tk.Tk):
             key = f"{name}|{addr}"
             if key in added: continue
             added.add(key)
-            
+            self._excl_all_contacts.append((name, addr))
+        
+        # Clear search and populate
+        self.excl_search_var.set("")
+        self._populate_excl_tree(self._excl_all_contacts)
+
+    def _populate_excl_tree(self, contacts):
+        """Populate the exclusion treeview with the given contacts list."""
+        self.tree_excl.delete(*self.tree_excl.get_children())
+        for name, addr in contacts:
             self.tree_excl.insert("", "end", values=("[ ]", name, addr))
-            
         self._refresh_tree_excl_checks()
+
+    def _filter_excl_contacts(self):
+        """Filter the exclusion contacts treeview based on search term."""
+        if not self._excl_all_contacts:
+            return
+        term = self.excl_search_var.get().strip().lower()
+        if not term:
+            self._populate_excl_tree(self._excl_all_contacts)
+            return
+        filtered = [
+            (name, addr) for name, addr in self._excl_all_contacts
+            if term in name.lower() or term in addr.lower()
+        ]
+        self._populate_excl_tree(filtered)
 
     def on_excl_tree_click(self, event):
         item = self.tree_excl.identify_row(event.y)
