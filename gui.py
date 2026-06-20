@@ -348,6 +348,12 @@ class App(tk.Tk):
         btn_save = ttk.Button(header_frame, text="💾 Salva Esclusioni", style="Accent.TButton", command=self.save_exclusions_from_gui)
         btn_save.pack(side="right")
         
+        btn_open_txt = ttk.Button(header_frame, text="📄 Apri File Esclusioni", command=self.open_exclusions_file)
+        btn_open_txt.pack(side="right", padx=(0, 8))
+        
+        btn_reload_txt = ttk.Button(header_frame, text="🔄 Ricarica da File", command=self.reload_exclusions_from_file)
+        btn_reload_txt.pack(side="right", padx=(0, 8))
+        
         paned = ttk.PanedWindow(container, orient="horizontal")
         paned.pack(fill="both", expand=True)
         
@@ -400,7 +406,7 @@ class App(tk.Tk):
         self.tree_excl.column("Nome", width=150, stretch=True)
         self.tree_excl.column("Numero", width=150, stretch=True)
         
-        self.tree_excl.bind("<Double-1>", self.on_excl_tree_click)
+        self.tree_excl.bind("<ButtonRelease-1>", self.on_excl_tree_click)
         
         scroll = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree_excl.yview)
         self.tree_excl.configure(yscrollcommand=scroll.set)
@@ -517,33 +523,44 @@ class App(tk.Tk):
         item = self.tree_excl.identify_row(event.y)
         if not item: return
         
-        col = self.tree_excl.identify_column(event.x)
-        if col == "#1":  # The "Escludi" checkbox column
-            values = list(self.tree_excl.item(item, "values"))
-            current_state = values[0]
-            name = values[1]
-            number = values[2]
+        # Toggle checkbox on click anywhere in the row
+        values = list(self.tree_excl.item(item, "values"))
+        current_state = values[0]
+        name = values[1]
+        number = values[2]
+        
+        new_state = "[X]" if current_state == "[ ]" else "[ ]"
+        values[0] = new_state
+        self.tree_excl.item(item, values=values)
+        
+        # Sync with text areas
+        if new_state == "[X]":
+            if name and name not in self.txt_excl_names.get("1.0", tk.END):
+                self.txt_excl_names.insert(tk.END, f"{name}\n")
+            if number and number not in self.txt_excl_numbers.get("1.0", tk.END):
+                self.txt_excl_numbers.insert(tk.END, f"{number}\n")
+        else:
+            # Remove from text areas
+            def remove_from_text(widget, text_to_remove):
+                content = widget.get("1.0", tk.END).split("\n")
+                new_content = [c for c in content if c.strip() != text_to_remove]
+                widget.delete("1.0", tk.END)
+                widget.insert(tk.END, "\n".join(new_content))
             
-            new_state = "[X]" if current_state == "[ ]" else "[ ]"
-            values[0] = new_state
-            self.tree_excl.item(item, values=values)
-            
-            # Sync with text areas
-            if new_state == "[X]":
-                if name and name not in self.txt_excl_names.get("1.0", tk.END):
-                    self.txt_excl_names.insert(tk.END, f"{name}\n")
-                if number and number not in self.txt_excl_numbers.get("1.0", tk.END):
-                    self.txt_excl_numbers.insert(tk.END, f"{number}\n")
-            else:
-                # Remove from text areas
-                def remove_from_text(widget, text_to_remove):
-                    content = widget.get("1.0", tk.END).split("\n")
-                    new_content = [c for c in content if c.strip() != text_to_remove]
-                    widget.delete("1.0", tk.END)
-                    widget.insert(tk.END, "\n".join(new_content))
-                
-                if name: remove_from_text(self.txt_excl_names, name)
-                if number: remove_from_text(self.txt_excl_numbers, number)
+            if name: remove_from_text(self.txt_excl_names, name)
+            if number: remove_from_text(self.txt_excl_numbers, number)
+
+    def open_exclusions_file(self):
+        """Open the plain-text exclusions file in the OS default editor."""
+        path = master_settings.open_exclusions_txt(self.current_device_name)
+        self.log_message(f"📄 File esclusioni aperto: {path}\n")
+        self.log_message("  Formato: un nome per riga, oppure TEL:+39... per i numeri\n")
+        self.log_message("  Dopo aver salvato il file, clicca '🔄 Ricarica da File'.\n")
+
+    def reload_exclusions_from_file(self):
+        """Reload exclusions from the text file and merge into GUI."""
+        self.load_exclusions_to_gui()
+        self.log_message("✅ Esclusioni ricaricate dal file di testo e dalle impostazioni.\n")
 
     def _refresh_tree_excl_checks(self):
         if not hasattr(self, 'tree_excl'): return
