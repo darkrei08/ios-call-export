@@ -1,0 +1,147 @@
+{
+  ".story/config.json": {
+    "mtime": 1781947558.0943909,
+    "ast_hash": "cf7d65109519afc850a9bdbb6ba9df0f",
+    "semantic_hash": ""
+  },
+  ".story/roadmap.json": {
+    "mtime": 1781947558.0974448,
+    "ast_hash": "813b5a5104ab2294937e4bfd0b24d456",
+    "semantic_hash": ""
+  },
+  "backup_explorer.py": {
+    "mtime": 1781878583.003909,
+    "ast_hash": "66a85b3fbe351388c6a1cc0bf1901fd6",
+    "semantic_hash": ""
+  },
+  "db_viewers.py": {
+    "mtime": 1781878583.003909,
+    "ast_hash": "ccfd8d3476a89e318a8a59f86b42bc8f",
+    "semantic_hash": ""
+  },
+  "export_calls.py": {
+    "mtime": 1781946293.7172372,
+    "ast_hash": "1feaff6d029c4943c62b7f6063f761ee",
+    "semantic_hash": ""
+  },
+  "export_messages.py": {
+    "mtime": 1781946293.7182357,
+    "ast_hash": "bdfecf7a0bc90777a9e00c12c8e8422a",
+    "semantic_hash": ""
+  },
+  "gui.py": {
+    "mtime": 1781946800.3120778,
+    "ast_hash": "5da73968e4fe7667ec8e6545d5288f70",
+    "semantic_hash": ""
+  },
+  "inject_logger.py": {
+    "mtime": 1781878583.00491,
+    "ast_hash": "63abf7eca00b377137646ff41a5475f8",
+    "semantic_hash": ""
+  },
+  "live_device_explorer.py": {
+    "mtime": 1781878583.0061097,
+    "ast_hash": "6641cb3d054d8d077d8f09e84f0d624c",
+    "semantic_hash": ""
+  },
+  "logger.py": {
+    "mtime": 1781878583.0061097,
+    "ast_hash": "d766b02d57b2ce39248b85b2acde9038",
+    "semantic_hash": ""
+  },
+  "pyproject.toml": {
+    "mtime": 1781946873.6308584,
+    "ast_hash": "46562e520c505b3f92302ffc3b4024a7",
+    "semantic_hash": ""
+  },
+  "refactor_gui.py": {
+    "mtime": 1781878583.0061097,
+    "ast_hash": "42fae4ded4126e77466150b483945274",
+    "semantic_hash": ""
+  },
+  "run.sh": {
+    "mtime": 1781878583.0071812,
+    "ast_hash": "1f995d292186f04b11c504b53d367542",
+    "semantic_hash": ""
+  },
+  "send_to_webhook.py": {
+    "mtime": 1781878583.0071812,
+    "ast_hash": "40ae933a7d984fbcd810936b6ffdc89b",
+    "semantic_hash": ""
+  },
+  ".github/copilot-instructions.md": {
+    "mtime": 1781878582.9904199,
+    "ast_hash": "2b23503628bf2ec71d067a85ca8948ab",
+    "semantic_hash": ""
+  },
+  "0-Exportes/2026-06-20 - iPhone di Emanuele/Calls_Viewer.html": {
+    "mtime": 1781947307.6574585,
+    "ast_hash": "3bbef65bdc5017932284a4cfeb9297f6",
+    "semantic_hash": ""
+  },
+  "0-Exportes/2026-06-20 - iPhone di Emanuele/Messages_Viewer.html": {
+    "mtime": 1781947314.996403,
+    "ast_hash": "e4e2843d8e99076a0ab957d64f9e6415",
+    "semantic_hash": ""
+  },
+  "MEMORY.md": {
+    "mtime": 1781947464.7416859,
+    "ast_hash": "be4849f0dea77613e9fb93bbdf0a144a",
+    "semantic_hash": ""
+  },
+  "PROJECT_ROADMAP.md": {
+    "mtime": 1781878582.9904199,
+    "ast_hash": "f93f77fa2b5405b0e4a8f8d20d795496",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1781887720.4349375,
+    "ast_hash": "13008fdc985887ce04fcd93bf61d6bc9",
+    "semantic_hash": ""
+  },
+  "assets/calls_template.html": {
+    "mtime": 1781946816.4958992,
+    "ast_hash": "1b0ed9a9857ad080f5ed75b9cf1aaa1b",
+    "semantic_hash": ""
+  },
+  "assets/messages_template.html": {
+    "mtime": 1781945739.801009,
+    "ast_hash": "e939abf71efa7bf6d8f52ce8974c021f",
+    "semantic_hash": ""
+  },
+  "assets/calls_dark.png": {
+    "mtime": 1781887567.4243517,
+    "ast_hash": "1d0408720dea4c92e6465fd716d88c9d",
+    "semantic_hash": ""
+  },
+  "assets/calls_light.png": {
+    "mtime": 1781887580.0763288,
+    "ast_hash": "ebb6afa320d052a05ca87ad9573ec0df",
+    "semantic_hash": ""
+  },
+  "assets/csv_export_example.png": {
+    "mtime": 1781878582.9959097,
+    "ast_hash": "e86535891dd350a1c2ea16b8ed196a0a",
+    "semantic_hash": ""
+  },
+  "assets/data_mockup.png": {
+    "mtime": 1781887689.352127,
+    "ast_hash": "c90761c21fcc2955cf0b06fbb84343c4",
+    "semantic_hash": ""
+  },
+  "assets/gui_mockup.png": {
+    "mtime": 1781887689.3551245,
+    "ast_hash": "6030f0732002094c91577c5aa6511fab",
+    "semantic_hash": ""
+  },
+  "assets/messages_dark.png": {
+    "mtime": 1781887634.8907187,
+    "ast_hash": "fe690183ff86bc078535061d34f075d6",
+    "semantic_hash": ""
+  },
+  "assets/messages_light.png": {
+    "mtime": 1781887641.3823528,
+    "ast_hash": "f751f8a16fff461357215be802acae5d",
+    "semantic_hash": ""
+  }
+}
