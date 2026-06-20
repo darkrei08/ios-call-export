@@ -120,18 +120,18 @@
             --surface-dim: #f9fafb;
         }
         html.dark {
-            --surface: #121317;
+            --surface: #000000;
             --on-surface: #e3e2e7;
             --on-surface-variant: #c1c6d7;
-            --surface-container: #1e1f23;
-            --surface-container-high: #292a2e;
+            --surface-container: #1a1b1f;
+            --surface-container-high: #26272b;
             --primary: #adc6ff;
             --primary-container: #4b8eff;
-            --on-primary-container: #00285c;
+            --on-primary-container: #ffffff;
             --secondary: #53e16f;
             --error: #ffb4ab;
-            --outline-variant: #414755;
-            --surface-dim: #121317;
+            --outline-variant: #3a3d4a;
+            --surface-dim: #000000;
         }
 
         body {
@@ -193,13 +193,63 @@
             nav, header .toolbar-btns, .print-hide { display: none !important; }
             .md\:ml-64 { margin-left: 0 !important; }
             main { padding-top: 20px !important; }
-            body { background: white !important; color: black !important; }
+            body { background: #ffffff !important; color: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            html.dark body { background: #ffffff !important; color: #000000 !important; }
+            html.dark * { color: #000000 !important; border-color: #cccccc !important; }
+            .glass-panel { background: #ffffff !important; border: 1px solid #cccccc !important; box-shadow: none !important; }
+            table thead tr { background: #f0f0f0 !important; }
+            td, th { color: #000000 !important; }
+        }
+
+        /* ===== FILTER BUTTONS AS CHIP-BOXES ===== */
+        .filter-btn {
+            border: 1.5px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            position: relative;
+            overflow: hidden;
+        }
+        html:not(.dark) .filter-btn {
+            border: 1.5px solid rgba(0,0,0,0.10);
+            background: rgba(0,0,0,0.03);
+        }
+        .filter-btn:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.18);
+        }
+        html:not(.dark) .filter-btn:hover {
+            background: rgba(0,0,0,0.06);
+            border-color: rgba(0,0,0,0.18);
+        }
+        .filter-btn.active {
+            background: #4b8eff !important;
+            border-color: #4b8eff !important;
+            color: #ffffff !important;
+        }
+        html:not(.dark) .filter-btn.active {
+            background: #007AFF !important;
+            border-color: #007AFF !important;
+            color: #ffffff !important;
+        }
+        .filter-btn.active span {
+            color: #ffffff !important;
+        }
+
+        /* ===== SECTION/KPI BOX ACCENT ===== */
+        .glass-panel {
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            box-shadow: 0 0 0 0.5px rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.35);
+        }
+        html:not(.dark) .glass-panel {
+            border: 1px solid rgba(0,0,0,0.10) !important;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
         }
     </style>
 </head>
-<body class="antialiased min-h-screen flex bg-[#f8f9fa] text-black dark:bg-[#000000] dark:text-gray-200 transition-colors duration-300">
+<body class="antialiased min-h-screen flex bg-[#f5f5f7] text-black dark:bg-[#000000] dark:text-gray-200 transition-colors duration-300">
 <!-- SideNavBar -->
-<nav class="fixed left-0 h-full w-64 z-40 bg-surface dark:bg-surface-dim border-r border-outline-variant/10 flex flex-col gap-base p-md pt-xxl hidden md:flex">
+<nav class="fixed left-0 h-full w-64 z-40 bg-white dark:bg-[#000000] border-r border-black/5 dark:border-white/5 flex flex-col gap-base p-md pt-xxl hidden md:flex">
 <div class="mb-lg px-sm pt-xl">
 <h2 class="font-headline-md text-headline-md font-bold text-on-surface" data-i18n="filtersTitle">Filters</h2>
 <p class="font-label-md text-label-md text-on-surface-variant mt-xs" data-i18n="filtersSubtitle">Refine call logs</p>
@@ -238,7 +288,7 @@
 <!-- Main Canvas -->
 <main class="flex-1 pt-[100px] px-container-margin pb-container-margin md:pt-[100px] md:px-xl md:pb-xl flex flex-col gap-xl">
 <!-- KPIs Section -->
-<section class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<section class="grid grid-cols-1 md:grid-cols-3 gap-md" style="--tw-ring-shadow: none;">
 <!-- KPI 1 -->
 <div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
 <div class="flex justify-between items-start">
@@ -305,7 +355,7 @@
 </div>
 </section>
 <!-- Recent Activity Table Section -->
-<section class="glass-panel rounded-xl overflow-hidden flex flex-col flex-1 border border-outline-variant/10">
+<section class="glass-panel rounded-xl overflow-hidden flex flex-col flex-1">
 <div class="p-lg border-b border-outline-variant/10 flex justify-between items-center">
 <h3 class="font-headline-md text-headline-md font-semibold text-on-surface" data-i18n="recentActivity">Recent Activity</h3>
 <div class="toolbar-btns flex gap-3">
@@ -582,18 +632,20 @@
 
             function buildFilterButton(label, icon, type) {
                 return `
-                <button data-type="${type}" data-val="${label}" class="filter-btn flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface active:translate-x-1 duration-150 w-full text-left">
-                    <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0;">${icon}</span>
-                    <span class="font-label-md text-label-md flex-1">${label}</span>
+                <button data-type="${type}" data-val="${label}" class="filter-btn flex items-center gap-3 px-3 py-2.5 w-full text-left text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[20px] shrink-0" style="font-variation-settings: 'FILL' 0;">${icon}</span>
+                    <span class="font-label-md text-label-md flex-1 font-medium">${label}</span>
+                    <span class="w-2 h-2 rounded-full bg-transparent filter-dot shrink-0"></span>
                 </button>`;
             }
 
             if (dynamicFiltersContainer) {
-                let html = '';
+                let html = '<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider px-1 mb-1 opacity-60">Servizio</p>';
                 uniqueServices.forEach(s => {
                     html += buildFilterButton(s, serviceIcons[s] || "apps", "service");
                 });
-                html += '<div class="h-px bg-outline-variant/10 my-xs"></div>';
+                html += '<div class="h-px bg-outline-variant/20 my-3"></div>';
+                html += '<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider px-1 mb-1 opacity-60">Direzione</p>';
                 uniqueDirections.forEach(d => {
                     html += buildFilterButton(d, dirIcons[d] || "call", "direction");
                 });
@@ -611,13 +663,16 @@
                         currentFilterDirection = currentFilterDirection === val ? null : val;
                     }
                     
+                    // Reset all buttons of same type
                     document.querySelectorAll(`.filter-btn[data-type="${type}"]`).forEach(b => {
-                        b.classList.remove("bg-primary-container", "text-on-primary-container", "font-semibold");
+                        b.classList.remove("active");
                         b.classList.add("text-on-surface-variant");
                     });
                     
-                    if ((type === "service" && currentFilterService) || (type === "direction" && currentFilterDirection)) {
-                        btn.classList.add("bg-primary-container", "text-on-primary-container", "font-semibold");
+                    // Activate selected
+                    const isActive = (type === "service" && currentFilterService) || (type === "direction" && currentFilterDirection);
+                    if (isActive) {
+                        btn.classList.add("active");
                         btn.classList.remove("text-on-surface-variant");
                     }
                     renderAll();
@@ -794,55 +849,67 @@
         });
     
         function exportCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,Date,Contact,Number,Duration,Direction,Service\n";
-            
-            // Re-run filtering to get current visible data
+            // Retrieve current filter state from DOM (re-read active filters)
+            const currentServiceFilter = (() => {
+                const active = document.querySelector('.filter-btn[data-type="service"].active');
+                return active ? active.getAttribute('data-val') : null;
+            })();
+            const currentDirFilter = (() => {
+                const active = document.querySelector('.filter-btn[data-type="direction"].active');
+                return active ? active.getAttribute('data-val') : null;
+            })();
+            const searchVal = (document.querySelector("input[type='text']") || {}).value || "";
+
             let filtered = CALLS_DATA.filter(c => {
                 let matchSearch = true;
-                if (currentSearchQuery) {
+                if (searchVal) {
                     const name = (c.contact_name || "").toLowerCase();
                     const num = (c.phone_number || "").toLowerCase();
-                    matchSearch = name.includes(currentSearchQuery) || num.includes(currentSearchQuery);
+                    matchSearch = name.includes(searchVal.toLowerCase()) || num.includes(searchVal.toLowerCase());
                 }
-                let matchService = true;
-                if (currentFilterService) matchService = (c.call_type || c.service) === currentFilterService;
-                let matchDir = true;
-                if (currentFilterDirection) matchDir = c.direction === currentFilterDirection;
+                let matchService = !currentServiceFilter || (c.call_type || c.service) === currentServiceFilter;
+                let matchDir = !currentDirFilter || c.direction === currentDirFilter;
                 
                 let matchDate = true;
                 if (c.start) {
                     const callDate = new Date(c.start);
-                    if (document.getElementById('dateFrom').value) {
-                        const dFrom = new Date(document.getElementById('dateFrom').value);
-                        dFrom.setHours(0,0,0,0);
+                    const fromVal = document.getElementById('dateFrom').value;
+                    const toVal = document.getElementById('dateTo').value;
+                    if (fromVal) {
+                        const dFrom = new Date(fromVal); dFrom.setHours(0,0,0,0);
                         if (callDate < dFrom) matchDate = false;
                     }
-                    if (document.getElementById('dateTo').value) {
-                        const dTo = new Date(document.getElementById('dateTo').value);
-                        dTo.setHours(23,59,59,999);
+                    if (toVal) {
+                        const dTo = new Date(toVal); dTo.setHours(23,59,59,999);
                         if (callDate > dTo) matchDate = false;
                     }
                 }
                 return matchSearch && matchService && matchDir && matchDate;
             });
 
-            filtered.forEach(c => {
-                const dateStr = c.start || "";
+            // Build CSV rows
+            const BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+            const header = 'Date,Contact,Number,Duration,Direction,Service';
+            const rows = filtered.map(c => {
+                const dateStr = (c.start || "").replace(/"/g, '""');
                 const name = (c.contact_name || "").replace(/"/g, '""');
-                const num = c.phone_number || "";
+                const num = (c.phone_number || "").replace(/"/g, '""');
                 const duration = formatDurationForCsv(c.duration_seconds || 0);
-                const dir = c.direction || "";
-                const service = c.call_type || c.service || "";
-                csvContent += `"${dateStr}","${name}","${num}","${duration}","${dir}","${service}"\n`;
+                const dir = (c.direction || "").replace(/"/g, '""');
+                const service = (c.call_type || c.service || "").replace(/"/g, '""');
+                return `"${dateStr}","${name}","${num}","${duration}","${dir}","${service}"`;
             });
-            
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "calls_export.csv");
+
+            const csvString = BOM + header + '\n' + rows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'calls_export_' + new Date().toISOString().slice(0,10) + '.csv';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
         }
         
         function formatDurationForCsv(seconds) {

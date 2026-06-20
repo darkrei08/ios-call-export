@@ -717,15 +717,42 @@ class App(tk.Tk):
         )
         thread.start()
 
-    def get_export_dir(self):
-        desktop = Path.home() / "Desktop"
-        return desktop if desktop.exists() else Path.home()
+    def get_export_dir(self, backup_dir=None):
+        import plistlib
+        import re
+        import os
+        from datetime import datetime
+        
+        # Use the directory where gui.py is located
+        base_export = Path(os.path.dirname(os.path.abspath(__file__))) / "0-Exportes"
+        base_export.mkdir(parents=True, exist_ok=True)
+        
+        if not backup_dir:
+            return base_export
+            
+        device_name = "Dispositivo Sconosciuto"
+        info_path = Path(backup_dir) / "Info.plist"
+        if info_path.exists():
+            try:
+                with open(info_path, "rb") as f:
+                    info = plistlib.load(f)
+                    device_name = info.get("Device Name", device_name)
+            except Exception:
+                pass
+                
+        timestamp = datetime.now().strftime("%Y-%m-%d")
+        safe_name = re.sub(r'[\\/*?:"<>|]', "", device_name)
+        folder_name = f"{timestamp} - {safe_name}"
+        
+        export_dir = base_export / folder_name
+        export_dir.mkdir(parents=True, exist_ok=True)
+        return export_dir
 
     def _run_export(
         self, backup_dir, passphrase, use_excel, do_calls, do_msgs, do_calls_html
     ):
         try:
-            export_dir = self.get_export_dir()
+            export_dir = self.get_export_dir(backup_dir)
 
             if do_calls or do_calls_html:
                 from export_calls import process_and_export_calls
