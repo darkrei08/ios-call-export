@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Call Analytics Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "var(--surface)",
+                    "error": "var(--error)",
+                    "on-background": "#e3e2e7",
+                    "on-secondary-fixed-variant": "#00531c",
+                    "outline-variant": "var(--outline-variant)",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-primary-container": "var(--on-primary-container)",
+                    "surface-container-low": "#1a1b1f",
+                    "inverse-on-surface": "#2f3034",
+                    "outline": "#8b90a0",
+                    "on-tertiary-fixed-variant": "#930005",
+                    "background": "#121317",
+                    "on-primary-fixed-variant": "#004493",
+                    "surface-container-high": "var(--surface-container-high)",
+                    "surface-container": "var(--surface-container)",
+                    "tertiary-fixed": "#ffdad5",
+                    "error-container": "#93000a",
+                    "surface-container-highest": "#343539",
+                    "tertiary-container": "#ff5545",
+                    "on-primary": "#002e69",
+                    "tertiary": "#ffb4aa",
+                    "secondary": "var(--secondary)",
+                    "surface-variant": "#343539",
+                    "on-tertiary": "#690003",
+                    "surface-dim": "var(--surface-dim)",
+                    "inverse-surface": "#e3e2e7",
+                    "on-primary-fixed": "#001a41",
+                    "secondary-fixed": "#72fe88",
+                    "tertiary-fixed-dim": "#ffb4aa",
+                    "primary": "var(--primary)",
+                    "primary-fixed": "#d8e2ff",
+                    "secondary-fixed-dim": "#53e16f",
+                    "on-tertiary-fixed": "#410001",
+                    "on-tertiary-container": "#5c0002",
+                    "inverse-primary": "#005bc1",
+                    "secondary-container": "#05b046",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary": "#003911",
+                    "on-secondary-container": "#003a11",
+                    "surface-tint": "#adc6ff",
+                    "surface-container-lowest": "#0d0e12",
+                    "primary-container": "var(--primary-container)",
+                    "on-surface-variant": "var(--on-surface-variant)",
+                    "surface-bright": "#38393d",
+                    "on-surface": "var(--on-surface)",
+                    "on-secondary-fixed": "#002107"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "sm": "12px",
+                    "xl": "32px",
+                    "gutter": "16px",
+                    "xxl": "48px",
+                    "md": "16px",
+                    "lg": "24px",
+                    "container-margin": "20px",
+                    "xs": "8px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+
+        :root {
+            --surface: #ffffff;
+            --on-surface: #111827;
+            --on-surface-variant: #4b5563;
+            --surface-container: #f3f4f6;
+            --surface-container-high: #e5e7eb;
+            --primary: #007AFF;
+            --primary-container: #dbeafe;
+            --on-primary-container: #1e3a8a;
+            --secondary: #16a34a;
+            --error: #dc2626;
+            --outline-variant: #d1d5db;
+            --surface-dim: #f9fafb;
+        }
+        html.dark {
+            --surface: #000000;
+            --on-surface: #e3e2e7;
+            --on-surface-variant: #c1c6d7;
+            --surface-container: #1a1b1f;
+            --surface-container-high: #26272b;
+            --primary: #adc6ff;
+            --primary-container: #4b8eff;
+            --on-primary-container: #ffffff;
+            --secondary: #53e16f;
+            --error: #ffb4ab;
+            --outline-variant: #3a3d4a;
+            --surface-dim: #000000;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        html.dark .glass-panel {
+            background: rgba(28, 28, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-panel:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        html.dark .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(28, 28, 30, 0.5);
+        }
+
+        .glass-input {
+            background: #f3f4f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #000000;
+        }
+        html.dark .glass-input {
+            background: #000000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e3e2e7;
+        }
+        
+        .glass-input:focus {
+            border-color: #007AFF;
+            outline: none;
+        }
+
+        .table-row-hover:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        html.dark .table-row-hover:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
+        html.dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.3); }
+        html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+        @media print {
+            nav, header .toolbar-btns, .print-hide { display: none !important; }
+            .md\:ml-64 { margin-left: 0 !important; }
+            main { padding-top: 20px !important; }
+            body { background: #ffffff !important; color: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            html.dark body { background: #ffffff !important; color: #000000 !important; }
+            html.dark * { color: #000000 !important; border-color: #cccccc !important; }
+            .glass-panel { background: #ffffff !important; border: 1px solid #cccccc !important; box-shadow: none !important; }
+            table thead tr { background: #f0f0f0 !important; }
+            td, th { color: #000000 !important; }
+        }
+
+        /* ===== FILTER BUTTONS AS CHIP-BOXES ===== */
+        .filter-btn {
+            border: 1.5px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.03);
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            position: relative;
+            overflow: hidden;
+        }
+        html:not(.dark) .filter-btn {
+            border: 1.5px solid rgba(0,0,0,0.10);
+            background: rgba(0,0,0,0.03);
+        }
+        .filter-btn:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.18);
+        }
+        html:not(.dark) .filter-btn:hover {
+            background: rgba(0,0,0,0.06);
+            border-color: rgba(0,0,0,0.18);
+        }
+        .filter-btn.active {
+            background: #4b8eff !important;
+            border-color: #4b8eff !important;
+            color: #ffffff !important;
+        }
+        html:not(.dark) .filter-btn.active {
+            background: #007AFF !important;
+            border-color: #007AFF !important;
+            color: #ffffff !important;
+        }
+        .filter-btn.active span {
+            color: #ffffff !important;
+        }
+
+        /* ===== SECTION/KPI BOX ACCENT ===== */
+        .glass-panel {
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            box-shadow: 0 0 0 0.5px rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.35);
+        }
+        html:not(.dark) .glass-panel {
+            border: 1px solid rgba(0,0,0,0.10) !important;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex bg-[#f5f5f7] text-black dark:bg-[#000000] dark:text-gray-200 transition-colors duration-300">
+<!-- SideNavBar -->
+<nav class="fixed left-0 h-full w-64 z-40 bg-white dark:bg-[#000000] border-r border-black/5 dark:border-white/5 flex flex-col gap-base p-md pt-xxl hidden md:flex">
+<div class="mb-lg px-sm pt-xl">
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface" data-i18n="filtersTitle">Filters</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-xs" data-i18n="filtersSubtitle">Refine call logs</p>
+<div class="mt-4 flex flex-col gap-2">
+    <label class="font-label-sm text-label-sm text-on-surface-variant" data-i18n="dateFrom">From</label>
+    <input type="date" id="dateFrom" class="glass-input rounded-md px-2 py-1 text-sm w-full">
+    <label class="font-label-sm text-label-sm text-on-surface-variant mt-1" data-i18n="dateTo">To</label>
+    <input type="date" id="dateTo" class="glass-input rounded-md px-2 py-1 text-sm w-full">
+</div>
+</div>
+<div class="flex flex-col gap-xs flex-1 px-sm" id="dynamic-filters-container">
+<!-- Filters injected by JS -->
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-64 relative min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] z-50 bg-surface/70 dark:bg-surface/70 backdrop-blur-xl border-b border-outline-variant/10 flex justify-between items-center px-lg py-sm">
+<div class="flex items-center gap-md">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface" data-i18n="appTitle">Call Analytics</h1>
+</div>
+<div class="hidden sm:flex flex-1 max-w-md mx-xl print-hide">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-variation-settings: 'FILL' 0;">search</span>
+<input class="glass-input w-full rounded-full py-2 pl-10 pr-4 font-body-md text-body-md transition-colors placeholder:text-on-surface-variant/50 focus:border-[#007AFF]" placeholder="Search contacts, numbers..." type="text" data-i18n-placeholder="searchPlaceholder"/>
+</div>
+</div>
+<div class="flex items-center gap-sm toolbar-btns">
+    <button id="themeToggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+        <span class="material-symbols-outlined dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined hidden dark:block">light_mode</span>
+    </button>
+    <button id="langToggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors font-bold text-sm">IT</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 pt-[100px] px-container-margin pb-container-margin md:pt-[100px] md:px-xl md:pb-xl flex flex-col gap-xl">
+<!-- KPIs Section -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-md" style="--tw-ring-shadow: none;">
+<!-- KPI 1 -->
+<div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" data-i18n="totalCalls">Total Calls</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">phone_in_talk</span>
+</div>
+</div>
+<div class="mt-md">
+<div class="flex items-baseline gap-sm">
+<span class="font-display-lg text-display-lg text-on-surface">1,284</span>
+<span class="font-label-sm text-label-sm text-secondary flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                                12%
+                            </span>
+</div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="glass-panel rounded-xl p-lg flex flex-col justify-between min-h-[140px] transition-all duration-300">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" data-i18n="totalDuration">Total Duration</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">schedule</span>
+</div>
+</div>
+<div class="mt-md">
+<div class="flex items-baseline gap-sm">
+<span class="font-display-lg text-display-lg text-on-surface">42<span class="text-on-surface-variant text-2xl ml-1">h</span> 15<span class="text-on-surface-variant text-2xl ml-1">m</span></span>
+</div>
+</div>
+</div>
+<!-- KPI 3: Top Contacts List -->
+<div class="glass-panel rounded-xl p-md flex flex-col transition-all duration-300">
+<div class="flex justify-between items-center mb-sm px-xs">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" data-i18n="topContacts">Top Contacts</span>
+</div>
+<div class="flex flex-col gap-xs">
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-container to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">SJ</div>
+<span class="font-body-md text-body-md text-on-surface">Sarah Jenkins</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">142 calls</span>
+</div>
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-high to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">MK</div>
+<span class="font-body-md text-body-md text-on-surface">Mike Ross</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">89 calls</span>
+</div>
+<!-- Contact Item -->
+<div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-high to-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold">EL</div>
+<span class="font-body-md text-body-md text-on-surface">Emma Lin</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">64 calls</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Activity Table Section -->
+<section class="glass-panel rounded-xl overflow-hidden flex flex-col flex-1">
+<div class="p-lg border-b border-outline-variant/10 flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md font-semibold text-on-surface" data-i18n="recentActivity">Recent Activity</h3>
+<div class="toolbar-btns flex gap-3">
+    <button onclick="exportCSV()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-sm font-medium border border-white/10 text-black dark:text-white">
+        <span class="material-symbols-outlined text-sm">download</span> <span data-i18n="exportCsv">CSV</span>
+    </button>
+    <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#007AFF] hover:bg-[#0056b3] transition-colors text-sm font-medium text-white shadow-lg shadow-blue-500/20">
+        <span class="material-symbols-outlined text-sm">print</span> <span data-i18n="printBtn">Print</span>
+    </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[800px]">
+<thead>
+<tr class="border-b border-outline-variant/10 bg-surface/30">
+<th data-sort="contact" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thContact">Contact</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="number" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thNumber">Number</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="duration" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thDuration">Duration</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="dir" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thDir">Dir</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="date" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thDate">Date</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+<th data-sort="service" class="cursor-pointer hover:bg-white/5 py-sm px-lg font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-medium group transition-colors"><div class="flex items-center gap-1"><span data-i18n="thService">Service</span> <span class="material-symbols-outlined text-[16px] opacity-0 group-hover:opacity-50 transition-opacity sort-icon">swap_vert</span></div></th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A portrait of a young woman smiling slightly, used as an avatar in a premium dark UI dashboard. The image is cropped to a circle and blends well with the deep black and subtle gray tones of the surrounding glassmorphic elements." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJgpVG-ENijVHYdEi99xnH6MhX2LEX3iG8mkY8DY930zv1_3q1cJ1F7H6LWSu6M7oBTr4HdrLvf9vFafSJesULKV8OSxqzU2cAmXLpTjoLrFA04d6WLGzaUhhX3x-EXcXQZ0unmVu-0mxu9hPUYw67F3Scv1dBe-Filuam6uX2UaF5Pm6jvcYpNcARqX2kf4fNMuT9CGk1an1kQGTmznWfNXlcIh_mtG6mrE2kwxorCznQk51a3DcdI-FnOKSlb92whS9Lx76wC4UP"/>
+</div>
+<span class="font-medium text-on-surface">Sarah Jenkins</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (555) 019-2834</td>
+<td class="py-md px-lg text-on-surface">45m 12s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-secondary text-lg" style="font-variation-settings: 'FILL' 1;">call_received</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">2h ago</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">FaceTime</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                                            MR
+                                        </div>
+<span class="font-medium text-on-surface">Mike Ross</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (555) 234-9876</td>
+<td class="py-md px-lg text-on-surface">1h 12m</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_made</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">5h ago</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">Mobile</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="A male user avatar portrait with neutral expression and modern styling. The circular crop fits perfectly within the dark-mode aesthetic of a sleek communication dashboard. The lighting is crisp, enhancing the premium feel of the interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFQziGDF4L2ZSqND9aMV0YH82lt7Zfb6fmla6LMtD2937cFWITRR82KGRwI6I-PqBriCUGNr0qf8OkkieE-AdytwRfvyP8KMAY3VJp6Qi8iW_HD4bAJQUukans1T6Dladd5Gs8BSr6H-ENpcYfgUJWj3YOxYo-QOsf4Ff2W6JIoX5E7oHvd4kkmr6hpkCly2P_CuT6mGgcImmk6tVNam5lHNb2uSMW5zOtzc-JiHqsjyQiK7LiRzI2XzUhBOQjOEVPia2qCfxQu0PE"/>
+</div>
+<span class="font-medium text-on-surface">David Chen</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+44 7700 900077</td>
+<td class="py-md px-lg text-on-surface">02m 45s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_missed_outgoing</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Yesterday</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">WhatsApp</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="table-row-hover transition-colors cursor-pointer">
+<td class="py-md px-lg">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold text-sm">
+                                            U
+                                        </div>
+<span class="font-medium text-on-surface">Unknown</span>
+</div>
+</td>
+<td class="py-md px-lg text-on-surface-variant">+1 (800) 555-0199</td>
+<td class="py-md px-lg text-on-surface">00m 00s</td>
+<td class="py-md px-lg">
+<span class="material-symbols-outlined text-error text-lg" style="font-variation-settings: 'FILL' 1;">call_missed</span>
+</td>
+<td class="py-md px-lg text-on-surface-variant">Yesterday</td>
+<td class="py-md px-lg">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">Mobile</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+</div>
+
+    <!-- INJECT_DATA_HERE -->
+    <script>
+        // Placeholder for python injection. DO NOT REMOVE the comment above.
+        const CALLS_DATA = [{"contact_name": "Mario R.", "phone_number": "=\"+39 345 000 0001\"", "call_type": "Phone", "direction": "Incoming", "start_time": "2026-06-19 10:00:00", "duration_str": "00:05:23", "answered": "Yes", "country_code": "IT", "location": "Italia"}, {"contact_name": "Luigi V.", "phone_number": "=\"+39 333 111 2222\"", "call_type": "WhatsApp", "direction": "Outgoing", "start_time": "2026-06-18 15:30:00", "duration_str": "00:12:45", "answered": "Yes", "country_code": "IT", "location": "Italia"}, {"contact_name": "Unknown", "phone_number": "=\"+1 555 123 4567\"", "call_type": "FaceTime", "direction": "Missed", "start_time": "2026-06-18 09:15:00", "duration_str": "00:00:00", "answered": "No", "country_code": "US", "location": "United States"}, {"contact_name": "Anna B.", "phone_number": "=\"+39 328 999 8888\"", "call_type": "Teams", "direction": "Incoming", "start_time": "2026-06-17 14:00:00", "duration_str": "01:05:10", "answered": "Yes", "country_code": "IT", "location": "Italia"}];
+        const I18N = {
+            en: {
+                appTitle: "Call Analytics",
+                searchPlaceholder: "Search contacts, numbers...",
+                filtersTitle: "Filters",
+                filtersSubtitle: "Refine call logs",
+                dateFrom: "From",
+                dateTo: "To",
+                totalCalls: "Total Calls",
+                totalDuration: "Total Duration",
+                topContacts: "Top Contacts",
+                recentActivity: "Recent Activity",
+                exportCsv: "CSV",
+                printBtn: "Print",
+                thContact: "Contact",
+                thNumber: "Number",
+                thDuration: "Duration",
+                thDir: "Dir",
+                thDate: "Date",
+                thService: "Service",
+                callsLabel: "calls"
+            },
+            it: {
+                appTitle: "Analisi Chiamate",
+                searchPlaceholder: "Cerca contatti, numeri...",
+                filtersTitle: "Filtri",
+                filtersSubtitle: "Affina le chiamate",
+                dateFrom: "Dal",
+                dateTo: "Al",
+                totalCalls: "Totale Chiamate",
+                totalDuration: "Durata Totale",
+                topContacts: "Top Contatti",
+                recentActivity: "Attività Recente",
+                exportCsv: "CSV",
+                printBtn: "Stampa",
+                thContact: "Contatto",
+                thNumber: "Numero",
+                thDuration: "Durata",
+                thDir: "Dir",
+                thDate: "Data",
+                thService: "Servizio",
+                callsLabel: "chiamate"
+            }
+        };
+        let currentLang = "it";
+
+        function updateI18n() {
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                if (I18N[currentLang][key]) {
+                    el.innerText = I18N[currentLang][key];
+                }
+            });
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                if (I18N[currentLang][key]) {
+                    el.setAttribute("placeholder", I18N[currentLang][key]);
+                }
+            });
+            document.getElementById("langToggle").innerText = currentLang.toUpperCase() === "EN" ? "IT" : "EN";
+        }
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            const dateFromInput = document.getElementById('dateFrom');
+            const dateToInput = document.getElementById('dateTo');
+            
+            document.getElementById('langToggle').addEventListener('click', () => {
+                currentLang = currentLang === 'it' ? 'en' : 'it';
+                updateI18n();
+                renderAll();
+            });
+
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+            
+            updateI18n();
+
+            dateFromInput.addEventListener('change', renderAll);
+            dateToInput.addEventListener('change', renderAll);
+
+            // Clean up phone numbers and Whatsapp label
+            if (Array.isArray(CALLS_DATA)) {
+                CALLS_DATA.forEach(c => {
+                    if (c.phone_number && c.phone_number.startsWith('="')) {
+                        c.phone_number = c.phone_number.replace(/^="(.*)"$/, '$1');
+                    }
+                    if (c.contact_name && c.contact_name.startsWith('="')) {
+                        c.contact_name = c.contact_name.replace(/^="(.*)"$/, '$1');
+                    }
+                    if (c.call_type && c.call_type.toLowerCase() === 'whatsappsmb') {
+                        c.call_type = 'WhatsApp';
+                    }
+                });
+            }
+
+            let currentFilterService = null;
+            let currentFilterDirection = null;
+            let currentSearchQuery = "";
+            let currentSortColumn = "date";
+            let currentSortAsc = false;
+
+            const tbody = document.querySelector("tbody");
+            const totalCallsEl = document.querySelectorAll(".font-display-lg")[0];
+            const totalDurationEl = document.querySelectorAll(".font-display-lg")[1];
+            const topContactsContainer = document.querySelector(".glass-panel .flex-col.gap-xs");
+            const dynamicFiltersContainer = document.getElementById("dynamic-filters-container");
+
+            const searchInput = document.querySelector("input[type='text']");
+            if (searchInput) {
+                searchInput.addEventListener("input", (e) => {
+                    currentSearchQuery = e.target.value.toLowerCase();
+                    renderAll();
+                });
+            }
+
+            document.querySelectorAll("th[data-sort]").forEach(th => {
+                th.addEventListener("click", () => {
+                    const col = th.getAttribute("data-sort");
+                    if (currentSortColumn === col) {
+                        currentSortAsc = !currentSortAsc;
+                    } else {
+                        currentSortColumn = col;
+                        currentSortAsc = col === "date" ? false : true;
+                    }
+                    renderAll();
+                });
+            });
+
+            let uniqueServices = new Set();
+            let uniqueDirections = new Set();
+            
+            if (Array.isArray(CALLS_DATA)) {
+                CALLS_DATA.forEach(c => {
+                    if (c.call_type) uniqueServices.add(c.call_type);
+                    if (c.direction) uniqueDirections.add(c.direction);
+                });
+            }
+            uniqueServices = Array.from(uniqueServices).sort();
+            uniqueDirections = Array.from(uniqueDirections).sort();
+
+            const serviceIcons = {
+                "Phone": "phone",
+                "WhatsApp": "chat",
+                "FaceTime Video": "video_chat",
+                "FaceTime Audio": "call",
+                "Telegram": "send",
+                "Skype": "video_call",
+                "Teams": "groups",
+                "Unknown": "help"
+            };
+            const dirIcons = {
+                "Incoming": "call_received",
+                "Outgoing": "call_made",
+                "Missed": "call_missed"
+            };
+
+            function buildFilterButton(label, icon, type) {
+                return `
+                <button data-type="${type}" data-val="${label}" class="filter-btn flex items-center gap-3 px-3 py-2.5 w-full text-left text-on-surface-variant">
+                    <span class="material-symbols-outlined text-[20px] shrink-0" style="font-variation-settings: 'FILL' 0;">${icon}</span>
+                    <span class="font-label-md text-label-md flex-1 font-medium">${label}</span>
+                    <span class="w-2 h-2 rounded-full bg-transparent filter-dot shrink-0"></span>
+                </button>`;
+            }
+
+            if (dynamicFiltersContainer) {
+                let html = '<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider px-1 mb-1 opacity-60">Servizio</p>';
+                uniqueServices.forEach(s => {
+                    html += buildFilterButton(s, serviceIcons[s] || "apps", "service");
+                });
+                html += '<div class="h-px bg-outline-variant/20 my-3"></div>';
+                html += '<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider px-1 mb-1 opacity-60">Direzione</p>';
+                uniqueDirections.forEach(d => {
+                    html += buildFilterButton(d, dirIcons[d] || "call", "direction");
+                });
+                dynamicFiltersContainer.innerHTML = html;
+            }
+
+            document.querySelectorAll(".filter-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const type = btn.getAttribute("data-type");
+                    const val = btn.getAttribute("data-val");
+                    
+                    if (type === "service") {
+                        currentFilterService = currentFilterService === val ? null : val;
+                    } else if (type === "direction") {
+                        currentFilterDirection = currentFilterDirection === val ? null : val;
+                    }
+                    
+                    // Reset all buttons of same type
+                    document.querySelectorAll(`.filter-btn[data-type="${type}"]`).forEach(b => {
+                        b.classList.remove("active");
+                        b.classList.add("text-on-surface-variant");
+                    });
+                    
+                    // Activate selected
+                    const isActive = (type === "service" && currentFilterService) || (type === "direction" && currentFilterDirection);
+                    if (isActive) {
+                        btn.classList.add("active");
+                        btn.classList.remove("text-on-surface-variant");
+                    }
+                    renderAll();
+                });
+            });
+
+            function formatDuration(seconds) {
+                if (!seconds) return "00h 00m 00s";
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+                return `${h.toString().padStart(2,'0')}h ${m.toString().padStart(2,'0')}m ${s.toString().padStart(2,'0')}s`;
+            }
+
+            function formatDirIcon(direction) {
+                if (direction === "Outgoing") return "call_made";
+                if (direction === "Incoming") return "call_received";
+                return "call_missed";
+            }
+
+            function renderAll() {
+                let filtered = CALLS_DATA;
+                
+                if (!Array.isArray(filtered)) {
+                    filtered = []; 
+                } else {
+                    filtered = filtered.filter(c => {
+                        let matchSearch = true;
+                        if (currentSearchQuery) {
+                            const name = (c.contact_name || "").toLowerCase();
+                            const num = (c.phone_number || "").toLowerCase();
+                            matchSearch = name.includes(currentSearchQuery) || num.includes(currentSearchQuery);
+                        }
+
+                        let matchService = true;
+                        if (currentFilterService) {
+                            matchService = (c.call_type || c.service) === currentFilterService;
+                        }
+
+                        let matchDir = true;
+                        if (currentFilterDirection) {
+                            matchDir = c.direction === currentFilterDirection;
+                        }
+                        
+                        let matchDate = true;
+                        if (c.start) {
+                            const callDate = new Date(c.start);
+                            if (dateFromInput.value) {
+                                const dFrom = new Date(dateFromInput.value);
+                                dFrom.setHours(0,0,0,0);
+                                if (callDate < dFrom) matchDate = false;
+                            }
+                            if (dateToInput.value) {
+                                const dTo = new Date(dateToInput.value);
+                                dTo.setHours(23,59,59,999);
+                                if (callDate > dTo) matchDate = false;
+                            }
+                        }
+
+                        return matchSearch && matchService && matchDir && matchDate;
+                    });
+                    
+                    filtered.sort((a, b) => {
+                        let valA, valB;
+                        switch (currentSortColumn) {
+                            case "contact":
+                                valA = (a.contact_name || a.phone_number || "Unknown").toLowerCase();
+                                valB = (b.contact_name || b.phone_number || "Unknown").toLowerCase();
+                                break;
+                            case "number":
+                                valA = (a.phone_number || "").toLowerCase();
+                                valB = (b.phone_number || "").toLowerCase();
+                                break;
+                            case "duration":
+                                valA = a.duration_seconds || 0;
+                                valB = b.duration_seconds || 0;
+                                break;
+                            case "dir":
+                                valA = (a.direction || "").toLowerCase();
+                                valB = (b.direction || "").toLowerCase();
+                                break;
+                            case "service":
+                                valA = (a.call_type || a.service || "").toLowerCase();
+                                valB = (b.call_type || b.service || "").toLowerCase();
+                                break;
+                            case "date":
+                            default:
+                                valA = new Date(a.start || 0).getTime();
+                                valB = new Date(b.start || 0).getTime();
+                                break;
+                        }
+                        if (valA < valB) return currentSortAsc ? -1 : 1;
+                        if (valA > valB) return currentSortAsc ? 1 : -1;
+                        return 0;
+                    });
+                }
+
+                document.querySelectorAll("th[data-sort]").forEach(th => {
+                    const icon = th.querySelector(".sort-icon");
+                    if (th.getAttribute("data-sort") === currentSortColumn) {
+                        icon.innerHTML = currentSortAsc ? "arrow_upward" : "arrow_downward";
+                        icon.classList.remove("opacity-0", "group-hover:opacity-50");
+                        icon.classList.add("opacity-100", "text-primary");
+                    } else {
+                        icon.innerHTML = "swap_vert";
+                        icon.classList.remove("opacity-100", "text-primary");
+                        icon.classList.add("opacity-0", "group-hover:opacity-50");
+                    }
+                });
+
+                if (totalCallsEl) {
+                    totalCallsEl.innerHTML = filtered.length.toLocaleString();
+                }
+
+                if (totalDurationEl) {
+                    const totalSec = filtered.reduce((acc, c) => acc + (c.duration_seconds || 0), 0);
+                    const h = Math.floor(totalSec / 3600);
+                    const m = Math.floor((totalSec % 3600) / 60);
+                    const s = Math.floor(totalSec % 60);
+                    totalDurationEl.innerHTML = `${h}<span class="text-on-surface-variant text-2xl ml-1">h</span> ${m}<span class="text-on-surface-variant text-2xl ml-1">m</span> ${s}<span class="text-on-surface-variant text-2xl ml-1">s</span>`;
+                }
+
+                if (topContactsContainer) {
+                    const contactCounts = {};
+                    filtered.forEach(c => {
+                        const name = c.contact_name || c.phone_number || "Unknown";
+                        contactCounts[name] = (contactCounts[name] || 0) + 1;
+                    });
+
+                    const sortedContacts = Object.entries(contactCounts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+                    
+                    topContactsContainer.innerHTML = sortedContacts.map(sc => {
+                        const initials = sc[0].substring(0, 2).toUpperCase();
+                        return `
+                        <div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
+                            <div class="flex items-center gap-sm">
+                                <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold text-on-surface">${initials}</div>
+                                <span class="font-body-md text-body-md text-on-surface">${sc[0]}</span>
+                            </div>
+                            <span class="font-label-md text-label-md text-on-surface-variant">${sc[1]} <span data-i18n="callsLabel">${I18N[currentLang].callsLabel}</span></span>
+                        </div>`;
+                    }).join("");
+                }
+
+                if (tbody) {
+                    tbody.innerHTML = filtered.map(c => {
+                        const initials = (c.contact_name || c.phone_number || "U").substring(0, 2).toUpperCase();
+                        const iconColor = c.direction === 'Outgoing' ? 'text-secondary' : (c.direction === 'Incoming' ? 'text-primary' : 'text-error');
+                        const dateStr = c.start || '';
+                        
+                        return `
+                        <tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
+                            <td class="py-md px-lg">
+                                <div class="flex items-center gap-sm">
+                                    <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-sm text-on-surface">${initials}</div>
+                                    <span class="font-medium text-on-surface">${c.contact_name || 'Unknown'}</span>
+                                </div>
+                            </td>
+                            <td class="py-md px-lg text-on-surface-variant">${c.phone_number || ''}</td>
+                            <td class="py-md px-lg text-on-surface">${formatDuration(c.duration_seconds)}</td>
+                            <td class="py-md px-lg">
+                                <span class="material-symbols-outlined ${iconColor} text-lg" style="font-variation-settings: 'FILL' 1;">${formatDirIcon(c.direction)}</span>
+                            </td>
+                            <td class="py-md px-lg text-on-surface-variant">${dateStr}</td>
+                            <td class="py-md px-lg">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">${c.call_type || c.service || 'Unknown'}</span>
+                            </td>
+                        </tr>`;
+                    }).join("");
+                }
+            }
+
+            renderAll();
+        });
+    
+        function exportCSV() {
+            // Retrieve current filter state from DOM (re-read active filters)
+            const currentServiceFilter = (() => {
+                const active = document.querySelector('.filter-btn[data-type="service"].active');
+                return active ? active.getAttribute('data-val') : null;
+            })();
+            const currentDirFilter = (() => {
+                const active = document.querySelector('.filter-btn[data-type="direction"].active');
+                return active ? active.getAttribute('data-val') : null;
+            })();
+            const searchVal = (document.querySelector("input[type='text']") || {}).value || "";
+
+            let filtered = CALLS_DATA.filter(c => {
+                let matchSearch = true;
+                if (searchVal) {
+                    const name = (c.contact_name || "").toLowerCase();
+                    const num = (c.phone_number || "").toLowerCase();
+                    matchSearch = name.includes(searchVal.toLowerCase()) || num.includes(searchVal.toLowerCase());
+                }
+                let matchService = !currentServiceFilter || (c.call_type || c.service) === currentServiceFilter;
+                let matchDir = !currentDirFilter || c.direction === currentDirFilter;
+                
+                let matchDate = true;
+                if (c.start) {
+                    const callDate = new Date(c.start);
+                    const fromVal = document.getElementById('dateFrom').value;
+                    const toVal = document.getElementById('dateTo').value;
+                    if (fromVal) {
+                        const dFrom = new Date(fromVal); dFrom.setHours(0,0,0,0);
+                        if (callDate < dFrom) matchDate = false;
+                    }
+                    if (toVal) {
+                        const dTo = new Date(toVal); dTo.setHours(23,59,59,999);
+                        if (callDate > dTo) matchDate = false;
+                    }
+                }
+                return matchSearch && matchService && matchDir && matchDate;
+            });
+
+            // Build CSV rows
+            const BOM = '\uFEFF'; // UTF-8 BOM for Excel compatibility
+            const header = 'Date,Contact,Number,Duration,Direction,Service';
+            const rows = filtered.map(c => {
+                const dateStr = (c.start || "").replace(/"/g, '""');
+                const name = (c.contact_name || "").replace(/"/g, '""');
+                const num = (c.phone_number || "").replace(/"/g, '""');
+                const duration = formatDurationForCsv(c.duration_seconds || 0);
+                const dir = (c.direction || "").replace(/"/g, '""');
+                const service = (c.call_type || c.service || "").replace(/"/g, '""');
+                return `"${dateStr}","${name}","${num}","${duration}","${dir}","${service}"`;
+            });
+
+            const csvString = BOM + header + '\n' + rows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'calls_export_' + new Date().toISOString().slice(0,10) + '.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+        }
+        
+        function formatDurationForCsv(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+</script>
+</body>
+</html>
