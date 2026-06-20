@@ -21,6 +21,7 @@ import phonenumbers
 from dotenv import load_dotenv
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
 from phonenumbers import geocoder
+import master_settings
 
 load_dotenv()
 
@@ -416,6 +417,25 @@ def process_and_export_calls(
 
     if not calls:
         raise ValueError("No call records found.")
+        
+    device_name = master_settings.get_device_name(backup_dir)
+    exclusions = master_settings.get_device_exclusions(device_name)
+    
+    # Filter calls
+    initial_count = len(calls)
+    filtered_calls = []
+    for c in calls:
+        if not master_settings.is_excluded(c["contact_name"], c["phone_number"], exclusions):
+            filtered_calls.append(c)
+            
+    excluded_count = initial_count - len(filtered_calls)
+    if excluded_count > 0:
+        app_logger.info(f"Esclusi {excluded_count} record in base alle impostazioni master del dispositivo ({device_name}).")
+        
+    calls = filtered_calls
+
+    if not calls:
+        raise ValueError("No call records found after applying exclusions.")
 
     if output_path:
         resolved_path = output_path

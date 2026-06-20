@@ -25,11 +25,13 @@ except ImportError:
 try:
     from export_calls import find_backups, IncorrectPassphraseError
     from logger import app_logger, dump_latest_logs
+    import master_settings
 except ImportError:
     # Append current directory to path if launched from outside
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from export_calls import find_backups, IncorrectPassphraseError
     from logger import app_logger, dump_latest_logs
+    import master_settings
 
 
 class App(tk.Tk):
@@ -219,12 +221,14 @@ class App(tk.Tk):
 
         # Tab 1: Export
         self.tab_export = ttk.Frame(self.notebook)
+        self.tab_exclusions = ttk.Frame(self.notebook)
         self.tab_view_calls = ttk.Frame(self.notebook)
         self.tab_view_msgs = ttk.Frame(self.notebook)
         self.tab_explorer = ttk.Frame(self.notebook)
         self.tab_wifi = ttk.Frame(self.notebook)
 
         self.notebook.add(self.tab_export, text="📥 Esportazioni")
+        self.notebook.add(self.tab_exclusions, text="⚙️ Filtri & Esclusioni")
         self.notebook.add(self.tab_view_calls, text="📞 Vista Chiamate")
         self.notebook.add(self.tab_view_msgs, text="💬 Vista Messaggi")
         self.notebook.add(self.tab_explorer, text="📂 File Explorer")
@@ -232,6 +236,9 @@ class App(tk.Tk):
 
         # --- TAB 1: Esportazioni ---
         self.create_export_tab()
+
+        # --- TAB 1.5: Esclusioni ---
+        self.create_exclusions_tab()
 
         # --- TAB 2/3: Viewers ---
         self.create_view_calls_tab()
@@ -248,6 +255,8 @@ class App(tk.Tk):
 
         # Viewer Backend
         self.db_backend = None
+        self.current_device_name = "Dispositivo Sconosciuto"
+        
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def create_export_tab(self):
@@ -328,6 +337,197 @@ class App(tk.Tk):
 
         self.log_text = ScrolledText(container, height=10, padx=8, pady=8)
         self.log_text.pack(fill="both", expand=True)
+
+    def create_exclusions_tab(self):
+        container = ttk.Frame(self.tab_exclusions, padding=16)
+        container.pack(fill="both", expand=True)
+        
+        header_frame = ttk.Frame(container)
+        header_frame.pack(fill="x", pady=(0, 10))
+        
+        self.lbl_excl_device = ttk.Label(header_frame, text="Dispositivo Corrente: Dispositivo Sconosciuto", font=("Segoe UI", 12, "bold"), foreground=self.primary_color)
+        self.lbl_excl_device.pack(side="left")
+        
+        btn_save = ttk.Button(header_frame, text="💾 Salva Esclusioni", style="Accent.TButton", command=self.save_exclusions_from_gui)
+        btn_save.pack(side="right")
+        
+        paned = ttk.PanedWindow(container, orient="horizontal")
+        paned.pack(fill="both", expand=True)
+        
+        # Left side: Manual text entry
+        left_frame = ttk.Frame(paned, padding=(0, 0, 8, 0))
+        paned.add(left_frame, weight=1)
+        
+        ttk.Label(left_frame, text="Inserimento Manuale", style="Section.TLabel").pack(anchor="w", pady=(0, 8))
+        ttk.Label(left_frame, text="Scrivi i Nomi da escludere (uno per riga):").pack(anchor="w")
+        self.txt_excl_names = ScrolledText(left_frame, height=8)
+        self.txt_excl_names.pack(fill="x", pady=(2, 10))
+        
+        ttk.Label(left_frame, text="Scrivi i Numeri di Telefono da escludere (uno per riga):").pack(anchor="w")
+        self.txt_excl_numbers = ScrolledText(left_frame, height=8)
+        self.txt_excl_numbers.pack(fill="x", pady=(2, 0))
+        
+        # Right side: Selection from Backup
+        right_frame = ttk.Frame(paned, padding=(8, 0, 0, 0))
+        paned.add(right_frame, weight=2)
+        
+        right_header = ttk.Frame(right_frame)
+        right_header.pack(fill="x", pady=(0, 8))
+        
+        ttk.Label(right_header, text="Seleziona Contatti dal Backup", style="Section.TLabel").pack(side="left")
+        btn_load_contacts = ttk.Button(right_header, text="🔄 Carica dal Backup", command=self.load_contacts_for_exclusions)
+        btn_load_contacts.pack(side="right")
+        
+        self.tree_excl = ttk.Treeview(right_frame, columns=("Escludi", "Nome", "Numero"), show="headings", selectmode="browse")
+        self.tree_excl.heading("Escludi", text="[ ]")
+        self.tree_excl.heading("Nome", text="Nome")
+        self.tree_excl.heading("Numero", text="Numero")
+        self.tree_excl.column("Escludi", width=50, anchor="center", stretch=False)
+        self.tree_excl.column("Nome", width=150, stretch=True)
+        self.tree_excl.column("Numero", width=150, stretch=True)
+        
+        self.tree_excl.bind("<Double-1>", self.on_excl_tree_click)
+        
+        scroll = ttk.Scrollbar(right_frame, orient="vertical", command=self.tree_excl.yview)
+        self.tree_excl.configure(yscrollcommand=scroll.set)
+        self.tree_excl.pack(side="left", fill="both", expand=True)
+        scroll.pack(side="right", fill="y")
+        
+        # Load empty state
+        self.load_exclusions_to_gui()
+
+    def load_exclusions_to_gui(self):
+        if not hasattr(self, 'txt_excl_names'): return
+        exclusions = master_settings.get_device_exclusions(self.current_device_name)
+        
+        self.txt_excl_names.delete("1.0", tk.END)
+        if exclusions.get("names"):
+            self.txt_excl_names.insert(tk.END, "\n".join(exclusions["names"]))
+            
+        self.txt_excl_numbers.delete("1.0", tk.END)
+        if exclusions.get("numbers"):
+            self.txt_excl_numbers.insert(tk.END, "\n".join(exclusions["numbers"]))
+            
+        self._refresh_tree_excl_checks()
+
+    def save_exclusions_from_gui(self):
+        names = [n.strip() for n in self.txt_excl_names.get("1.0", tk.END).split("\n") if n.strip()]
+        numbers = [n.strip() for n in self.txt_excl_numbers.get("1.0", tk.END).split("\n") if n.strip()]
+        
+        master_settings.save_device_exclusions(self.current_device_name, {
+            "names": names,
+            "numbers": numbers
+        })
+        messagebox.showinfo("Salvato", f"Esclusioni salvate per il dispositivo:\n{self.current_device_name}")
+        self._refresh_tree_excl_checks()
+
+    def load_contacts_for_exclusions(self):
+        if not self.selected_backup_dir:
+            messagebox.showerror("Errore", "Nessun backup selezionato.")
+            return
+
+        passphrase = self.pass_var.get().strip()
+        if not passphrase and not messagebox.askyesno("Attenzione", "Password vuota. Continuare?"):
+            return
+
+        self.log_message("⏳ Caricamento contatti per esclusioni in corso...\n")
+
+        def _load():
+            try:
+                from db_viewers import DataViewerBackend
+                if self.db_backend:
+                    self.db_backend.close()
+                self.db_backend = DataViewerBackend(self.selected_backup_dir, passphrase)
+                self.db_backend.load_databases()
+                
+                # Fetch unique contacts from CallHistory
+                conn = self.db_backend.conn
+                cursor = conn.execute("SELECT DISTINCT ZNAME, ZADDRESS FROM ZCALLRECORD")
+                unique_contacts = cursor.fetchall()
+                
+                self.after(0, self._on_contacts_loaded, unique_contacts)
+            except Exception as e:
+                err_msg = str(e)
+                app_logger.error("Errore caricamento contatti", exc_info=True)
+                self.after(0, lambda err=err_msg: messagebox.showerror("Errore", err))
+
+        import threading
+        threading.Thread(target=_load, daemon=True).start()
+
+    def _on_contacts_loaded(self, contacts):
+        self.log_message("✅ Contatti caricati. Puoi ora selezionarli dalla lista.\n")
+        self.tree_excl.delete(*self.tree_excl.get_children())
+        
+        # We need AddressBook contacts for better names
+        from export_calls import EncryptedBackup, build_contact_lookup, suppress_size_warnings
+        # Since we just need the names, and db_backend might not have AddressBook logic directly...
+        # ZNAME from CallHistory and ZADDRESS are available.
+        # We will just show ZNAME and ZADDRESS.
+        
+        added = set()
+        for row in contacts:
+            name = row[0] or ""
+            addr = row[1] or ""
+            if not addr and not name: continue
+            
+            key = f"{name}|{addr}"
+            if key in added: continue
+            added.add(key)
+            
+            self.tree_excl.insert("", "end", values=("[ ]", name, addr))
+            
+        self._refresh_tree_excl_checks()
+
+    def on_excl_tree_click(self, event):
+        item = self.tree_excl.identify_row(event.y)
+        if not item: return
+        
+        col = self.tree_excl.identify_column(event.x)
+        if col == "#1":  # The "Escludi" checkbox column
+            values = list(self.tree_excl.item(item, "values"))
+            current_state = values[0]
+            name = values[1]
+            number = values[2]
+            
+            new_state = "[X]" if current_state == "[ ]" else "[ ]"
+            values[0] = new_state
+            self.tree_excl.item(item, values=values)
+            
+            # Sync with text areas
+            if new_state == "[X]":
+                if name and name not in self.txt_excl_names.get("1.0", tk.END):
+                    self.txt_excl_names.insert(tk.END, f"{name}\n")
+                if number and number not in self.txt_excl_numbers.get("1.0", tk.END):
+                    self.txt_excl_numbers.insert(tk.END, f"{number}\n")
+            else:
+                # Remove from text areas
+                def remove_from_text(widget, text_to_remove):
+                    content = widget.get("1.0", tk.END).split("\n")
+                    new_content = [c for c in content if c.strip() != text_to_remove]
+                    widget.delete("1.0", tk.END)
+                    widget.insert(tk.END, "\n".join(new_content))
+                
+                if name: remove_from_text(self.txt_excl_names, name)
+                if number: remove_from_text(self.txt_excl_numbers, number)
+
+    def _refresh_tree_excl_checks(self):
+        if not hasattr(self, 'tree_excl'): return
+        names = [n.strip().lower() for n in self.txt_excl_names.get("1.0", tk.END).split("\n") if n.strip()]
+        numbers = [n.strip() for n in self.txt_excl_numbers.get("1.0", tk.END).split("\n") if n.strip()]
+        
+        for item in self.tree_excl.get_children():
+            values = list(self.tree_excl.item(item, "values"))
+            name = values[1].strip().lower()
+            num = values[2].strip()
+            
+            is_excluded = False
+            for n in names:
+                if n and n in name: is_excluded = True
+            for num_exc in numbers:
+                if num_exc and num_exc in num: is_excluded = True
+                
+            values[0] = "[X]" if is_excluded else "[ ]"
+            self.tree_excl.item(item, values=values)
 
     # --- Live Data Viewers ---
     def load_db_backend(self):
@@ -633,6 +833,7 @@ class App(tk.Tk):
             self.selected_backup_dir = str(self.backups[idx])
         else:
             self.selected_backup_dir = ""
+        self._update_device_name()
 
     def browse_backup(self):
         dir_path = filedialog.askdirectory(
@@ -648,6 +849,15 @@ class App(tk.Tk):
             self.selected_backup_dir = dir_path
             self.backup_var.set(dir_path)
             self.log_message(f"📁 Selezionato manualmente backup in: {dir_path}\n")
+            self._update_device_name()
+
+    def _update_device_name(self):
+        if self.selected_backup_dir:
+            self.current_device_name = master_settings.get_device_name(self.selected_backup_dir)
+            self.log_message(f"📱 Dispositivo rilevato: {self.current_device_name}\n")
+            if hasattr(self, 'lbl_excl_device'):
+                self.lbl_excl_device.configure(text=f"Dispositivo Corrente: {self.current_device_name}")
+            self.load_exclusions_to_gui()
 
     def log_message(self, message):
         app_logger.info(message.strip())

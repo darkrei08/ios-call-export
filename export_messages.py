@@ -11,6 +11,7 @@ from iphone_backup_decrypt import EncryptedBackup, RelativePath
 
 from export_calls import build_contact_lookup, IncorrectPassphraseError
 from logger import app_logger
+import master_settings
 
 # iOS dates are typically measured in seconds from Jan 1, 2001
 APPLE_EPOCH_OFFSET = 978307200
@@ -121,6 +122,22 @@ def export_messages_to_csv_and_html(
     app_logger.info("Inizio estrazione messaggi...")
     chat_data = get_messages_data(backup_dir, passphrase)
 
+    device_name = master_settings.get_device_name(backup_dir)
+    exclusions = master_settings.get_device_exclusions(device_name)
+
+    filtered_chat_data = {}
+    excluded_count = 0
+    for handle_id, chat in chat_data.items():
+        contact_name = chat.get("contact_name") or ""
+        if not master_settings.is_excluded(contact_name, handle_id, exclusions):
+            filtered_chat_data[handle_id] = chat
+        else:
+            excluded_count += 1
+            
+    if excluded_count > 0:
+        app_logger.info(f"Escluse {excluded_count} conversazioni in base alle impostazioni master del dispositivo ({device_name}).")
+
+    chat_data = filtered_chat_data
     app_logger.info(f"Trovate conversazioni per {len(chat_data)} contatti.")
 
     # --- HTML EXPORT ---
