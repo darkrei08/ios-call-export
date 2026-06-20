@@ -23,12 +23,12 @@ except ImportError:
 
 # Try to import the core modules
 try:
-    from export_calls import find_backups
+    from export_calls import find_backups, IncorrectPassphraseError
     from logger import app_logger, dump_latest_logs
 except ImportError:
     # Append current directory to path if launched from outside
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    from export_calls import find_backups
+    from export_calls import find_backups, IncorrectPassphraseError
     from logger import app_logger, dump_latest_logs
 
 
@@ -791,6 +791,11 @@ class App(tk.Tk):
                 )
 
             self.after(0, self._export_success)
+        except IncorrectPassphraseError as e:
+            app_logger.error(
+                "Password di decrittazione errata", exc_info=True
+            )
+            self.after(0, self._export_passphrase_failure, str(e))
         except Exception as e:
             app_logger.error(
                 "Errore durante l'esportazione in background", exc_info=True
@@ -806,6 +811,28 @@ class App(tk.Tk):
         )
         messagebox.showinfo(
             "Successo", "Esportazione completata!\nControlla i file esportati."
+        )
+
+    def _export_passphrase_failure(self, error_msg):
+        self.spinner.stop()
+        self.spinner.pack_forget()
+        self.btn_export.configure(state="normal")
+        self.log_message(
+            "🔐 ❌ PASSWORD ERRATA: La password di decrittazione inserita non è corretta.\n"
+            "   Controlla la password e riprova.\n\n"
+            "   💡 Suggerimento: È la password che hai impostato quando hai creato\n"
+            "   il backup crittografato su iTunes/Finder.\n"
+        )
+        messagebox.showerror(
+            "🔐 Password Errata",
+            "La password di decrittazione del backup è errata.\n\n"
+            "Non è stato possibile decrittare i dati del backup.\n\n"
+            "Cosa fare:\n"
+            "• Controlla che la password sia scritta correttamente\n"
+            "• Verifica maiuscole/minuscole e spazi\n"
+            "• È la password impostata durante la creazione\n"
+            "  del backup crittografato su iTunes/Finder\n\n"
+            "Correggi la password e riprova.",
         )
 
     def _export_failure(self, error_msg):
