@@ -362,10 +362,11 @@ def export_whatsapp_to_csv_and_html(
     output_html: str,
     output_csv: str,
     excel_compat: bool = True,
+    choice_callback=None
 ):
     """Main entry point to export WhatsApp chats to HTML viewer and CSV."""
     app_logger.info("Inizio estrazione chat WhatsApp...")
-    chat_data = get_whatsapp_chats(backup_dir, passphrase)
+    chat_data = get_whatsapp_chats(backup_dir, passphrase, choice_callback=choice_callback)
 
     if not chat_data:
         raise ValueError(
