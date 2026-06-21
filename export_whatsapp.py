@@ -50,39 +50,42 @@ SESSION_TYPES = {
 }
 
 
-def _find_whatsapp_domains(backup: EncryptedBackup) -> list[str]:
-    """Find all domains that have a WhatsApp ChatStorage.sqlite."""
-    from iphone_backup_decrypt import RelativePath
+def _find_whatsapp_dbs_raw(backup: EncryptedBackup) -> list[dict]:
+    """Find all domains and relative paths for WhatsApp ChatStorage.sqlite."""
     try:
         with backup.manifest_db_cursor() as cur:
             query = """
-                SELECT domain
+                SELECT domain, relativePath
                 FROM Files
-                WHERE relativePath = ?
-                AND domain LIKE ?
+                WHERE relativePath LIKE '%ChatStorage.sqlite'
                 AND flags=1
                 ORDER BY domain
             """
-            cur.execute(query, (RelativePath.WHATSAPP_MESSAGES, "%whatsapp%"))
+            cur.execute(query)
             results = cur.fetchall()
-            return [row[0] for row in results]
+            
+            dbs = [{"domain": row[0], "relative_path": row[1]} for row in results]
+            app_logger.info(f"DEBUG_DOMAINS: Trovati {len(dbs)} file WhatsApp in Manifest.db: {dbs}")
+            return dbs
     except Exception as e:
         app_logger.warning(f"Errore lettura Manifest.db per ricerca WhatsApp: {e}")
         return []
 
 def _find_whatsapp_dbs_with_stats(backup: EncryptedBackup) -> list[dict]:
     """Find all WhatsApp ChatStorage.sqlite databases, extract them temporarily to gather stats."""
-    domains = _find_whatsapp_domains(backup)
+    dbs_raw = _find_whatsapp_dbs_raw(backup)
     results = []
     
-    for domain in domains:
-        tmp_path = _extract_whatsapp_db(backup, domain)
+    for db in dbs_raw:
+        domain = db["domain"]
+        relative_path = db["relative_path"]
+        tmp_path = _extract_whatsapp_db(backup, domain, relative_path)
         if not tmp_path:
+            app_logger.info(f"DEBUG_STATS: _extract_whatsapp_db ha restituito None per {domain} - {relative_path}")
             continue
             
         try:
             conn = sqlite3.connect(tmp_path)
-            # Query message count and last message date
             row = conn.execute("SELECT COUNT(*), MAX(ZMESSAGEDATE) FROM ZWAMESSAGE").fetchone()
             msg_count = row[0] if row else 0
             last_msg_date_raw = row[1] if row else 0
@@ -91,8 +94,11 @@ def _find_whatsapp_dbs_with_stats(backup: EncryptedBackup) -> list[dict]:
             dt = apple_timestamp_to_datetime(last_msg_date_raw)
             dt_str = dt.strftime("%d/%m/%Y %H:%M") if dt else "N/A"
             
+            app_logger.info(f"DEBUG_STATS: {domain} -> {msg_count} messaggi, ultimo {dt_str}")
+            
             results.append({
                 "domain": domain,
+                "relative_path": relative_path,
                 "msg_count": msg_count,
                 "last_date": dt_str,
                 "tmp_path": tmp_path
@@ -105,7 +111,7 @@ def _find_whatsapp_dbs_with_stats(backup: EncryptedBackup) -> list[dict]:
     return results
 
 
-def _extract_whatsapp_db(backup: EncryptedBackup, domain: str) -> str | None:
+def _extract_whatsapp_db(backup: EncryptedBackup, domain: str, relative_path: str) -> str | None:
     """Extract ChatStorage.sqlite from backup to a temp file for a specific domain. Returns path or None."""
     tmp_fd = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
     tmp_path = tmp_fd.name
@@ -113,9 +119,8 @@ def _extract_whatsapp_db(backup: EncryptedBackup, domain: str) -> str | None:
 
     try:
         with suppress_size_warnings():
-            from iphone_backup_decrypt import RelativePath
             backup.extract_file(
-                relative_path=RelativePath.WHATSAPP_MESSAGES,
+                relative_path=relative_path,
                 domain_like=domain,
                 output_filename=tmp_path,
             )
