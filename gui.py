@@ -538,11 +538,29 @@ class App(tk.Tk):
         ]
         self._populate_excl_tree(filtered)
 
+    def _append_to_text_widget(self, widget, value):
+        """Append a value on a new line in a ScrolledText widget, avoiding same-line concatenation."""
+        current = widget.get("1.0", "end-1c")  # exclude Tk's implicit trailing newline
+        if current and not current.endswith("\n"):
+            widget.insert("end", "\n")
+        widget.insert("end", value)
+
+    def _remove_from_text_widget(self, widget, value):
+        """Remove a specific line from a ScrolledText widget, cleaning up empty lines."""
+        lines = widget.get("1.0", "end-1c").split("\n")
+        cleaned = [line for line in lines if line.strip() != value]
+        # Remove leading/trailing empty lines but keep internal structure
+        while cleaned and not cleaned[-1].strip():
+            cleaned.pop()
+        widget.delete("1.0", tk.END)
+        if cleaned:
+            widget.insert("1.0", "\n".join(cleaned))
+
     def on_excl_tree_click(self, event):
         item = self.tree_excl.identify_row(event.y)
-        if not item: return
+        if not item:
+            return
         
-        # Toggle checkbox on click anywhere in the row
         values = list(self.tree_excl.item(item, "values"))
         current_state = values[0]
         name = values[1]
@@ -552,22 +570,16 @@ class App(tk.Tk):
         values[0] = new_state
         self.tree_excl.item(item, values=values)
         
-        # Sync with text areas
         if new_state == "[X]":
             if name and name not in self.txt_excl_names.get("1.0", tk.END):
-                self.txt_excl_names.insert(tk.END, f"{name}\n")
+                self._append_to_text_widget(self.txt_excl_names, name)
             if number and number not in self.txt_excl_numbers.get("1.0", tk.END):
-                self.txt_excl_numbers.insert(tk.END, f"{number}\n")
+                self._append_to_text_widget(self.txt_excl_numbers, number)
         else:
-            # Remove from text areas
-            def remove_from_text(widget, text_to_remove):
-                content = widget.get("1.0", tk.END).split("\n")
-                new_content = [c for c in content if c.strip() != text_to_remove]
-                widget.delete("1.0", tk.END)
-                widget.insert(tk.END, "\n".join(new_content))
-            
-            if name: remove_from_text(self.txt_excl_names, name)
-            if number: remove_from_text(self.txt_excl_numbers, number)
+            if name:
+                self._remove_from_text_widget(self.txt_excl_names, name)
+            if number:
+                self._remove_from_text_widget(self.txt_excl_numbers, number)
 
     def open_exclusions_file(self):
         """Open the plain-text exclusions file in the OS default editor."""

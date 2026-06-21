@@ -83,6 +83,10 @@ def main():
             print(f"  ... and {len(calls) - 10} more")
         return
 
+    if not webhook_url.lower().startswith("https://"):
+        print("Error: webhook URL must use HTTPS", file=sys.stderr)
+        sys.exit(1)
+
     payload = json.dumps({"calls": calls}).encode()
     req = Request(
         webhook_url,
@@ -91,11 +95,15 @@ def main():
         method="POST",
     )
 
-    with urlopen(req) as resp:
-        print(f"Response: {resp.status} {resp.reason}")
-        body = resp.read().decode()
-        if body:
-            print(body)
+    try:
+        with urlopen(req, timeout=10) as resp:
+            print(f"Response: {resp.status} {resp.reason}")
+            body = resp.read().decode()
+            if body:
+                print(body)
+    except Exception as e:
+        print(f"Webhook request failed: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

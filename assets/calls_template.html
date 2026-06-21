@@ -269,6 +269,12 @@
 <div class="flex flex-col gap-xs flex-1 px-sm" id="dynamic-filters-container">
 <!-- Filters injected by JS -->
 </div>
+<div class="mt-auto px-sm pb-lg">
+<button id="resetFilters" class="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high transition-colors text-sm font-medium text-on-surface-variant border border-outline-variant/20">
+<span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
+<span data-i18n="resetFilters">Ripristina Filtri</span>
+</button>
+</div>
 </nav>
 <!-- Main Content Wrapper -->
 <div class="flex-1 md:ml-64 relative min-h-screen flex flex-col">
@@ -305,7 +311,7 @@
 </div>
 <div class="mt-auto pt-md flex flex-col justify-end">
 <div class="flex items-center gap-sm">
-<span class="font-headline-lg text-headline-lg text-on-surface">1,284</span>
+<span id="kpi-total-calls" class="font-headline-lg text-headline-lg text-on-surface">—</span>
 <span class="font-label-sm text-label-sm text-secondary flex items-center">
 <span class="material-symbols-outlined text-[14px]">trending_up</span>
                                 12%
@@ -323,7 +329,7 @@
 </div>
 <div class="mt-auto pt-md flex flex-col justify-end">
 <div class="flex items-center gap-sm">
-<span class="font-headline-lg text-headline-lg text-on-surface">42<span class="text-on-surface-variant text-xl ml-1">h</span> 15<span class="text-on-surface-variant text-xl ml-1">m</span></span>
+<span id="kpi-total-duration" class="font-headline-lg text-headline-lg text-on-surface">—</span>
 </div>
 </div>
 </div>
@@ -497,7 +503,8 @@
                 thDir: "Dir",
                 thDate: "Date",
                 thService: "Service",
-                callsLabel: "calls"
+                callsLabel: "calls",
+                resetFilters: "Reset Filters"
             },
             it: {
                 appTitle: "Analisi Chiamate",
@@ -518,10 +525,16 @@
                 thDir: "Dir",
                 thDate: "Data",
                 thService: "Servizio",
-                callsLabel: "chiamate"
+                callsLabel: "chiamate",
+                resetFilters: "Ripristina Filtri"
             }
         };
         let currentLang = "it";
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+        }
 
         function updateI18n() {
             document.querySelectorAll("[data-i18n]").forEach(el => {
@@ -582,8 +595,8 @@
             let currentSortAsc = false;
 
             const tbody = document.querySelector("tbody");
-            const totalCallsEl = document.querySelectorAll(".font-display-lg")[0];
-            const totalDurationEl = document.querySelectorAll(".font-display-lg")[1];
+            const totalCallsEl = document.getElementById('kpi-total-calls');
+            const totalDurationEl = document.getElementById('kpi-total-duration');
             const topContactsContainer = document.querySelector(".glass-panel .flex-col.gap-xs");
             const dynamicFiltersContainer = document.getElementById("dynamic-filters-container");
 
@@ -684,6 +697,26 @@
                     renderAll();
                 });
             });
+
+            // Reset Filters button
+            const resetBtn = document.getElementById('resetFilters');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    currentFilterService = null;
+                    currentFilterDirection = null;
+                    currentSearchQuery = '';
+                    currentSortColumn = 'date';
+                    currentSortAsc = false;
+                    dateFromInput.value = '';
+                    dateToInput.value = '';
+                    if (searchInput) searchInput.value = '';
+                    document.querySelectorAll('.filter-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.add('text-on-surface-variant');
+                    });
+                    renderAll();
+                });
+            }
 
             function formatDuration(seconds) {
                 if (!seconds) return "00h 00m 00s";
@@ -816,7 +849,7 @@
                         <div class="flex items-center justify-between p-xs rounded-lg hover:bg-white/5 transition-colors cursor-default">
                             <div class="flex items-center gap-sm">
                                 <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-label-sm font-bold text-on-surface">${initials}</div>
-                                <span class="font-body-md text-body-md text-on-surface">${sc[0]}</span>
+                                <span class="font-body-md text-body-md text-on-surface">${escapeHtml(sc[0])}</span>
                             </div>
                             <span class="font-label-md text-label-md text-on-surface-variant">${sc[1]} <span data-i18n="callsLabel">${I18N[currentLang].callsLabel}</span></span>
                         </div>`;
@@ -829,22 +862,25 @@
                         const iconColor = c.direction === 'Outgoing' ? 'text-secondary' : (c.direction === 'Incoming' ? 'text-primary' : 'text-error');
                         const dateStr = c.start || '';
                         
+                        const dispName = escapeHtml(c.contact_name || 'Unknown');
+                        const dispPhone = escapeHtml(c.phone_number || '');
+                        const dispService = escapeHtml(c.call_type || c.service || 'Unknown');
                         return `
                         <tr class="border-b border-outline-variant/10 table-row-hover transition-colors cursor-pointer">
                             <td class="py-md px-lg">
                                 <div class="flex items-center gap-sm">
                                     <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-sm text-on-surface">${initials}</div>
-                                    <span class="font-medium text-on-surface">${c.contact_name || 'Unknown'}</span>
+                                    <span class="font-medium text-on-surface">${dispName}</span>
                                 </div>
                             </td>
-                            <td class="py-md px-lg text-on-surface-variant">${c.phone_number || ''}</td>
+                            <td class="py-md px-lg text-on-surface-variant">${dispPhone}</td>
                             <td class="py-md px-lg text-on-surface">${formatDuration(c.duration_seconds)}</td>
                             <td class="py-md px-lg">
                                 <span class="material-symbols-outlined ${iconColor} text-lg" style="font-variation-settings: 'FILL' 1;">${formatDirIcon(c.direction)}</span>
                             </td>
                             <td class="py-md px-lg text-on-surface-variant">${dateStr}</td>
                             <td class="py-md px-lg">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">${c.call_type || c.service || 'Unknown'}</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/20">${dispService}</span>
                             </td>
                         </tr>`;
                     }).join("");

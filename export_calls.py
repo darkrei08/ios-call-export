@@ -165,7 +165,9 @@ def parse_phone_info(number: str) -> dict:
 
 def build_contact_lookup(backup: EncryptedBackup) -> dict[str, str]:
     """Extract AddressBook and build phone/email → display name mapping."""
-    tmp_path = tempfile.mktemp(suffix=".sqlite")
+    tmp_fd = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
+    tmp_path = tmp_fd.name
+    tmp_fd.close()
     try:
         with suppress_size_warnings():
             backup.extract_file(
@@ -356,7 +358,9 @@ def extract_calls(backup_dir: str, passphrase: str) -> list[dict]:
 
     for rel_path in CALL_HISTORY_PATHS:
         label = rel_path.rsplit("/", 1)[-1]
-        tmp_path = tempfile.mktemp(suffix=".sqlite")
+        tmp_fd = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
+        tmp_path = tmp_fd.name
+        tmp_fd.close()
         files_attempted += 1
         try:
             with suppress_size_warnings():
