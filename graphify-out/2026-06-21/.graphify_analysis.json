@@ -1,0 +1,380 @@
+{
+  "communities": {
+    "0": [
+      "db_viewers_dataviewerbackend_load_databases",
+      "db_viewers_rationale_25",
+      "encryptedbackup",
+      "exception",
+      "export_calls",
+      "export_calls_build_contact_lookup",
+      "export_calls_extract_calls",
+      "export_calls_find_backups",
+      "export_calls_format_duration",
+      "export_calls_incorrectpassphraseerror",
+      "export_calls_main",
+      "export_calls_normalize_phone",
+      "export_calls_parse_phone_info",
+      "export_calls_process_and_export_calls",
+      "export_calls_py_path",
+      "export_calls_rationale_126",
+      "export_calls_rationale_166",
+      "export_calls_rationale_30",
+      "export_calls_rationale_37",
+      "export_calls_read_calls_from_db",
+      "export_calls_resolve_call_type",
+      "export_calls_suppress_size_warnings",
+      "export_messages",
+      "export_messages_export_messages_to_csv_and_html",
+      "export_messages_get_messages_data",
+      "export_messages_rationale_119",
+      "export_messages_rationale_21",
+      "gui_app_browse_backup",
+      "gui_app_get_export_dir",
+      "gui_app_run_export"
+    ],
+    "1": [
+      "datetime",
+      "db_viewers",
+      "db_viewers_dataviewerbackend",
+      "db_viewers_dataviewerbackend_close",
+      "db_viewers_dataviewerbackend_init",
+      "db_viewers_dataviewerbackend_search_calls",
+      "db_viewers_dataviewerbackend_search_messages",
+      "export_calls_apple_timestamp_to_datetime",
+      "gui",
+      "gui_app_copy_debug_log",
+      "gui_rationale_919",
+      "logger",
+      "logger_dump_latest_logs",
+      "logger_get_logger",
+      "logger_rationale_105",
+      "logger_rationale_11",
+      "logger_sqlitehandler",
+      "logger_sqlitehandler_emit",
+      "logger_sqlitehandler_init",
+      "logger_sqlitehandler_init_db",
+      "send_to_webhook",
+      "send_to_webhook_main"
+    ],
+    "2": [
+      "master_settings",
+      "master_settings_get_device_exclusions",
+      "master_settings_get_device_name",
+      "master_settings_get_exclusions_txt_path",
+      "master_settings_get_master_settings_path",
+      "master_settings_is_excluded",
+      "master_settings_load_exclusions_from_txt",
+      "master_settings_load_master_settings",
+      "master_settings_open_exclusions_txt",
+      "master_settings_py_path",
+      "master_settings_rationale_10",
+      "master_settings_rationale_113",
+      "master_settings_rationale_130",
+      "master_settings_rationale_138",
+      "master_settings_rationale_25",
+      "master_settings_rationale_32",
+      "master_settings_rationale_44",
+      "master_settings_rationale_51",
+      "master_settings_rationale_69",
+      "master_settings_rationale_89",
+      "master_settings_save_device_exclusions",
+      "master_settings_save_master_settings"
+    ],
+    "3": [
+      "gui_app",
+      "gui_app_filter_files",
+      "gui_app_go_up_dir",
+      "gui_app_load_backup_files",
+      "gui_app_load_explorer_data",
+      "gui_app_load_live_files",
+      "gui_app_on_closing",
+      "gui_app_on_db_loaded",
+      "gui_app_on_tree_double_click",
+      "gui_app_toggle_pass_visibility",
+      "gui_app_update_calls_view",
+      "gui_app_update_msgs_view"
+    ],
+    "4": [
+      "gui_app_export_failure",
+      "gui_app_export_passphrase_failure",
+      "gui_app_export_success",
+      "gui_app_load_contacts_for_exclusions",
+      "gui_app_load_db_backend",
+      "gui_app_log_message",
+      "gui_app_open_exclusions_file",
+      "gui_app_populate_backup_tree",
+      "gui_app_populate_live_tree",
+      "gui_rationale_578"
+    ],
+    "5": [
+      "gui_app_extract_selected_file",
+      "gui_app_run_load_live_files",
+      "live_device_explorer",
+      "live_device_explorer_extract_live_file",
+      "live_device_explorer_get_connected_device_info",
+      "live_device_explorer_list_live_files",
+      "live_device_explorer_rationale_14",
+      "live_device_explorer_rationale_32",
+      "live_device_explorer_rationale_69"
+    ],
+    "6": [
+      "gui_app_create_explorer_tab",
+      "gui_app_create_export_tab",
+      "gui_app_create_view_calls_tab",
+      "gui_app_create_view_msgs_tab",
+      "gui_app_create_widgets",
+      "gui_app_create_wifi_tab",
+      "gui_app_on_source_changed"
+    ],
+    "7": [
+      "gui_app_detect_backups",
+      "gui_app_init",
+      "gui_app_on_backup_selected",
+      "gui_app_setup_styles",
+      "gui_app_switch_theme",
+      "gui_app_update_device_name",
+      "gui_rationale_76"
+    ],
+    "8": [
+      "gui_app_create_exclusions_tab",
+      "gui_app_filter_excl_contacts",
+      "gui_app_on_contacts_loaded",
+      "gui_app_populate_excl_tree",
+      "gui_rationale_515",
+      "gui_rationale_522"
+    ],
+    "9": [
+      "gui_app_load_exclusions_to_gui",
+      "gui_app_refresh_tree_excl_checks",
+      "gui_app_reload_exclusions_from_file",
+      "gui_app_save_exclusions_from_gui",
+      "gui_app_start_export",
+      "gui_rationale_585"
+    ],
+    "10": [
+      "gui_app_append_to_text_widget",
+      "gui_app_on_excl_tree_click",
+      "gui_app_remove_from_text_widget",
+      "gui_rationale_535",
+      "gui_rationale_542"
+    ],
+    "11": [
+      "backup_explorer",
+      "backup_explorer_get_backup_files",
+      "backup_explorer_rationale_5",
+      "gui_app_run_load_backup_files"
+    ],
+    "12": [
+      "c_users_ema_desktop_repooo_ios_call_export_run_sh__entry",
+      "run"
+    ],
+    "13": [
+      "assets_calls_dark_png"
+    ],
+    "14": [
+      "assets_calls_light_png"
+    ],
+    "15": [
+      "assets_calls_template_html"
+    ],
+    "16": [
+      "assets_csv_export_example_png"
+    ],
+    "17": [
+      "assets_data_mockup_png"
+    ],
+    "18": [
+      "assets_gui_mockup_png"
+    ],
+    "19": [
+      "assets_messages_dark_png"
+    ],
+    "20": [
+      "assets_messages_light_png"
+    ],
+    "21": [
+      "assets_messages_template_html"
+    ],
+    "22": [
+      "copilot_instructions_md"
+    ],
+    "23": [
+      "export_calls_py"
+    ],
+    "24": [
+      "gui_py"
+    ],
+    "25": [
+      "inject_logger"
+    ],
+    "26": [
+      "master_settings_json"
+    ],
+    "27": [
+      "memory_md"
+    ],
+    "28": [
+      "pkg_ios_call_export"
+    ],
+    "29": [
+      "project_roadmap_md"
+    ],
+    "30": [
+      "readme_md"
+    ],
+    "31": [
+      "refactor_gui"
+    ],
+    "32": [
+      "send_to_webhook_py"
+    ]
+  },
+  "cohesion": {
+    "0": 0.12643678160919541,
+    "1": 0.12121212121212122,
+    "2": 0.1341991341991342,
+    "3": 0.25757575757575757,
+    "4": 0.2,
+    "5": 0.25,
+    "6": 0.2857142857142857,
+    "7": 0.2857142857142857,
+    "8": 0.3333333333333333,
+    "9": 0.3333333333333333,
+    "10": 0.4,
+    "11": 0.5,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0
+  },
+  "gods": [
+    {
+      "id": "gui_app",
+      "label": "App",
+      "degree": 55
+    },
+    {
+      "id": "export_calls_build_contact_lookup",
+      "label": "build_contact_lookup()",
+      "degree": 10
+    },
+    {
+      "id": "db_viewers_dataviewerbackend",
+      "label": "DataViewerBackend",
+      "degree": 8
+    },
+    {
+      "id": "export_calls_incorrectpassphraseerror",
+      "label": "IncorrectPassphraseError",
+      "degree": 8
+    },
+    {
+      "id": "export_calls_read_calls_from_db",
+      "label": "read_calls_from_db()",
+      "degree": 7
+    },
+    {
+      "id": "export_calls_extract_calls",
+      "label": "extract_calls()",
+      "degree": 7
+    },
+    {
+      "id": "export_messages_get_messages_data",
+      "label": "get_messages_data()",
+      "degree": 7
+    },
+    {
+      "id": "export_calls_find_backups",
+      "label": "find_backups()",
+      "degree": 6
+    },
+    {
+      "id": "encryptedbackup",
+      "label": "EncryptedBackup",
+      "degree": 6
+    },
+    {
+      "id": "export_messages_export_messages_to_csv_and_html",
+      "label": "export_messages_to_csv_and_html()",
+      "degree": 6
+    }
+  ],
+  "surprises": [
+    {
+      "source": "get_backup_files()",
+      "target": "EncryptedBackup",
+      "source_files": [
+        "backup_explorer.py",
+        "export_calls.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "App",
+      "target": "DataViewerBackend",
+      "source_files": [
+        "gui.py",
+        "db_viewers.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "App",
+      "target": "IncorrectPassphraseError",
+      "source_files": [
+        "gui.py",
+        "export_calls.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "get_messages_data()",
+      "target": "IncorrectPassphraseError",
+      "source_files": [
+        "export_messages.py",
+        "export_calls.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "export_messages_to_csv_and_html()",
+      "target": "Path",
+      "source_files": [
+        "export_messages.py",
+        "export_calls.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}
