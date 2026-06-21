@@ -216,6 +216,7 @@ class App(tk.Tk):
         self.tab_exclusions = ttk.Frame(self.notebook)
         self.tab_view_calls = ttk.Frame(self.notebook)
         self.tab_view_msgs = ttk.Frame(self.notebook)
+        self.tab_whatsapp = ttk.Frame(self.notebook)
         self.tab_explorer = ttk.Frame(self.notebook)
         self.tab_wifi = ttk.Frame(self.notebook)
 
@@ -223,6 +224,7 @@ class App(tk.Tk):
         self.notebook.add(self.tab_exclusions, text="⚙️ Filtri & Esclusioni")
         self.notebook.add(self.tab_view_calls, text="📞 Vista Chiamate")
         self.notebook.add(self.tab_view_msgs, text="💬 Vista Messaggi")
+        self.notebook.add(self.tab_whatsapp, text="📱 WhatsApp")
         self.notebook.add(self.tab_explorer, text="📂 File Explorer")
         self.notebook.add(self.tab_wifi, text="📶 Wi-Fi Passwords")
 
@@ -236,10 +238,13 @@ class App(tk.Tk):
         self.create_view_calls_tab()
         self.create_view_msgs_tab()
 
-        # Tab 4: Explorer
+        # Tab WhatsApp
+        self.create_whatsapp_tab()
+
+        # Tab Explorer
         self.create_explorer_tab()
 
-        # Tab 5: Wi-Fi
+        # Tab Wi-Fi
         self.create_wifi_tab()
 
         # Log Section
@@ -282,7 +287,15 @@ class App(tk.Tk):
             text="💬 Messaggi SMS e iMessage (HTML Viewer Interattivo)",
             variable=self.export_msgs_var,
         )
-        chk_msgs.pack(anchor="w", pady=(0, 16))
+        chk_msgs.pack(anchor="w", pady=(0, 4))
+
+        self.export_whatsapp_var = tk.BooleanVar(value=False)
+        chk_whatsapp = ttk.Checkbutton(
+            container,
+            text="📱 Chat WhatsApp (HTML Viewer + CSV)",
+            variable=self.export_whatsapp_var,
+        )
+        chk_whatsapp.pack(anchor="w", pady=(0, 16))
 
         # Config Frame
         config_frame = ttk.LabelFrame(container, text="Impostazioni Chiamate", padding=16)
@@ -641,6 +654,7 @@ class App(tk.Tk):
         self.log_message("✅ Database caricati in memoria locale. Pronti per la ricerca veloce.\n")
         self.update_calls_view()
         self.update_msgs_view()
+        self.update_whatsapp_sessions()
 
     def create_view_calls_tab(self):
         container = ttk.Frame(self.tab_view_calls, padding=16)
@@ -729,6 +743,178 @@ class App(tk.Tk):
         self.tree_msgs.delete(*self.tree_msgs.get_children())
         for r in results:
             self.tree_msgs.insert("", "end", values=r)
+
+    # --- WhatsApp Tab ---
+
+    def create_whatsapp_tab(self):
+        container = ttk.Frame(self.tab_whatsapp, padding=8)
+        container.pack(fill="both", expand=True)
+
+        # Top bar: load button + search
+        top_frame = ttk.Frame(container)
+        top_frame.pack(fill="x", pady=(0, 8))
+
+        btn_load = ttk.Button(
+            top_frame,
+            text="Carica Chat WhatsApp dal Backup",
+            command=self.load_db_backend,
+        )
+        btn_load.pack(side="left")
+
+        self.wa_search_var = tk.StringVar()
+        self.wa_search_var.trace_add("write", lambda *args: self.after(300, self.update_whatsapp_search))
+        wa_search = ttk.Entry(top_frame, textvariable=self.wa_search_var, width=30)
+        wa_search.pack(side="right")
+        ttk.Label(top_frame, text="Cerca:").pack(side="right", padx=8)
+
+        # Status label
+        self.wa_status_var = tk.StringVar(value="Nessun dato caricato. Clicca 'Carica Chat WhatsApp dal Backup'.")
+        status_lbl = ttk.Label(container, textvariable=self.wa_status_var, foreground=self.sub_text_color)
+        status_lbl.pack(anchor="w", pady=(0, 6))
+
+        # Two-panel PanedWindow
+        paned = ttk.PanedWindow(container, orient="horizontal")
+        paned.pack(fill="both", expand=True)
+
+        # Left panel: chat sessions list
+        left_frame = ttk.Frame(paned)
+        paned.add(left_frame, weight=1)
+
+        session_cols = ("Chat", "Tipo", "Messaggi", "Ultimo Msg")
+        self.wa_session_tree = ttk.Treeview(
+            left_frame, columns=session_cols, show="headings", selectmode="browse"
+        )
+        self.wa_session_tree.heading("Chat", text="Chat")
+        self.wa_session_tree.heading("Tipo", text="Tipo")
+        self.wa_session_tree.heading("Messaggi", text="Msg")
+        self.wa_session_tree.heading("Ultimo Msg", text="Ultimo Msg")
+
+        self.wa_session_tree.column("Chat", width=180, stretch=True)
+        self.wa_session_tree.column("Tipo", width=70, stretch=False)
+        self.wa_session_tree.column("Messaggi", width=50, stretch=False)
+        self.wa_session_tree.column("Ultimo Msg", width=130, stretch=False)
+
+        sess_scroll = ttk.Scrollbar(left_frame, orient="vertical", command=self.wa_session_tree.yview)
+        self.wa_session_tree.configure(yscrollcommand=sess_scroll.set)
+        self.wa_session_tree.pack(side="left", fill="both", expand=True)
+        sess_scroll.pack(side="right", fill="y")
+
+        self.wa_session_tree.bind("<<TreeviewSelect>>", self.on_whatsapp_chat_selected)
+
+        # Right panel: messages for selected chat
+        right_frame = ttk.Frame(paned)
+        paned.add(right_frame, weight=2)
+
+        # Header for selected chat
+        self.wa_chat_header_var = tk.StringVar(value="← Seleziona una conversazione")
+        header_lbl = ttk.Label(
+            right_frame,
+            textvariable=self.wa_chat_header_var,
+            font=("Segoe UI", 12, "bold") if sys.platform == "win32" else ("Helvetica", 14, "bold"),
+        )
+        header_lbl.pack(anchor="w", padx=8, pady=(4, 8))
+
+        msg_cols = ("Data", "Direzione", "Mittente", "Testo")
+        self.wa_msg_tree = ttk.Treeview(
+            right_frame, columns=msg_cols, show="headings", selectmode="browse"
+        )
+        self.wa_msg_tree.heading("Data", text="Data")
+        self.wa_msg_tree.heading("Direzione", text="Dir.")
+        self.wa_msg_tree.heading("Mittente", text="Mittente")
+        self.wa_msg_tree.heading("Testo", text="Testo")
+
+        self.wa_msg_tree.column("Data", width=140, stretch=False)
+        self.wa_msg_tree.column("Direzione", width=70, stretch=False)
+        self.wa_msg_tree.column("Mittente", width=130, stretch=False)
+        self.wa_msg_tree.column("Testo", width=400, stretch=True)
+
+        msg_scroll = ttk.Scrollbar(right_frame, orient="vertical", command=self.wa_msg_tree.yview)
+        self.wa_msg_tree.configure(yscrollcommand=msg_scroll.set)
+        self.wa_msg_tree.pack(side="left", fill="both", expand=True)
+        msg_scroll.pack(side="right", fill="y")
+
+        # Internal state: mapping iid -> session_id
+        self._wa_session_map = {}
+
+    def update_whatsapp_sessions(self):
+        """Load WhatsApp sessions into the left panel."""
+        if not self.db_backend:
+            return
+
+        sessions = self.db_backend.get_whatsapp_sessions()
+        self.wa_session_tree.delete(*self.wa_session_tree.get_children())
+        self._wa_session_map.clear()
+        self.wa_msg_tree.delete(*self.wa_msg_tree.get_children())
+        self.wa_chat_header_var.set("← Seleziona una conversazione")
+
+        if not sessions:
+            self.wa_status_var.set(
+                "⚠️ WhatsApp non trovato nel backup, oppure nessuna chat presente."
+            )
+            return
+
+        total_msgs = 0
+        for s in sessions:
+            name = s["partner_name"] or s["contact_jid"] or "Chat sconosciuta"
+            iid = self.wa_session_tree.insert(
+                "", "end",
+                values=(name, s["session_type"], s["message_count"], s["last_date"]),
+            )
+            self._wa_session_map[iid] = s["session_id"]
+            total_msgs += s["message_count"]
+
+        self.wa_status_var.set(
+            f"📱 {len(sessions)} conversazioni · {total_msgs:,} messaggi totali"
+        )
+
+    def on_whatsapp_chat_selected(self, event=None):
+        """When a chat is selected in the left panel, load its messages in the right panel."""
+        if not self.db_backend:
+            return
+
+        selected = self.wa_session_tree.selection()
+        if not selected:
+            return
+
+        iid = selected[0]
+        session_id = self._wa_session_map.get(iid)
+        if session_id is None:
+            return
+
+        # Get chat name from selected row
+        vals = self.wa_session_tree.item(iid, "values")
+        chat_name = vals[0] if vals else "Chat"
+        self.wa_chat_header_var.set(f"📱 {chat_name}")
+
+        messages = self.db_backend.get_whatsapp_messages(session_id, limit=1000)
+        self.wa_msg_tree.delete(*self.wa_msg_tree.get_children())
+
+        for msg in messages:
+            self.wa_msg_tree.insert("", "end", values=msg)
+
+        # Scroll to last message
+        children = self.wa_msg_tree.get_children()
+        if children:
+            self.wa_msg_tree.see(children[-1])
+
+    def update_whatsapp_search(self):
+        """Filter WhatsApp sessions and messages by search term."""
+        if not self.db_backend:
+            return
+
+        term = self.wa_search_var.get().strip()
+        if not term:
+            self.update_whatsapp_sessions()
+            return
+
+        # Search across all messages
+        results = self.db_backend.search_whatsapp(term, limit=300)
+        self.wa_msg_tree.delete(*self.wa_msg_tree.get_children())
+        self.wa_chat_header_var.set(f"🔍 Risultati per: \"{term}\"")
+
+        for r in results:
+            # r = (date, partner, direction, session_type, text)
+            self.wa_msg_tree.insert("", "end", values=(r[0], r[2], r[1], r[4]))
 
     def create_explorer_tab(self):
         container = ttk.Frame(self.tab_explorer, padding=16)
@@ -944,10 +1130,14 @@ class App(tk.Tk):
             ):
                 return
 
-        if not self.export_calls_var.get() and not self.export_msgs_var.get():
+        if (
+            not self.export_calls_var.get()
+            and not self.export_msgs_var.get()
+            and not self.export_whatsapp_var.get()
+        ):
             messagebox.showwarning(
                 "Nessuna selezione",
-                "Seleziona almeno una voce da esportare (Chiamate o Messaggi).",
+                "Seleziona almeno una voce da esportare (Chiamate, Messaggi o WhatsApp).",
             )
             return
 
@@ -967,6 +1157,7 @@ class App(tk.Tk):
                 self.export_calls_var.get(),
                 self.export_msgs_var.get(),
                 self.export_calls_html_var.get(),
+                self.export_whatsapp_var.get(),
             ),
             daemon=True,
         )
@@ -1003,7 +1194,7 @@ class App(tk.Tk):
         export_dir.mkdir(parents=True, exist_ok=True)
         return export_dir
 
-    def _run_export(self, backup_dir, passphrase, use_excel, do_calls, do_msgs, do_calls_html):
+    def _run_export(self, backup_dir, passphrase, use_excel, do_calls, do_msgs, do_calls_html, do_whatsapp=False):
         try:
             from datetime import datetime
 
@@ -1033,6 +1224,23 @@ class App(tk.Tk):
                 count = export_messages_to_csv_and_html(backup_dir, passphrase, out_html, out_csv_msgs, use_excel)
                 self.log_message(f"✅ Trovate {count} conversazioni.\n")
                 self.log_message(f"✅ Messaggi esportati con successo in:\n{out_html}\n{out_csv_msgs}\n\n")
+
+            if do_whatsapp:
+                from export_whatsapp import export_whatsapp_to_csv_and_html
+
+                out_html_wa = str(export_dir / "WhatsApp_Viewer.html")
+                out_csv_wa = str(export_dir / f"whatsapp_export_{timestamp}.csv")
+                self.log_message("📱 Avvio estrazione Chat WhatsApp...\n")
+                try:
+                    count = export_whatsapp_to_csv_and_html(
+                        backup_dir, passphrase, out_html_wa, out_csv_wa, use_excel
+                    )
+                    self.log_message(f"✅ Trovate {count} conversazioni WhatsApp.\n")
+                    self.log_message(
+                        f"✅ WhatsApp esportato con successo in:\n{out_html_wa}\n{out_csv_wa}\n\n"
+                    )
+                except ValueError as ve:
+                    self.log_message(f"⚠️ WhatsApp: {ve}\n\n")
 
             self.after(0, self._export_success)
         except IncorrectPassphraseError as e:

@@ -6,6 +6,7 @@ import tempfile
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
 
 from export_calls import apple_timestamp_to_datetime, build_contact_lookup
+from export_whatsapp import WHATSAPP_DOMAIN, WHATSAPP_DB_PATH, MESSAGE_TYPES, SESSION_TYPES
 from logger import app_logger
 
 # iOS dates are typically measured in seconds from Jan 1, 2001
@@ -19,6 +20,7 @@ class DataViewerBackend:
         self.temp_dir = tempfile.mkdtemp()
         self.calls_db = None
         self.sms_db = None
+        self.whatsapp_db = None
         self.contact_lookup = {}
 
     def load_databases(self):
@@ -43,6 +45,20 @@ class DataViewerBackend:
             self.sms_db.row_factory = sqlite3.Row
         except Exception:
             app_logger.error("Errore estrazione SMS DB per Viewer", exc_info=True)
+
+        # Extract WhatsApp DB
+        wa_path = os.path.join(self.temp_dir, "whatsapp.sqlite")
+        try:
+            backup.extract_file(
+                relative_path=f"{WHATSAPP_DOMAIN}/{WHATSAPP_DB_PATH}",
+                output_filename=wa_path,
+            )
+            self.whatsapp_db = sqlite3.connect(wa_path, check_same_thread=False)
+            self.whatsapp_db.row_factory = sqlite3.Row
+        except FileNotFoundError:
+            app_logger.info("WhatsApp non trovato nel backup (normale se non installato).")
+        except Exception:
+            app_logger.error("Errore estrazione WhatsApp DB per Viewer", exc_info=True)
 
         # Clean up backup object to avoid cross-thread SQLite issues on __del__
         try:
@@ -125,9 +141,124 @@ class DataViewerBackend:
 
         return results
 
+    def search_whatsapp(self, search_term: str = "", limit: int = 200):
+        if not self.whatsapp_db:
+            return []
+
+        query = """
+            SELECT
+                m.ZMESSAGEDATE, m.ZTEXT, m.ZISFROMME, m.ZMESSAGETYPE,
+                s.ZPARTNERNAME, s.ZCONTACTJID, s.ZSESSIONTYPE
+            FROM ZWAMESSAGE m
+            JOIN ZWACHATSESSION s ON m.ZCHATSESSION = s.Z_PK
+            WHERE m.ZTEXT LIKE ? OR s.ZPARTNERNAME LIKE ? OR s.ZCONTACTJID LIKE ?
+            ORDER BY m.ZMESSAGEDATE DESC
+            LIMIT ?
+        """
+        like_term = f"%{search_term}%"
+        try:
+            rows = self.whatsapp_db.execute(query, (like_term, like_term, like_term, limit)).fetchall()
+        except Exception:
+            app_logger.error("Errore ricerca WhatsApp", exc_info=True)
+            return []
+
+        results = []
+        for row in rows:
+            dt = apple_timestamp_to_datetime(row["ZMESSAGEDATE"])
+            dt_str = dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
+            direction = "Inviato" if row["ZISFROMME"] else "Ricevuto"
+            partner = row["ZPARTNERNAME"] or row["ZCONTACTJID"] or ""
+            text = row["ZTEXT"] or ""
+            msg_type = MESSAGE_TYPES.get(row["ZMESSAGETYPE"], "altro")
+            session_type = SESSION_TYPES.get(row["ZSESSIONTYPE"], "")
+
+            if not text:
+                text = f"[{msg_type}]"
+
+            results.append((dt_str, partner, direction, session_type, text.replace("\n", " ")))
+
+        return results
+
+    def get_whatsapp_sessions(self) -> list[dict]:
+        """Return a list of WhatsApp sessions with metadata for the chat list."""
+        if not self.whatsapp_db:
+            return []
+
+        query = """
+            SELECT
+                s.Z_PK,
+                s.ZPARTNERNAME,
+                s.ZCONTACTJID,
+                s.ZSESSIONTYPE,
+                COUNT(m.Z_PK) as msg_count,
+                MAX(m.ZMESSAGEDATE) as last_date
+            FROM ZWACHATSESSION s
+            LEFT JOIN ZWAMESSAGE m ON m.ZCHATSESSION = s.Z_PK
+            GROUP BY s.Z_PK
+            HAVING msg_count > 0
+            ORDER BY last_date DESC
+        """
+        try:
+            rows = self.whatsapp_db.execute(query).fetchall()
+        except Exception:
+            app_logger.error("Errore caricamento sessioni WhatsApp", exc_info=True)
+            return []
+
+        sessions = []
+        for row in rows:
+            dt = apple_timestamp_to_datetime(row["last_date"])
+            sessions.append({
+                "session_id": row["Z_PK"],
+                "partner_name": row["ZPARTNERNAME"] or "",
+                "contact_jid": row["ZCONTACTJID"] or "",
+                "session_type": SESSION_TYPES.get(row["ZSESSIONTYPE"], ""),
+                "session_type_raw": row["ZSESSIONTYPE"],
+                "message_count": row["msg_count"],
+                "last_date": dt.strftime("%Y-%m-%d %H:%M") if dt else "",
+            })
+
+        return sessions
+
+    def get_whatsapp_messages(self, session_id: int, limit: int = 500) -> list[tuple]:
+        """Return messages for a specific WhatsApp session."""
+        if not self.whatsapp_db:
+            return []
+
+        query = """
+            SELECT
+                ZMESSAGEDATE, ZTEXT, ZISFROMME, ZMESSAGETYPE, ZFROMJID
+            FROM ZWAMESSAGE
+            WHERE ZCHATSESSION = ?
+            ORDER BY ZMESSAGEDATE ASC
+            LIMIT ?
+        """
+        try:
+            rows = self.whatsapp_db.execute(query, (session_id, limit)).fetchall()
+        except Exception:
+            app_logger.error("Errore caricamento messaggi WhatsApp", exc_info=True)
+            return []
+
+        results = []
+        for row in rows:
+            dt = apple_timestamp_to_datetime(row["ZMESSAGEDATE"])
+            dt_str = dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
+            direction = "Inviato" if row["ZISFROMME"] else "Ricevuto"
+            text = row["ZTEXT"] or ""
+            msg_type = MESSAGE_TYPES.get(row["ZMESSAGETYPE"], "altro")
+            from_jid = row["ZFROMJID"] or ""
+
+            if not text:
+                text = f"[{msg_type}]"
+
+            results.append((dt_str, direction, from_jid, text.replace("\n", " ")))
+
+        return results
+
     def close(self):
         if self.calls_db:
             self.calls_db.close()
         if self.sms_db:
             self.sms_db.close()
+        if self.whatsapp_db:
+            self.whatsapp_db.close()
         shutil.rmtree(self.temp_dir, ignore_errors=True)

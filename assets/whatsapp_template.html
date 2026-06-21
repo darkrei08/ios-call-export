@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Chat Viewer — iOS Backup Explorer</title>
+<style>
+  :root {
+    --bg: #E5DDD5;
+    --sidebar-bg: #FFFFFF;
+    --sidebar-hover: #F0F2F5;
+    --sidebar-active: #D9FDD3;
+    --header-bg: #008069;
+    --header-text: #FFFFFF;
+    --bubble-out: #D9FDD3;
+    --bubble-in: #FFFFFF;
+    --text-primary: #111B21;
+    --text-secondary: #667781;
+    --text-time: #667781;
+    --border: #E9EDEF;
+    --search-bg: #F0F2F5;
+    --search-fg: #3B4A54;
+    --system-bg: rgba(255,213,79,0.15);
+    --system-text: #54656F;
+    --scrollbar-track: transparent;
+    --scrollbar-thumb: #BCC0C5;
+    --badge-bg: #25D366;
+    --badge-text: #FFFFFF;
+    --starred-color: #F5C400;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0B141A;
+      --sidebar-bg: #111B21;
+      --sidebar-hover: #202C33;
+      --sidebar-active: #005C4B;
+      --header-bg: #202C33;
+      --header-text: #E9EDEF;
+      --bubble-out: #005C4B;
+      --bubble-in: #202C33;
+      --text-primary: #E9EDEF;
+      --text-secondary: #8696A0;
+      --text-time: #8696A0;
+      --border: #2A3942;
+      --search-bg: #2A3942;
+      --search-fg: #8696A0;
+      --system-bg: rgba(255,213,79,0.08);
+      --system-text: #8696A0;
+      --scrollbar-thumb: #374045;
+      --badge-bg: #00A884;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app { display: flex; height: 100vh; }
+
+  /* --- SIDEBAR --- */
+  .sidebar {
+    width: 380px;
+    min-width: 300px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-header {
+    padding: 12px 16px;
+    background: var(--header-bg);
+    color: var(--header-text);
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sidebar-header .logo { font-size: 24px; }
+  .sidebar-search {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-search input {
+    width: 100%;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--search-bg);
+    color: var(--search-fg);
+    font-size: 14px;
+    outline: none;
+  }
+  .sidebar-stats {
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .chat-list {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .chat-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.15s;
+  }
+  .chat-item:hover { background: var(--sidebar-hover); }
+  .chat-item.active { background: var(--sidebar-active); }
+  .chat-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--header-bg);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .chat-avatar.group { background: #00A884; font-size: 18px; }
+  .chat-info { flex: 1; min-width: 0; }
+  .chat-name {
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chat-preview {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+  .chat-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .chat-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .chat-badge {
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* --- MAIN CHAT --- */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+  .main-header {
+    padding: 10px 20px;
+    background: var(--header-bg);
+    color: var(--header-text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+  }
+  .main-header .partner-name { font-size: 16px; font-weight: 600; }
+  .main-header .partner-info { font-size: 13px; opacity: 0.85; }
+  .main-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 18px;
+    text-align: center;
+    padding: 40px;
+  }
+  .main-empty .icon { font-size: 72px; margin-bottom: 16px; opacity: 0.5; }
+  .messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .msg-date-sep {
+    text-align: center;
+    margin: 16px 0 8px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .msg-date-sep span {
+    background: var(--system-bg);
+    padding: 4px 14px;
+    border-radius: 8px;
+  }
+  .msg-system {
+    text-align: center;
+    margin: 4px 0;
+    font-size: 12px;
+    color: var(--system-text);
+  }
+  .msg-system span {
+    background: var(--system-bg);
+    padding: 4px 10px;
+    border-radius: 8px;
+  }
+
+  .bubble {
+    max-width: 65%;
+    padding: 6px 10px;
+    border-radius: 8px;
+    position: relative;
+    font-size: 14.2px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    margin: 1px 0;
+  }
+  .bubble.out {
+    background: var(--bubble-out);
+    align-self: flex-end;
+    border-top-right-radius: 0;
+  }
+  .bubble.in {
+    background: var(--bubble-in);
+    align-self: flex-start;
+    border-top-left-radius: 0;
+  }
+  .bubble .sender {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #06CF9C;
+    margin-bottom: 2px;
+  }
+  .bubble .time {
+    font-size: 11px;
+    color: var(--text-time);
+    float: right;
+    margin-left: 10px;
+    margin-top: 4px;
+  }
+  .bubble .starred { color: var(--starred-color); margin-left: 2px; }
+  .bubble .text { display: inline; }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 100%; }
+    .main { display: none; }
+    .app.chat-open .sidebar { display: none; }
+    .app.chat-open .main { display: flex; }
+    .messages-area { padding: 12px 16px; }
+    .bubble { max-width: 85%; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span class="logo">📱</span> WhatsApp Viewer
+    </div>
+    <div class="sidebar-search">
+      <input type="text" id="searchInput" placeholder="🔍 Cerca conversazione...">
+    </div>
+    <div class="sidebar-stats" id="stats"></div>
+    <div class="chat-list" id="chatList"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="mainPanel">
+    <div class="main-empty" id="emptyState">
+      <div>
+        <div class="icon">💬</div>
+        <div>Seleziona una conversazione per visualizzare i messaggi</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const RAW_DATA = {{ WHATSAPP_DATA_JSON }};
+
+// Convert to array and sort by last message date (desc)
+const chats = Object.values(RAW_DATA).sort((a, b) => {
+  const la = a.messages.length ? a.messages[a.messages.length - 1].timestamp : 0;
+  const lb = b.messages.length ? b.messages[b.messages.length - 1].timestamp : 0;
+  return lb - la;
+});
+
+let activeSessionId = null;
+
+// --- RENDER SIDEBAR ---
+function renderChatList(filter = '') {
+  const list = document.getElementById('chatList');
+  const lower = filter.toLowerCase();
+  const filtered = chats.filter(c => {
+    const name = (c.partner_name || c.contact_jid || '').toLowerCase();
+    return name.includes(lower);
+  });
+
+  const totalChats = chats.length;
+  const totalMsgs = chats.reduce((s, c) => s + c.message_count, 0);
+  document.getElementById('stats').textContent =
+    `${totalChats} conversazioni · ${totalMsgs.toLocaleString()} messaggi`;
+
+  list.innerHTML = filtered.map(chat => {
+    const name = chat.partner_name || chat.contact_jid || 'Chat sconosciuta';
+    const initial = name.charAt(0).toUpperCase();
+    const isGroup = chat.session_type_raw === 1;
+    const lastMsg = chat.messages.length ? chat.messages[chat.messages.length - 1] : null;
+    const preview = lastMsg ? (lastMsg.text || '').substring(0, 60) : '';
+    const lastDate = lastMsg ? formatDate(lastMsg.timestamp) : '';
+    const active = chat.session_id === activeSessionId ? 'active' : '';
+
+    return `
+      <div class="chat-item ${active}" onclick="openChat(${chat.session_id})">
+        <div class="chat-avatar ${isGroup ? 'group' : ''}">${isGroup ? '👥' : initial}</div>
+        <div class="chat-info">
+          <div class="chat-name">${esc(name)}</div>
+          <div class="chat-preview">${esc(preview)}</div>
+        </div>
+        <div class="chat-meta">
+          <div class="chat-date">${lastDate}</div>
+          <div class="chat-badge">${chat.message_count}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// --- RENDER MESSAGES ---
+function openChat(sessionId) {
+  activeSessionId = sessionId;
+  const chat = chats.find(c => c.session_id === sessionId);
+  if (!chat) return;
+
+  const main = document.getElementById('mainPanel');
+  const name = chat.partner_name || chat.contact_jid || 'Chat';
+  const isGroup = chat.session_type_raw === 1;
+
+  let html = `
+    <div class="main-header">
+      <div class="chat-avatar ${isGroup ? 'group' : ''}" style="width:40px;height:40px;font-size:16px;">
+        ${isGroup ? '👥' : name.charAt(0).toUpperCase()}
+      </div>
+      <div>
+        <div class="partner-name">${esc(name)}</div>
+        <div class="partner-info">${chat.session_type} · ${chat.message_count} messaggi</div>
+      </div>
+    </div>
+    <div class="messages-area" id="messagesArea">`;
+
+  let lastDateStr = '';
+  for (const msg of chat.messages) {
+    const dateStr = formatDateFull(msg.timestamp);
+    if (dateStr !== lastDateStr) {
+      html += `<div class="msg-date-sep"><span>${dateStr}</span></div>`;
+      lastDateStr = dateStr;
+    }
+
+    if (msg.message_type === 'system' || msg.message_type_raw === 6) {
+      html += `<div class="msg-system"><span>${esc(msg.text)}</span></div>`;
+      continue;
+    }
+
+    const dir = msg.is_from_me ? 'out' : 'in';
+    const time = formatTime(msg.timestamp);
+    const star = msg.starred ? '<span class="starred">⭐</span>' : '';
+    const sender = (isGroup && !msg.is_from_me && msg.from_jid)
+      ? `<div class="sender">${esc(msg.from_jid.split('@')[0])}</div>` : '';
+
+    html += `
+      <div class="bubble ${dir}">
+        ${sender}
+        <span class="text">${esc(msg.text)}</span>
+        <span class="time">${time}${star}</span>
+      </div>`;
+  }
+
+  html += '</div>';
+  main.innerHTML = html;
+
+  // Scroll to bottom
+  const area = document.getElementById('messagesArea');
+  if (area) area.scrollTop = area.scrollHeight;
+
+  renderChatList(document.getElementById('searchInput').value);
+}
+
+// --- UTILITIES ---
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts * 1000);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return 'Oggi';
+  const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) return 'Ieri';
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' });
+}
+function formatDateFull(ts) {
+  if (!ts) return '';
+  return new Date(ts * 1000).toLocaleDateString('it-IT', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+}
+function formatTime(ts) {
+  if (!ts) return '';
+  return new Date(ts * 1000).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+}
+
+// --- INIT ---
+document.getElementById('searchInput').addEventListener('input', function() {
+  renderChatList(this.value);
+});
+renderChatList();
+</script>
+</body>
+</html>
