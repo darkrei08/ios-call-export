@@ -61,9 +61,12 @@ class DataViewerBackend:
             app_logger.error("Errore estrazione WhatsApp DB per Viewer", exc_info=True)
 
         # Clean up backup object to avoid cross-thread SQLite issues on __del__
+        import gc
+        gc.collect()
         try:
             if hasattr(backup, "_cleanup"):
                 backup._cleanup()
+                backup._cleanup = lambda *args, **kwargs: None
         except Exception:
             pass
 

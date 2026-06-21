@@ -95,6 +95,20 @@
       "gui_app_update_msgs_view"
     ],
     "4": [
+      "gui_app_create_exclusions_tab",
+      "gui_app_filter_excl_contacts",
+      "gui_app_load_exclusions_to_gui",
+      "gui_app_on_contacts_loaded",
+      "gui_app_populate_excl_tree",
+      "gui_app_refresh_tree_excl_checks",
+      "gui_app_reload_exclusions_from_file",
+      "gui_app_save_exclusions_from_gui",
+      "gui_app_start_export",
+      "gui_rationale_515",
+      "gui_rationale_522",
+      "gui_rationale_585"
+    ],
+    "5": [
       "gui_app_export_failure",
       "gui_app_export_passphrase_failure",
       "gui_app_export_success",
@@ -106,7 +120,7 @@
       "gui_app_populate_live_tree",
       "gui_rationale_578"
     ],
-    "5": [
+    "6": [
       "gui_app_extract_selected_file",
       "gui_app_run_load_live_files",
       "live_device_explorer",
@@ -117,7 +131,7 @@
       "live_device_explorer_rationale_32",
       "live_device_explorer_rationale_69"
     ],
-    "6": [
+    "7": [
       "gui_app_create_explorer_tab",
       "gui_app_create_export_tab",
       "gui_app_create_view_calls_tab",
@@ -126,7 +140,7 @@
       "gui_app_create_wifi_tab",
       "gui_app_on_source_changed"
     ],
-    "7": [
+    "8": [
       "gui_app_detect_backups",
       "gui_app_init",
       "gui_app_on_backup_selected",
@@ -135,97 +149,81 @@
       "gui_app_update_device_name",
       "gui_rationale_76"
     ],
-    "8": [
-      "gui_app_create_exclusions_tab",
-      "gui_app_filter_excl_contacts",
-      "gui_app_on_contacts_loaded",
-      "gui_app_populate_excl_tree",
-      "gui_rationale_515",
-      "gui_rationale_522"
-    ],
     "9": [
-      "gui_app_load_exclusions_to_gui",
-      "gui_app_refresh_tree_excl_checks",
-      "gui_app_reload_exclusions_from_file",
-      "gui_app_save_exclusions_from_gui",
-      "gui_app_start_export",
-      "gui_rationale_585"
-    ],
-    "10": [
       "gui_app_append_to_text_widget",
       "gui_app_on_excl_tree_click",
       "gui_app_remove_from_text_widget",
       "gui_rationale_535",
       "gui_rationale_542"
     ],
-    "11": [
+    "10": [
       "backup_explorer",
       "backup_explorer_get_backup_files",
       "backup_explorer_rationale_5",
       "gui_app_run_load_backup_files"
     ],
-    "12": [
+    "11": [
       "c_users_ema_desktop_repooo_ios_call_export_run_sh__entry",
       "run"
     ],
-    "13": [
+    "12": [
       "assets_calls_dark_png"
     ],
-    "14": [
+    "13": [
       "assets_calls_light_png"
     ],
-    "15": [
+    "14": [
       "assets_calls_template_html"
     ],
-    "16": [
+    "15": [
       "assets_csv_export_example_png"
     ],
-    "17": [
+    "16": [
       "assets_data_mockup_png"
     ],
-    "18": [
+    "17": [
       "assets_gui_mockup_png"
     ],
-    "19": [
+    "18": [
       "assets_messages_dark_png"
     ],
-    "20": [
+    "19": [
       "assets_messages_light_png"
     ],
-    "21": [
+    "20": [
       "assets_messages_template_html"
     ],
-    "22": [
+    "21": [
       "copilot_instructions_md"
     ],
-    "23": [
+    "22": [
       "export_calls_py"
     ],
-    "24": [
+    "23": [
       "gui_py"
     ],
-    "25": [
+    "24": [
       "inject_logger"
     ],
-    "26": [
+    "25": [
       "master_settings_json"
     ],
-    "27": [
+    "26": [
       "memory_md"
     ],
-    "28": [
+    "27": [
       "pkg_ios_call_export"
     ],
-    "29": [
+    "28": [
       "project_roadmap_md"
     ],
-    "30": [
+    "29": [
       "readme_md"
     ],
-    "31": [
+    "30": [
       "refactor_gui"
     ],
-    "32": [
+    "31": [
       "send_to_webhook_py"
     ]
   },
@@ -234,14 +232,14 @@
     "1": 0.12121212121212122,
     "2": 0.1341991341991342,
     "3": 0.25757575757575757,
-    "4": 0.2,
-    "5": 0.25,
-    "6": 0.2857142857142857,
+    "4": 0.18181818181818182,
+    "5": 0.2,
+    "6": 0.25,
     "7": 0.2857142857142857,
-    "8": 0.3333333333333333,
-    "9": 0.3333333333333333,
-    "10": 0.4,
-    "11": 0.5,
+    "8": 0.2857142857142857,
+    "9": 0.4,
+    "10": 0.5,
+    "11": 1.0,
     "12": 1.0,
     "13": 1.0,
     "14": 1.0,
@@ -261,8 +259,7 @@
     "28": 1.0,
     "29": 1.0,
     "30": 1.0,
-    "31": 1.0,
-    "32": 1.0
+    "31": 1.0
   },
   "gods": [
     {

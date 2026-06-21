@@ -20,7 +20,7 @@
       "source_file": "backup_explorer.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "backup_explorer.py",
       "community_name": "Community 11",
       "id": "backup_explorer"
@@ -31,7 +31,7 @@
       "source_file": "backup_explorer.py",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "get_backup_files()",
       "community_name": "Community 11",
       "id": "backup_explorer_get_backup_files"
@@ -42,7 +42,7 @@
       "source_file": "backup_explorer.py",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "return a list of files available in the encrypted backup.",
       "community_name": "Community 11",
       "id": "backup_explorer_rationale_5"
@@ -449,7 +449,7 @@
       "source_file": "gui.py",
       "source_location": "L38",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": ".__init__()",
       "community_name": "Community 7",
       "id": "gui_app_init"
@@ -460,7 +460,7 @@
       "source_file": "gui.py",
       "source_location": "L75",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": ".setup_styles()",
       "community_name": "Community 7",
       "id": "gui_app_setup_styles"
@@ -471,7 +471,7 @@
       "source_file": "gui.py",
       "source_location": "L130",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".create_widgets()",
       "community_name": "Community 8",
       "id": "gui_app_create_widgets"
@@ -482,7 +482,7 @@
       "source_file": "gui.py",
       "source_location": "L250",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".create_export_tab()",
       "community_name": "Community 8",
       "id": "gui_app_create_export_tab"
@@ -493,7 +493,7 @@
       "source_file": "gui.py",
       "source_location": "L325",
       "_origin": "ast",
-      "community": 8,
+      "community": 4,
       "norm_label": ".create_exclusions_tab()",
       "community_name": "Community 5",
       "id": "gui_app_create_exclusions_tab"
@@ -504,7 +504,7 @@
       "source_file": "gui.py",
       "source_location": "L417",
       "_origin": "ast",
-      "community": 9,
+      "community": 4,
       "norm_label": ".load_exclusions_to_gui()",
       "community_name": "Community 5",
       "id": "gui_app_load_exclusions_to_gui"
@@ -515,7 +515,7 @@
       "source_file": "gui.py",
       "source_location": "L432",
       "_origin": "ast",
-      "community": 9,
+      "community": 4,
       "norm_label": ".save_exclusions_from_gui()",
       "community_name": "Community 5",
       "id": "gui_app_save_exclusions_from_gui"
@@ -526,7 +526,7 @@
       "source_file": "gui.py",
       "source_location": "L447",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": ".load_contacts_for_exclusions()",
       "community_name": "Community 6",
       "id": "gui_app_load_contacts_for_exclusions"
@@ -537,7 +537,7 @@
       "source_file": "gui.py",
       "source_location": "L492",
       "_origin": "ast",
-      "community": 8,
+      "community": 4,
       "norm_label": "._on_contacts_loaded()",
       "community_name": "Community 5",
       "id": "gui_app_on_contacts_loaded"
@@ -548,7 +548,7 @@
       "source_file": "gui.py",
       "source_location": "L514",
       "_origin": "ast",
-      "community": 8,
+      "community": 4,
       "norm_label": "._populate_excl_tree()",
       "community_name": "Community 5",
       "id": "gui_app_populate_excl_tree"
@@ -559,7 +559,7 @@
       "source_file": "gui.py",
       "source_location": "L521",
       "_origin": "ast",
-      "community": 8,
+      "community": 4,
       "norm_label": "._filter_excl_contacts()",
       "community_name": "Community 5",
       "id": "gui_app_filter_excl_contacts"
@@ -570,7 +570,7 @@
       "source_file": "gui.py",
       "source_location": "L534",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "._append_to_text_widget()",
       "community_name": "Community 10",
       "id": "gui_app_append_to_text_widget"
@@ -581,7 +581,7 @@
       "source_file": "gui.py",
       "source_location": "L541",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "._remove_from_text_widget()",
       "community_name": "Community 10",
       "id": "gui_app_remove_from_text_widget"
@@ -592,7 +592,7 @@
       "source_file": "gui.py",
       "source_location": "L552",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": ".on_excl_tree_click()",
       "community_name": "Community 10",
       "id": "gui_app_on_excl_tree_click"
@@ -603,7 +603,7 @@
       "source_file": "gui.py",
       "source_location": "L577",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": ".open_exclusions_file()",
       "community_name": "Community 6",
       "id": "gui_app_open_exclusions_file"
@@ -614,7 +614,7 @@
       "source_file": "gui.py",
       "source_location": "L584",
       "_origin": "ast",
-      "community": 9,
+      "community": 4,
       "norm_label": ".reload_exclusions_from_file()",
       "community_name": "Community 5",
       "id": "gui_app_reload_exclusions_from_file"
@@ -625,7 +625,7 @@
       "source_file": "gui.py",
       "source_location": "L589",
       "_origin": "ast",
-      "community": 9,
+      "community": 4,
       "norm_label": "._refresh_tree_excl_checks()",
       "community_name": "Community 5",
       "id": "gui_app_refresh_tree_excl_checks"
@@ -636,7 +636,7 @@
       "source_file": "gui.py",
       "source_location": "L612",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": ".load_db_backend()",
       "community_name": "Community 6",
       "id": "gui_app_load_db_backend"
@@ -658,7 +658,7 @@
       "source_file": "gui.py",
       "source_location": "L645",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".create_view_calls_tab()",
       "community_name": "Community 8",
       "id": "gui_app_create_view_calls_tab"
@@ -680,7 +680,7 @@
       "source_file": "gui.py",
       "source_location": "L685",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".create_view_msgs_tab()",
       "community_name": "Community 8",
       "id": "gui_app_create_view_msgs_tab"
@@ -702,7 +702,7 @@
       "source_file": "gui.py",
       "source_location": "L733",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".create_explorer_tab()",
       "community_name": "Community 8",
       "id": "gui_app_create_explorer_tab"
@@ -713,7 +713,7 @@
       "source_file": "gui.py",
       "source_location": "L815",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".create_wifi_tab()",
       "community_name": "Community 8",
       "id": "gui_app_create_wifi_tab"
@@ -724,7 +724,7 @@
       "source_file": "gui.py",
       "source_location": "L832",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": ".switch_theme()",
       "community_name": "Community 7",
       "id": "gui_app_switch_theme"
@@ -746,7 +746,7 @@
       "source_file": "gui.py",
       "source_location": "L848",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": ".detect_backups()",
       "community_name": "Community 7",
       "id": "gui_app_detect_backups"
@@ -757,7 +757,7 @@
       "source_file": "gui.py",
       "source_location": "L875",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": ".on_backup_selected()",
       "community_name": "Community 7",
       "id": "gui_app_on_backup_selected"
@@ -779,7 +779,7 @@
       "source_file": "gui.py",
       "source_location": "L897",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "._update_device_name()",
       "community_name": "Community 7",
       "id": "gui_app_update_device_name"
@@ -790,7 +790,7 @@
       "source_file": "gui.py",
       "source_location": "L907",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": ".log_message()",
       "community_name": "Community 6",
       "id": "gui_app_log_message"
@@ -812,7 +812,7 @@
       "source_file": "gui.py",
       "source_location": "L931",
       "_origin": "ast",
-      "community": 9,
+      "community": 4,
       "norm_label": ".start_export()",
       "community_name": "Community 5",
       "id": "gui_app_start_export"
@@ -845,7 +845,7 @@
       "source_file": "gui.py",
       "source_location": "L1045",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "._export_success()",
       "community_name": "Community 6",
       "id": "gui_app_export_success"
@@ -856,7 +856,7 @@
       "source_file": "gui.py",
       "source_location": "L1052",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "._export_passphrase_failure()",
       "community_name": "Community 6",
       "id": "gui_app_export_passphrase_failure"
@@ -867,7 +867,7 @@
       "source_file": "gui.py",
       "source_location": "L1074",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "._export_failure()",
       "community_name": "Community 6",
       "id": "gui_app_export_failure"
@@ -878,7 +878,7 @@
       "source_file": "gui.py",
       "source_location": "L1083",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".on_source_changed()",
       "community_name": "Community 8",
       "id": "gui_app_on_source_changed"
@@ -911,7 +911,7 @@
       "source_file": "gui.py",
       "source_location": "L1134",
       "_origin": "ast",
-      "community": 11,
+      "community": 10,
       "norm_label": "._run_load_backup_files()",
       "community_name": "Community 11",
       "id": "gui_app_run_load_backup_files"
@@ -922,7 +922,7 @@
       "source_file": "gui.py",
       "source_location": "L1144",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "._populate_backup_tree()",
       "community_name": "Community 6",
       "id": "gui_app_populate_backup_tree"
@@ -944,7 +944,7 @@
       "source_file": "gui.py",
       "source_location": "L1167",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "._run_load_live_files()",
       "community_name": "Community 0",
       "id": "gui_app_run_load_live_files"
@@ -955,7 +955,7 @@
       "source_file": "gui.py",
       "source_location": "L1186",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "._populate_live_tree()",
       "community_name": "Community 6",
       "id": "gui_app_populate_live_tree"
@@ -999,7 +999,7 @@
       "source_file": "gui.py",
       "source_location": "L1277",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": ".extract_selected_file()",
       "community_name": "Community 6",
       "id": "gui_app_extract_selected_file"
@@ -1021,7 +1021,7 @@
       "source_file": "gui.py",
       "source_location": "L76",
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "apply custom styling overrides on top of the current sv_ttk theme.",
       "community_name": "Community 7",
       "id": "gui_rationale_76"
@@ -1032,7 +1032,7 @@
       "source_file": "gui.py",
       "source_location": "L515",
       "_origin": "ast",
-      "community": 8,
+      "community": 4,
       "norm_label": "populate the exclusion treeview with the given contacts list.",
       "community_name": "Community 5",
       "id": "gui_rationale_515"
@@ -1043,7 +1043,7 @@
       "source_file": "gui.py",
       "source_location": "L522",
       "_origin": "ast",
-      "community": 8,
+      "community": 4,
       "norm_label": "filter the exclusion contacts treeview based on search term.",
       "community_name": "Community 5",
       "id": "gui_rationale_522"
@@ -1054,7 +1054,7 @@
       "source_file": "gui.py",
       "source_location": "L535",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "append a value on a new line in a scrolledtext widget, avoiding same-line concat",
       "community_name": "Community 10",
       "id": "gui_rationale_535"
@@ -1065,7 +1065,7 @@
       "source_file": "gui.py",
       "source_location": "L542",
       "_origin": "ast",
-      "community": 10,
+      "community": 9,
       "norm_label": "remove a specific line from a scrolledtext widget, cleaning up empty lines.",
       "community_name": "Community 10",
       "id": "gui_rationale_542"
@@ -1076,7 +1076,7 @@
       "source_file": "gui.py",
       "source_location": "L578",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "open the plain-text exclusions file in the os default editor.",
       "community_name": "Community 6",
       "id": "gui_rationale_578"
@@ -1087,7 +1087,7 @@
       "source_file": "gui.py",
       "source_location": "L585",
       "_origin": "ast",
-      "community": 9,
+      "community": 4,
       "norm_label": "reload exclusions from the text file and merge into gui.",
       "community_name": "Community 5",
       "id": "gui_rationale_585"
@@ -1109,7 +1109,7 @@
       "source_file": "inject_logger.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 25,
+      "community": 24,
       "norm_label": "inject_logger.py",
       "community_name": "Community 16",
       "id": "inject_logger"
@@ -1120,7 +1120,7 @@
       "source_file": "live_device_explorer.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "live_device_explorer.py",
       "community_name": "Community 0",
       "id": "live_device_explorer"
@@ -1131,7 +1131,7 @@
       "source_file": "live_device_explorer.py",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "get_connected_device_info()",
       "community_name": "Community 0",
       "id": "live_device_explorer_get_connected_device_info"
@@ -1142,7 +1142,7 @@
       "source_file": "live_device_explorer.py",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "list_live_files()",
       "community_name": "Community 0",
       "id": "live_device_explorer_list_live_files"
@@ -1153,7 +1153,7 @@
       "source_file": "live_device_explorer.py",
       "source_location": "L68",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "extract_live_file()",
       "community_name": "Community 0",
       "id": "live_device_explorer_extract_live_file"
@@ -1164,7 +1164,7 @@
       "source_file": "live_device_explorer.py",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "returns the name/identifier of the connected device or raises an error.",
       "community_name": "Community 0",
       "id": "live_device_explorer_rationale_14"
@@ -1175,7 +1175,7 @@
       "source_file": "live_device_explorer.py",
       "source_location": "L32",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "list files and directories in the given path using afc.     returns a list of d",
       "community_name": "Community 0",
       "id": "live_device_explorer_rationale_32"
@@ -1186,7 +1186,7 @@
       "source_file": "live_device_explorer.py",
       "source_location": "L69",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "extract a file from the connected device to the local pc.",
       "community_name": "Community 0",
       "id": "live_device_explorer_rationale_69"
@@ -1541,7 +1541,7 @@
       "source_location": "L1",
       "version": "1.8.4",
       "_origin": "ast",
-      "community": 28,
+      "community": 27,
       "norm_label": "ios-call-export",
       "community_name": "Community 17",
       "id": "pkg_ios_call_export"
@@ -1552,7 +1552,7 @@
       "source_file": "refactor_gui.py",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 31,
+      "community": 30,
       "norm_label": "refactor_gui.py",
       "community_name": "Community 18",
       "id": "refactor_gui"
@@ -1567,7 +1567,7 @@
         "kind": "file"
       },
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "run.sh",
       "community_name": "Community 12",
       "id": "run"
@@ -1582,7 +1582,7 @@
         "kind": "bash_entrypoint"
       },
       "_origin": "ast",
-      "community": 12,
+      "community": 11,
       "norm_label": "run.sh script",
       "community_name": "Community 12",
       "id": "c_users_ema_desktop_repooo_ios_call_export_run_sh__entry"
@@ -1613,7 +1613,7 @@
       "label": "GUI Application",
       "file_type": "code",
       "source_file": "gui.py",
-      "community": 24,
+      "community": 23,
       "norm_label": "gui application",
       "community_name": "Community 4",
       "id": "gui_py"
@@ -1622,7 +1622,7 @@
       "label": "Call Export CLI",
       "file_type": "code",
       "source_file": "export_calls.py",
-      "community": 23,
+      "community": 22,
       "norm_label": "call export cli",
       "community_name": "Community 4",
       "id": "export_calls_py"
@@ -1631,7 +1631,7 @@
       "label": "Webhook Sync Script",
       "file_type": "code",
       "source_file": "send_to_webhook.py",
-      "community": 32,
+      "community": 31,
       "norm_label": "webhook sync script",
       "community_name": "Community 4",
       "id": "send_to_webhook_py"
@@ -1640,7 +1640,7 @@
       "label": "Master Settings",
       "file_type": "code",
       "source_file": "master_settings.json",
-      "community": 26,
+      "community": 25,
       "norm_label": "master settings",
       "community_name": "Community 13",
       "id": "master_settings_json"
@@ -1649,105 +1649,105 @@
       "label": "Copilot Instructions",
       "file_type": "document",
       "source_file": ".github/copilot-instructions.md",
-      "id": "copilot_instructions_md",
-      "community": 22,
-      "norm_label": "copilot instructions"
+      "community": 21,
+      "norm_label": "copilot instructions",
+      "id": "copilot_instructions_md"
     },
     {
       "label": "Memory Log",
       "file_type": "document",
       "source_file": "MEMORY.md",
-      "id": "memory_md",
-      "community": 27,
-      "norm_label": "memory log"
+      "community": 26,
+      "norm_label": "memory log",
+      "id": "memory_md"
     },
     {
       "label": "Project Roadmap",
       "file_type": "document",
       "source_file": "PROJECT_ROADMAP.md",
-      "id": "project_roadmap_md",
-      "community": 29,
-      "norm_label": "project roadmap"
+      "community": 28,
+      "norm_label": "project roadmap",
+      "id": "project_roadmap_md"
     },
     {
       "label": "README",
       "file_type": "document",
       "source_file": "README.md",
-      "id": "readme_md",
-      "community": 30,
-      "norm_label": "readme"
+      "community": 29,
+      "norm_label": "readme",
+      "id": "readme_md"
     },
     {
       "label": "Calls Dashboard Template",
       "file_type": "code",
       "source_file": "assets/calls_template.html",
-      "id": "assets_calls_template_html",
-      "community": 15,
-      "norm_label": "calls dashboard template"
+      "community": 14,
+      "norm_label": "calls dashboard template",
+      "id": "assets_calls_template_html"
     },
     {
       "label": "Messages Dashboard Template",
       "file_type": "code",
       "source_file": "assets/messages_template.html",
-      "id": "assets_messages_template_html",
-      "community": 21,
-      "norm_label": "messages dashboard template"
+      "community": 20,
+      "norm_label": "messages dashboard template",
+      "id": "assets_messages_template_html"
     },
     {
       "label": "Calls Dashboard Dark UI",
       "file_type": "image",
       "source_file": "assets/calls_dark.png",
-      "id": "assets_calls_dark_png",
-      "community": 13,
-      "norm_label": "calls dashboard dark ui"
+      "community": 12,
+      "norm_label": "calls dashboard dark ui",
+      "id": "assets_calls_dark_png"
     },
     {
       "label": "Calls Dashboard Light UI",
       "file_type": "image",
       "source_file": "assets/calls_light.png",
-      "id": "assets_calls_light_png",
-      "community": 14,
-      "norm_label": "calls dashboard light ui"
+      "community": 13,
+      "norm_label": "calls dashboard light ui",
+      "id": "assets_calls_light_png"
     },
     {
       "label": "CSV Export Preview",
       "file_type": "image",
       "source_file": "assets/csv_export_example.png",
-      "id": "assets_csv_export_example_png",
-      "community": 16,
-      "norm_label": "csv export preview"
+      "community": 15,
+      "norm_label": "csv export preview",
+      "id": "assets_csv_export_example_png"
     },
     {
       "label": "Data Mockup UI",
       "file_type": "image",
       "source_file": "assets/data_mockup.png",
-      "id": "assets_data_mockup_png",
-      "community": 17,
-      "norm_label": "data mockup ui"
+      "community": 16,
+      "norm_label": "data mockup ui",
+      "id": "assets_data_mockup_png"
     },
     {
       "label": "GUI Mockup",
       "file_type": "image",
       "source_file": "assets/gui_mockup.png",
-      "id": "assets_gui_mockup_png",
-      "community": 18,
-      "norm_label": "gui mockup"
+      "community": 17,
+      "norm_label": "gui mockup",
+      "id": "assets_gui_mockup_png"
     },
     {
       "label": "Messages Dashboard Dark UI",
       "file_type": "image",
       "source_file": "assets/messages_dark.png",
-      "id": "assets_messages_dark_png",
-      "community": 19,
-      "norm_label": "messages dashboard dark ui"
+      "community": 18,
+      "norm_label": "messages dashboard dark ui",
+      "id": "assets_messages_dark_png"
     },
     {
       "label": "Messages Dashboard Light UI",
       "file_type": "image",
       "source_file": "assets/messages_light.png",
-      "id": "assets_messages_light_png",
-      "community": 20,
-      "norm_label": "messages dashboard light ui"
+      "community": 19,
+      "norm_label": "messages dashboard light ui",
+      "id": "assets_messages_light_png"
     }
   ],
   "links": [
