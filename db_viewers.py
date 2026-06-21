@@ -23,7 +23,7 @@ class DataViewerBackend:
         self.whatsapp_db = None
         self.contact_lookup = {}
 
-    def load_databases(self):
+    def load_databases(self, whatsapp_choice_callback=None):
         """Extract both databases to the temp folder and build contact lookup."""
         backup = EncryptedBackup(backup_directory=self.backup_dir, passphrase=self.passphrase)
         self.contact_lookup = build_contact_lookup(backup)
@@ -49,18 +49,31 @@ class DataViewerBackend:
             app_logger.error("Errore estrazione SMS DB per Viewer", exc_info=True)
 
         # Extract WhatsApp DB
-        wa_path = os.path.join(self.temp_dir, "whatsapp.sqlite")
         try:
-            with suppress_size_warnings():
-                backup.extract_file(
-                    relative_path=RelativePath.WHATSAPP_MESSAGES,
-                    domain_like="%whatsapp%",
-                    output_filename=wa_path,
-                )
-            self.whatsapp_db = sqlite3.connect(wa_path, check_same_thread=False)
-            self.whatsapp_db.row_factory = sqlite3.Row
-        except FileNotFoundError:
-            app_logger.info("WhatsApp non trovato nel backup (normale se non installato).")
+            from export_whatsapp import _find_whatsapp_dbs_with_stats
+            dbs_info = _find_whatsapp_dbs_with_stats(backup)
+            if not dbs_info:
+                app_logger.info("WhatsApp non trovato nel backup (normale se non installato).")
+            else:
+                if len(dbs_info) > 1 and whatsapp_choice_callback:
+                    chosen_info = whatsapp_choice_callback(dbs_info)
+                else:
+                    chosen_info = dbs_info[0]
+
+                if chosen_info:
+                    wa_path = os.path.join(self.temp_dir, "whatsapp.sqlite")
+                    shutil.move(chosen_info["tmp_path"], wa_path)
+                    
+                    self.whatsapp_db = sqlite3.connect(wa_path, check_same_thread=False)
+                    self.whatsapp_db.row_factory = sqlite3.Row
+                
+                # Cleanup unchosen
+                for info in dbs_info:
+                    try:
+                        if os.path.exists(info["tmp_path"]):
+                            os.unlink(info["tmp_path"])
+                    except Exception:
+                        pass
         except Exception:
             app_logger.error("Errore estrazione WhatsApp DB per Viewer", exc_info=True)
 

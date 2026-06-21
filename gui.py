@@ -457,6 +457,47 @@ class App(tk.Tk):
             self.notebook.select(self.tab_export)
             self.start_export()
 
+    def prompt_whatsapp_selection(self, options: list[dict]) -> dict:
+        """Prompt user to select a WhatsApp database. Blocks until chosen."""
+        import threading
+        
+        result_container = []
+        event = threading.Event()
+        
+        def _show_dialog():
+            top = tk.Toplevel(self)
+            top.title("Seleziona Backup WhatsApp")
+            top.geometry("480x300")
+            top.grab_set()  # Make modal
+            
+            ttk.Label(top, text="Trovati più backup WhatsApp (Es. Classico e Business).\nScegli quale versione vuoi caricare:", justify="center").pack(pady=10)
+            
+            choice_var = tk.StringVar(value=options[0]["domain"])
+            for opt in options:
+                domain = opt["domain"]
+                label = "WhatsApp Business" if "WhatsAppSMB" in domain else "WhatsApp Classico" if "WhatsApp.shared" in domain else domain
+                desc = f"{label}\n({opt['msg_count']} messaggi | Ultimo: {opt['last_date']})"
+                ttk.Radiobutton(top, text=desc, variable=choice_var, value=domain).pack(anchor="w", padx=20, pady=5)
+                
+            def on_confirm():
+                chosen_domain = choice_var.get()
+                chosen_opt = next((o for o in options if o["domain"] == chosen_domain), None)
+                result_container.append(chosen_opt)
+                top.destroy()
+                event.set()
+                
+            def on_cancel():
+                result_container.append(None)
+                top.destroy()
+                event.set()
+                
+            top.protocol("WM_DELETE_WINDOW", on_cancel)
+            ttk.Button(top, text="Conferma Selezione", command=on_confirm, style="Accent.TButton").pack(pady=15)
+            
+        self.after(0, _show_dialog)
+        event.wait()
+        return result_container[0] if result_container else None
+
     def load_contacts_for_exclusions(self):
         if not self.selected_backup_dir:
             messagebox.showerror("Errore", "Nessun backup selezionato.")
@@ -475,7 +516,7 @@ class App(tk.Tk):
                 if self.db_backend:
                     self.db_backend.close()
                 self.db_backend = DataViewerBackend(self.selected_backup_dir, passphrase)
-                self.db_backend.load_databases()
+                self.db_backend.load_databases(whatsapp_choice_callback=self.prompt_whatsapp_selection)
 
                 # Fetch unique contacts from CallHistory
                 unique_contacts = []
@@ -641,7 +682,7 @@ class App(tk.Tk):
                 if self.db_backend:
                     self.db_backend.close()
                 self.db_backend = DataViewerBackend(self.selected_backup_dir, passphrase)
-                self.db_backend.load_databases()
+                self.db_backend.load_databases(whatsapp_choice_callback=self.prompt_whatsapp_selection)
                 self.after(0, self._on_db_loaded)
             except Exception as e:
                 err_msg = str(e)
@@ -1233,7 +1274,8 @@ class App(tk.Tk):
                 self.log_message("📱 Avvio estrazione Chat WhatsApp...\n")
                 try:
                     count = export_whatsapp_to_csv_and_html(
-                        backup_dir, passphrase, out_html_wa, out_csv_wa, use_excel
+                        backup_dir, passphrase, out_html_wa, out_csv_wa, use_excel,
+                        choice_callback=self.prompt_whatsapp_selection
                     )
                     self.log_message(f"✅ Trovate {count} conversazioni WhatsApp.\n")
                     self.log_message(

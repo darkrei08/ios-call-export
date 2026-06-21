@@ -50,8 +50,63 @@ SESSION_TYPES = {
 }
 
 
-def _extract_whatsapp_db(backup: EncryptedBackup) -> str | None:
-    """Extract ChatStorage.sqlite from backup to a temp file. Returns path or None."""
+def _find_whatsapp_domains(backup: EncryptedBackup) -> list[str]:
+    """Find all domains that have a WhatsApp ChatStorage.sqlite."""
+    from iphone_backup_decrypt import RelativePath
+    try:
+        with backup.manifest_db_cursor() as cur:
+            query = """
+                SELECT domain
+                FROM Files
+                WHERE relativePath = ?
+                AND domain LIKE ?
+                AND flags=1
+                ORDER BY domain
+            """
+            cur.execute(query, (RelativePath.WHATSAPP_MESSAGES, "%whatsapp%"))
+            results = cur.fetchall()
+            return [row[0] for row in results]
+    except Exception as e:
+        app_logger.warning(f"Errore lettura Manifest.db per ricerca WhatsApp: {e}")
+        return []
+
+def _find_whatsapp_dbs_with_stats(backup: EncryptedBackup) -> list[dict]:
+    """Find all WhatsApp ChatStorage.sqlite databases, extract them temporarily to gather stats."""
+    domains = _find_whatsapp_domains(backup)
+    results = []
+    
+    for domain in domains:
+        tmp_path = _extract_whatsapp_db(backup, domain)
+        if not tmp_path:
+            continue
+            
+        try:
+            conn = sqlite3.connect(tmp_path)
+            # Query message count and last message date
+            row = conn.execute("SELECT COUNT(*), MAX(ZMESSAGEDATE) FROM ZWAMESSAGE").fetchone()
+            msg_count = row[0] if row else 0
+            last_msg_date_raw = row[1] if row else 0
+            
+            from export_calls import apple_timestamp_to_datetime
+            dt = apple_timestamp_to_datetime(last_msg_date_raw)
+            dt_str = dt.strftime("%d/%m/%Y %H:%M") if dt else "N/A"
+            
+            results.append({
+                "domain": domain,
+                "msg_count": msg_count,
+                "last_date": dt_str,
+                "tmp_path": tmp_path
+            })
+            conn.close()
+        except Exception as e:
+            app_logger.warning(f"Failed to read stats for domain {domain}: {e}")
+            os.unlink(tmp_path)
+            
+    return results
+
+
+def _extract_whatsapp_db(backup: EncryptedBackup, domain: str) -> str | None:
+    """Extract ChatStorage.sqlite from backup to a temp file for a specific domain. Returns path or None."""
     tmp_fd = tempfile.NamedTemporaryFile(suffix=".sqlite", delete=False)
     tmp_path = tmp_fd.name
     tmp_fd.close()
@@ -61,7 +116,7 @@ def _extract_whatsapp_db(backup: EncryptedBackup) -> str | None:
             from iphone_backup_decrypt import RelativePath
             backup.extract_file(
                 relative_path=RelativePath.WHATSAPP_MESSAGES,
-                domain_like="%whatsapp%",
+                domain_like=domain,
                 output_filename=tmp_path,
             )
         return tmp_path
@@ -227,7 +282,7 @@ def _read_messages(conn: sqlite3.Connection, sessions: dict[int, dict]) -> None:
         )
 
 
-def get_whatsapp_chats(backup_dir: str, passphrase: str) -> dict:
+def get_whatsapp_chats(backup_dir: str, passphrase: str, choice_callback=None) -> dict:
     """Extract WhatsApp ChatStorage.sqlite and build the chat data dictionary.
 
     Returns a dict keyed by session_id with session metadata and messages list.
@@ -236,14 +291,38 @@ def get_whatsapp_chats(backup_dir: str, passphrase: str) -> dict:
     backup = EncryptedBackup(backup_directory=backup_dir, passphrase=passphrase)
 
     app_logger.info("Ricerca database WhatsApp nel backup...")
-    tmp_path = _extract_whatsapp_db(backup)
-
-    if tmp_path is None:
+    dbs_info = _find_whatsapp_dbs_with_stats(backup)
+    
+    if not dbs_info:
         app_logger.warning(
             "WhatsApp non trovato nel backup. "
             "Assicurati che WhatsApp fosse installato al momento del backup."
         )
         return {}
+        
+    if len(dbs_info) > 1 and choice_callback:
+        chosen_info = choice_callback(dbs_info)
+        if not chosen_info:
+            app_logger.info("Selezione WhatsApp annullata dall'utente.")
+            for info in dbs_info:
+                try:
+                    os.unlink(info["tmp_path"])
+                except Exception:
+                    pass
+            return {}
+    else:
+        chosen_info = dbs_info[0]
+        
+    # Cleanup unchosen
+    for info in dbs_info:
+        if info != chosen_info:
+            try:
+                os.unlink(info["tmp_path"])
+            except Exception:
+                pass
+                
+    tmp_path = chosen_info["tmp_path"]
+    app_logger.info(f"Estrazione database WhatsApp da: {chosen_info['domain']}")
 
     try:
         conn = sqlite3.connect(tmp_path)
