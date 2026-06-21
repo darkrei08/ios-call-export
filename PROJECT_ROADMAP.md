@@ -20,7 +20,7 @@ This file serves as the permanent memory and architectural roadmap for the proje
 - Extract linked media attachments (photos, videos, audio).
 - *Branch:* `feature/messages`
 
-### [ ] v1.3 - WhatsApp & Telegram
+### [x] v1.3 - WhatsApp & Telegram
 - Parse WhatsApp `ChatStorage.sqlite` and Telegram local DBs.
 - Export chats to readable formats including media.
 - *Branch:* `feature/third-party-chats`
