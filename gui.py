@@ -23,15 +23,15 @@ except ImportError:
 
 # Try to import the core modules
 try:
-    from export_calls import find_backups, IncorrectPassphraseError
-    from logger import app_logger, dump_latest_logs
     import master_settings
+    from export_calls import IncorrectPassphraseError, find_backups
+    from logger import app_logger, dump_latest_logs
 except ImportError:
     # Append current directory to path if launched from outside
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-    from export_calls import find_backups, IncorrectPassphraseError
-    from logger import app_logger, dump_latest_logs
     import master_settings
+    from export_calls import IncorrectPassphraseError, find_backups
+    from logger import app_logger, dump_latest_logs
 
 
 class App(tk.Tk):
@@ -110,9 +110,7 @@ class App(tk.Tk):
 
         # Custom style overrides for specific widget classes
         style.configure("Title.TLabel", foreground=primary_color, font=title_font)
-        style.configure(
-            "Subtitle.TLabel", foreground=sub_text_color, font=subtitle_font
-        )
+        style.configure("Subtitle.TLabel", foreground=sub_text_color, font=subtitle_font)
         style.configure("Section.TLabel", foreground=text_color, font=section_font)
 
         # Accent Button provided by sv_ttk handles primary action perfectly.
@@ -127,9 +125,7 @@ class App(tk.Tk):
 
         # Update the log_text widget colors if it already exists
         if hasattr(self, "log_text"):
-            self.log_text.configure(
-                bg=self.log_bg, fg=self.log_fg, insertbackground=self.log_fg
-            )
+            self.log_text.configure(bg=self.log_bg, fg=self.log_fg, insertbackground=self.log_fg)
 
     def create_widgets(self):
         # 1. Header (Banner)
@@ -150,9 +146,7 @@ class App(tk.Tk):
         )
         self.btn_theme.pack(side="right", padx=32, pady=32)
 
-        title_label = ttk.Label(
-            self.header_frame, text="iOS Backup Explorer", style="Title.TLabel"
-        )
+        title_label = ttk.Label(self.header_frame, text="iOS Backup Explorer", style="Title.TLabel")
         title_label.pack(anchor="w", padx=32, pady=(20, 4))
 
         subtitle_label = ttk.Label(
@@ -171,18 +165,12 @@ class App(tk.Tk):
         cred_frame.pack(fill="x", pady=(0, 16))
 
         lbl_font = ("Segoe UI", 10, "bold")
-        self.lbl_backup = ttk.Label(
-            cred_frame, text="Backup iOS di origine:", font=lbl_font
-        )
+        self.lbl_backup = ttk.Label(cred_frame, text="Backup iOS di origine:", font=lbl_font)
         self.lbl_backup.grid(row=0, column=0, sticky="w", pady=8)
 
         self.backup_var = tk.StringVar()
-        self.backup_combobox = ttk.Combobox(
-            cred_frame, textvariable=self.backup_var, state="readonly", width=50
-        )
-        self.backup_combobox.grid(
-            row=0, column=1, sticky="we", padx=(16, 16), pady=8, ipady=4
-        )
+        self.backup_combobox = ttk.Combobox(cred_frame, textvariable=self.backup_var, state="readonly", width=50)
+        self.backup_combobox.grid(row=0, column=1, sticky="we", padx=(16, 16), pady=8, ipady=4)
         self.backup_combobox.bind("<<ComboboxSelected>>", self.on_backup_selected)
 
         btn_browse_backup = ttk.Button(
@@ -193,18 +181,12 @@ class App(tk.Tk):
         )
         btn_browse_backup.grid(row=0, column=2, pady=8)
 
-        self.lbl_pass = ttk.Label(
-            cred_frame, text="Password del backup:", font=lbl_font
-        )
+        self.lbl_pass = ttk.Label(cred_frame, text="Password del backup:", font=lbl_font)
         self.lbl_pass.grid(row=1, column=0, sticky="w", pady=8)
 
         self.pass_var = tk.StringVar()
-        self.pass_entry = ttk.Entry(
-            cred_frame, textvariable=self.pass_var, show="*", width=50
-        )
-        self.pass_entry.grid(
-            row=1, column=1, sticky="we", padx=(16, 16), pady=8, ipady=4
-        )
+        self.pass_entry = ttk.Entry(cred_frame, textvariable=self.pass_var, show="*", width=50)
+        self.pass_entry.grid(row=1, column=1, sticky="we", padx=(16, 16), pady=8, ipady=4)
 
         self.show_pass_var = tk.BooleanVar(value=False)
         self.show_pass_check = ttk.Checkbutton(
@@ -214,12 +196,10 @@ class App(tk.Tk):
             command=self.toggle_pass_visibility,
         )
         self.show_pass_check.grid(row=1, column=2, sticky="w", pady=8)
-        
-        self.lbl_device_title = ttk.Label(
-            cred_frame, text="Dispositivo Rilevato:", font=lbl_font
-        )
+
+        self.lbl_device_title = ttk.Label(cred_frame, text="Dispositivo Rilevato:", font=lbl_font)
         self.lbl_device_title.grid(row=2, column=0, sticky="w", pady=(0, 8))
-        
+
         self.lbl_device_value = ttk.Label(
             cred_frame, text="Dispositivo Sconosciuto", font=("Segoe UI", 10, "bold"), foreground=self.primary_color
         )
@@ -264,7 +244,7 @@ class App(tk.Tk):
 
         # Log Section
         # Log is now in the first tab
-        
+
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def create_export_tab(self):
@@ -305,9 +285,7 @@ class App(tk.Tk):
         chk_msgs.pack(anchor="w", pady=(0, 16))
 
         # Config Frame
-        config_frame = ttk.LabelFrame(
-            container, text="Impostazioni Chiamate", padding=16
-        )
+        config_frame = ttk.LabelFrame(container, text="Impostazioni Chiamate", padding=16)
         config_frame.pack(fill="x", pady=(0, 20))
 
         self.excel_var = tk.BooleanVar(value=True)
@@ -338,9 +316,7 @@ class App(tk.Tk):
         lbl_logs = ttk.Label(log_header_frame, text="Log Operazioni:", style="TLabel")
         lbl_logs.pack(side="left")
 
-        btn_copy_log = ttk.Button(
-            log_header_frame, text="📋 Copia Log (Debug)", command=self.copy_debug_log
-        )
+        btn_copy_log = ttk.Button(log_header_frame, text="📋 Copia Log (Debug)", command=self.copy_debug_log)
         btn_copy_log.pack(side="right")
 
         self.log_text = ScrolledText(container, height=10, padx=8, pady=8)
@@ -349,49 +325,58 @@ class App(tk.Tk):
     def create_exclusions_tab(self):
         container = ttk.Frame(self.tab_exclusions, padding=16)
         container.pack(fill="both", expand=True)
-        
+
         header_frame = ttk.Frame(container)
         header_frame.pack(fill="x", pady=(0, 10))
-        
-        self.lbl_excl_device = ttk.Label(header_frame, text="Dispositivo Corrente: Dispositivo Sconosciuto", font=("Segoe UI", 12, "bold"), foreground=self.primary_color)
+
+        self.lbl_excl_device = ttk.Label(
+            header_frame,
+            text="Dispositivo Corrente: Dispositivo Sconosciuto",
+            font=("Segoe UI", 12, "bold"),
+            foreground=self.primary_color,
+        )
         self.lbl_excl_device.pack(side="left")
-        
-        btn_save = ttk.Button(header_frame, text="💾 Salva Esclusioni", style="Accent.TButton", command=self.save_exclusions_from_gui)
+
+        btn_save = ttk.Button(
+            header_frame, text="💾 Salva Esclusioni", style="Accent.TButton", command=self.save_exclusions_from_gui
+        )
         btn_save.pack(side="right")
-        
+
         btn_open_txt = ttk.Button(header_frame, text="📄 Apri File Esclusioni", command=self.open_exclusions_file)
         btn_open_txt.pack(side="right", padx=(0, 8))
-        
+
         btn_reload_txt = ttk.Button(header_frame, text="🔄 Ricarica da File", command=self.reload_exclusions_from_file)
         btn_reload_txt.pack(side="right", padx=(0, 8))
-        
+
         paned = ttk.PanedWindow(container, orient="horizontal")
         paned.pack(fill="both", expand=True)
-        
+
         # Left side: Manual text entry
         left_frame = ttk.Frame(paned, padding=(0, 0, 8, 0))
         paned.add(left_frame, weight=1)
-        
+
         ttk.Label(left_frame, text="Inserimento Manuale", style="Section.TLabel").pack(anchor="w", pady=(0, 8))
         ttk.Label(left_frame, text="Scrivi i Nomi da escludere (uno per riga):").pack(anchor="w")
         self.txt_excl_names = ScrolledText(left_frame, height=8)
         self.txt_excl_names.pack(fill="x", pady=(2, 10))
-        
+
         ttk.Label(left_frame, text="Scrivi i Numeri di Telefono da escludere (uno per riga):").pack(anchor="w")
         self.txt_excl_numbers = ScrolledText(left_frame, height=8)
         self.txt_excl_numbers.pack(fill="x", pady=(2, 0))
-        
+
         # Right side: Selection from Backup
         right_frame = ttk.Frame(paned, padding=(8, 0, 0, 0))
         paned.add(right_frame, weight=2)
-        
+
         right_header = ttk.Frame(right_frame)
         right_header.pack(fill="x", pady=(0, 4))
-        
+
         ttk.Label(right_header, text="Seleziona Contatti dal Backup", style="Section.TLabel").pack(side="left")
-        btn_load_contacts = ttk.Button(right_header, text="🔄 Carica dal Backup", command=self.load_contacts_for_exclusions)
+        btn_load_contacts = ttk.Button(
+            right_header, text="🔄 Carica dal Backup", command=self.load_contacts_for_exclusions
+        )
         btn_load_contacts.pack(side="right")
-        
+
         # Search bar for filtering contacts
         search_frame = ttk.Frame(right_frame)
         search_frame.pack(fill="x", pady=(0, 8))
@@ -402,63 +387,62 @@ class App(tk.Tk):
         excl_search_entry.pack(side="left", fill="x", expand=True)
         btn_clear_search = ttk.Button(search_frame, text="✕", width=3, command=lambda: self.excl_search_var.set(""))
         btn_clear_search.pack(side="left", padx=(4, 0))
-        
+
         # Internal storage for all loaded contacts (for filtering)
         self._excl_all_contacts = []
-        
+
         tree_frame = ttk.Frame(right_frame)
         tree_frame.pack(fill="both", expand=True)
-        
-        self.tree_excl = ttk.Treeview(tree_frame, columns=("Escludi", "Nome", "Numero"), show="headings", selectmode="browse")
+
+        self.tree_excl = ttk.Treeview(
+            tree_frame, columns=("Escludi", "Nome", "Numero"), show="headings", selectmode="browse"
+        )
         self.tree_excl.heading("Escludi", text="[ ]")
         self.tree_excl.heading("Nome", text="Nome")
         self.tree_excl.heading("Numero", text="Numero")
         self.tree_excl.column("Escludi", width=50, anchor="center", stretch=False)
         self.tree_excl.column("Nome", width=150, stretch=True)
         self.tree_excl.column("Numero", width=150, stretch=True)
-        
+
         self.tree_excl.bind("<ButtonRelease-1>", self.on_excl_tree_click)
-        
+
         scroll = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree_excl.yview)
         self.tree_excl.configure(yscrollcommand=scroll.set)
         self.tree_excl.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")
-        
+
         # Load empty state
         self.load_exclusions_to_gui()
 
     def load_exclusions_to_gui(self):
-        if not hasattr(self, 'txt_excl_names'): return
+        if not hasattr(self, "txt_excl_names"):
+            return
         exclusions = master_settings.get_device_exclusions(self.current_device_name)
-        
+
         self.txt_excl_names.delete("1.0", tk.END)
         if exclusions.get("names"):
             self.txt_excl_names.insert(tk.END, "\n".join(exclusions["names"]))
-            
+
         self.txt_excl_numbers.delete("1.0", tk.END)
         if exclusions.get("numbers"):
             self.txt_excl_numbers.insert(tk.END, "\n".join(exclusions["numbers"]))
-            
+
         self._refresh_tree_excl_checks()
 
     def save_exclusions_from_gui(self):
         names = [n.strip() for n in self.txt_excl_names.get("1.0", tk.END).split("\n") if n.strip()]
         numbers = [n.strip() for n in self.txt_excl_numbers.get("1.0", tk.END).split("\n") if n.strip()]
-        
-        master_settings.save_device_exclusions(self.current_device_name, {
-            "names": names,
-            "numbers": numbers
-        })
+
+        master_settings.save_device_exclusions(self.current_device_name, {"names": names, "numbers": numbers})
         self._refresh_tree_excl_checks()
-        
+
         if messagebox.askyesno(
-            "Esportazione Dinamica", 
+            "Esportazione Dinamica",
             f"Esclusioni salvate per il dispositivo:\n{self.current_device_name}\n\n"
-            "Vuoi rigenerare i file esportati (CSV/HTML) per applicare subito i nuovi filtri?"
+            "Vuoi rigenerare i file esportati (CSV/HTML) per applicare subito i nuovi filtri?",
         ):
             self.notebook.select(self.tab_export)
             self.start_export()
-
 
     def load_contacts_for_exclusions(self):
         if not self.selected_backup_dir:
@@ -474,20 +458,27 @@ class App(tk.Tk):
         def _load():
             try:
                 from db_viewers import DataViewerBackend
+
                 if self.db_backend:
                     self.db_backend.close()
                 self.db_backend = DataViewerBackend(self.selected_backup_dir, passphrase)
                 self.db_backend.load_databases()
-                
+
                 # Fetch unique contacts from CallHistory
                 unique_contacts = []
                 if self.db_backend.calls_db:
-                    cursor = self.db_backend.calls_db.execute("SELECT DISTINCT ZADDRESS FROM ZCALLRECORD WHERE ZADDRESS IS NOT NULL")
+                    cursor = self.db_backend.calls_db.execute(
+                        "SELECT DISTINCT ZADDRESS FROM ZCALLRECORD WHERE ZADDRESS IS NOT NULL"
+                    )
                     for row in cursor.fetchall():
                         addr = row[0]
-                        name = self.db_backend.contact_lookup.get(addr.replace(" ", "")) or self.db_backend.contact_lookup.get(addr) or ""
+                        name = (
+                            self.db_backend.contact_lookup.get(addr.replace(" ", ""))
+                            or self.db_backend.contact_lookup.get(addr)
+                            or ""
+                        )
                         unique_contacts.append((name, addr))
-                
+
                 self.after(0, self._on_contacts_loaded, unique_contacts)
             except Exception as e:
                 err_msg = str(e)
@@ -495,24 +486,27 @@ class App(tk.Tk):
                 self.after(0, lambda err=err_msg: messagebox.showerror("Errore", err))
 
         import threading
+
         threading.Thread(target=_load, daemon=True).start()
 
     def _on_contacts_loaded(self, contacts):
         self.log_message("✅ Contatti caricati. Puoi ora selezionarli dalla lista.\n")
-        
+
         # Store all contacts for search filtering
         self._excl_all_contacts = []
         added = set()
         for row in contacts:
             name = row[0] or ""
             addr = row[1] or ""
-            if not addr and not name: continue
-            
+            if not addr and not name:
+                continue
+
             key = f"{name}|{addr}"
-            if key in added: continue
+            if key in added:
+                continue
             added.add(key)
             self._excl_all_contacts.append((name, addr))
-        
+
         # Clear search and populate
         self.excl_search_var.set("")
         self._populate_excl_tree(self._excl_all_contacts)
@@ -533,8 +527,7 @@ class App(tk.Tk):
             self._populate_excl_tree(self._excl_all_contacts)
             return
         filtered = [
-            (name, addr) for name, addr in self._excl_all_contacts
-            if term in name.lower() or term in addr.lower()
+            (name, addr) for name, addr in self._excl_all_contacts if term in name.lower() or term in addr.lower()
         ]
         self._populate_excl_tree(filtered)
 
@@ -560,16 +553,16 @@ class App(tk.Tk):
         item = self.tree_excl.identify_row(event.y)
         if not item:
             return
-        
+
         values = list(self.tree_excl.item(item, "values"))
         current_state = values[0]
         name = values[1]
         number = values[2]
-        
+
         new_state = "[X]" if current_state == "[ ]" else "[ ]"
         values[0] = new_state
         self.tree_excl.item(item, values=values)
-        
+
         if new_state == "[X]":
             if name and name not in self.txt_excl_names.get("1.0", tk.END):
                 self._append_to_text_widget(self.txt_excl_names, name)
@@ -594,21 +587,24 @@ class App(tk.Tk):
         self.log_message("✅ Esclusioni ricaricate dal file di testo e dalle impostazioni.\n")
 
     def _refresh_tree_excl_checks(self):
-        if not hasattr(self, 'tree_excl'): return
+        if not hasattr(self, "tree_excl"):
+            return
         names = [n.strip().lower() for n in self.txt_excl_names.get("1.0", tk.END).split("\n") if n.strip()]
         numbers = [n.strip() for n in self.txt_excl_numbers.get("1.0", tk.END).split("\n") if n.strip()]
-        
+
         for item in self.tree_excl.get_children():
             values = list(self.tree_excl.item(item, "values"))
             name = values[1].strip().lower()
             num = values[2].strip()
-            
+
             is_excluded = False
             for n in names:
-                if n and n in name: is_excluded = True
+                if n and n in name:
+                    is_excluded = True
             for num_exc in numbers:
-                if num_exc and num_exc in num: is_excluded = True
-                
+                if num_exc and num_exc in num:
+                    is_excluded = True
+
             values[0] = "[X]" if is_excluded else "[ ]"
             self.tree_excl.item(item, values=values)
 
@@ -623,9 +619,7 @@ class App(tk.Tk):
             if not messagebox.askyesno("Attenzione", "Password vuota. Continuare?"):
                 return
 
-        self.log_message(
-            "⏳ Caricamento dei database (Chiamate & Messaggi) in corso...\n"
-        )
+        self.log_message("⏳ Caricamento dei database (Chiamate & Messaggi) in corso...\n")
 
         def _load():
             try:
@@ -633,9 +627,7 @@ class App(tk.Tk):
 
                 if self.db_backend:
                     self.db_backend.close()
-                self.db_backend = DataViewerBackend(
-                    self.selected_backup_dir, passphrase
-                )
+                self.db_backend = DataViewerBackend(self.selected_backup_dir, passphrase)
                 self.db_backend.load_databases()
                 self.after(0, self._on_db_loaded)
             except Exception as e:
@@ -646,9 +638,7 @@ class App(tk.Tk):
         threading.Thread(target=_load, daemon=True).start()
 
     def _on_db_loaded(self):
-        self.log_message(
-            "✅ Database caricati in memoria locale. Pronti per la ricerca veloce.\n"
-        )
+        self.log_message("✅ Database caricati in memoria locale. Pronti per la ricerca veloce.\n")
         self.update_calls_view()
         self.update_msgs_view()
 
@@ -667,26 +657,18 @@ class App(tk.Tk):
         btn_load.pack(side="left")
 
         self.search_calls_var = tk.StringVar()
-        self.search_calls_var.trace_add(
-            "write", lambda *args: self.after(300, self.update_calls_view)
-        )
-        search_entry = ttk.Entry(
-            top_frame, textvariable=self.search_calls_var, width=40
-        )
+        self.search_calls_var.trace_add("write", lambda *args: self.after(300, self.update_calls_view))
+        search_entry = ttk.Entry(top_frame, textvariable=self.search_calls_var, width=40)
         search_entry.pack(side="right")
         ttk.Label(top_frame, text="Cerca:").pack(side="right", padx=8)
 
         columns = ("Data", "Contatto/Numero", "Durata", "Direzione", "Servizio")
-        self.tree_calls = ttk.Treeview(
-            container, columns=columns, show="headings", selectmode="browse"
-        )
+        self.tree_calls = ttk.Treeview(container, columns=columns, show="headings", selectmode="browse")
         for col in columns:
             self.tree_calls.heading(col, text=col)
             self.tree_calls.column(col, width=150)
 
-        scroll = ttk.Scrollbar(
-            container, orient="vertical", command=self.tree_calls.yview
-        )
+        scroll = ttk.Scrollbar(container, orient="vertical", command=self.tree_calls.yview)
         self.tree_calls.configure(yscrollcommand=scroll.set)
         self.tree_calls.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")
@@ -715,17 +697,13 @@ class App(tk.Tk):
         btn_load.pack(side="left")
 
         self.search_msgs_var = tk.StringVar()
-        self.search_msgs_var.trace_add(
-            "write", lambda *args: self.after(300, self.update_msgs_view)
-        )
+        self.search_msgs_var.trace_add("write", lambda *args: self.after(300, self.update_msgs_view))
         search_entry = ttk.Entry(top_frame, textvariable=self.search_msgs_var, width=40)
         search_entry.pack(side="right")
         ttk.Label(top_frame, text="Cerca (Testo o Numero):").pack(side="right", padx=8)
 
         columns = ("Data", "Contatto", "Direzione", "Servizio", "Testo")
-        self.tree_msgs = ttk.Treeview(
-            container, columns=columns, show="headings", selectmode="browse"
-        )
+        self.tree_msgs = ttk.Treeview(container, columns=columns, show="headings", selectmode="browse")
         self.tree_msgs.heading("Data", text="Data")
         self.tree_msgs.heading("Contatto", text="Contatto")
         self.tree_msgs.heading("Direzione", text="Direzione")
@@ -738,9 +716,7 @@ class App(tk.Tk):
         self.tree_msgs.column("Servizio", width=80, stretch=False)
         self.tree_msgs.column("Testo", width=400, stretch=True)
 
-        scroll = ttk.Scrollbar(
-            container, orient="vertical", command=self.tree_msgs.yview
-        )
+        scroll = ttk.Scrollbar(container, orient="vertical", command=self.tree_msgs.yview)
         self.tree_msgs.configure(yscrollcommand=scroll.set)
         self.tree_msgs.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")
@@ -795,15 +771,11 @@ class App(tk.Tk):
         )
         self.btn_load_files.pack(side="left")
 
-        self.btn_up_dir = ttk.Button(
-            self.action_frame, text="⬆️ Su", command=self.go_up_dir
-        )
+        self.btn_up_dir = ttk.Button(self.action_frame, text="⬆️ Su", command=self.go_up_dir)
         # Search bar for Live File Explorer
         self.search_var = tk.StringVar()
         self.search_var.trace_add("write", self.filter_files)
-        self.search_entry = ttk.Entry(
-            self.action_frame, textvariable=self.search_var, width=30
-        )
+        self.search_entry = ttk.Entry(self.action_frame, textvariable=self.search_var, width=30)
         self.search_entry.pack(side="right")
         self.lbl_search = ttk.Label(self.action_frame, text="Cerca:", style="TLabel")
         self.lbl_search.pack(side="right", padx=8)
@@ -812,9 +784,7 @@ class App(tk.Tk):
         self.lbl_live_path = ttk.Label(container, text="Percorso: /", style="TLabel")
 
         columns = ("col1", "col2")
-        self.file_tree = ttk.Treeview(
-            container, columns=columns, show="headings", selectmode="browse"
-        )
+        self.file_tree = ttk.Treeview(container, columns=columns, show="headings", selectmode="browse")
         self.file_tree.heading("col1", text="Dominio / Nome")
         self.file_tree.heading("col2", text="Percorso File / Tipo")
         self.file_tree.column("col1", width=200, stretch=False)
@@ -823,9 +793,7 @@ class App(tk.Tk):
         # Double click event for navigating directories
         self.file_tree.bind("<Double-1>", self.on_tree_double_click)
 
-        scrollbar = ttk.Scrollbar(
-            container, orient="vertical", command=self.file_tree.yview
-        )
+        scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.file_tree.yview)
         self.file_tree.configure(yscrollcommand=scrollbar.set)
 
         self.file_tree.pack(side="top", fill="both", expand=True)
@@ -869,9 +837,7 @@ class App(tk.Tk):
         # Re-apply our custom style overrides on top of the new sv_ttk theme
         self.setup_styles()
         if hasattr(self, "btn_theme"):
-            self.btn_theme.configure(
-                text="☀️ Tema Chiaro" if self.is_dark_mode else "🌙 Tema Scuro"
-            )
+            self.btn_theme.configure(text="☀️ Tema Chiaro" if self.is_dark_mode else "🌙 Tema Scuro")
 
     def toggle_pass_visibility(self):
         if self.show_pass_var.get():
@@ -885,9 +851,7 @@ class App(tk.Tk):
             if self.backups:
                 options = []
                 for b in self.backups:
-                    mtime = datetime.fromtimestamp(b.stat().st_mtime).strftime(
-                        "%Y-%m-%d %H:%M"
-                    )
+                    mtime = datetime.fromtimestamp(b.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
                     options.append(f"{b.name} (Modificato: {mtime})")
 
                 self.backup_combobox.configure(values=options)
@@ -898,9 +862,7 @@ class App(tk.Tk):
                     f"✅ Rilevati automaticamente {len(self.backups)} backup sul sistema.\nSelezionato il più recente.\n\n"
                 )
             else:
-                self.backup_combobox.configure(
-                    values=["Nessun backup trovato automaticamente - Clicca Sfoglia..."]
-                )
+                self.backup_combobox.configure(values=["Nessun backup trovato automaticamente - Clicca Sfoglia..."])
                 self.backup_combobox.current(0)
                 self.selected_backup_dir = ""
                 self._update_device_name()
@@ -908,9 +870,7 @@ class App(tk.Tk):
                     "⚠️ AVVISO: Nessun backup iOS rilevato nelle cartelle di default.\nSeleziona manualmente la cartella del backup cliccando su 'Sfoglia...'.\n\n"
                 )
         except Exception as e:
-            self.log_message(
-                f"❌ Errore durante la scansione automatica dei backup: {e}\n\n"
-            )
+            self.log_message(f"❌ Errore durante la scansione automatica dei backup: {e}\n\n")
 
     def on_backup_selected(self, event):
         idx = self.backup_combobox.current()
@@ -921,9 +881,7 @@ class App(tk.Tk):
         self._update_device_name()
 
     def browse_backup(self):
-        dir_path = filedialog.askdirectory(
-            title="Seleziona la cartella del backup iOS (contenente Manifest.db)"
-        )
+        dir_path = filedialog.askdirectory(title="Seleziona la cartella del backup iOS (contenente Manifest.db)")
         if dir_path:
             # Check if Manifest.db exists in that directory
             if not (Path(dir_path) / "Manifest.db").exists():
@@ -940,9 +898,9 @@ class App(tk.Tk):
         if self.selected_backup_dir:
             self.current_device_name = master_settings.get_device_name(self.selected_backup_dir)
             self.log_message(f"📱 Dispositivo rilevato: {self.current_device_name}\n")
-            if hasattr(self, 'lbl_excl_device'):
+            if hasattr(self, "lbl_excl_device"):
                 self.lbl_excl_device.configure(text=f"Dispositivo Corrente: {self.current_device_name}")
-            if hasattr(self, 'lbl_device_value'):
+            if hasattr(self, "lbl_device_value"):
                 self.lbl_device_value.configure(text=self.current_device_name)
             self.load_exclusions_to_gui()
 
@@ -1015,18 +973,18 @@ class App(tk.Tk):
         thread.start()
 
     def get_export_dir(self, backup_dir=None):
+        import os
         import plistlib
         import re
-        import os
         from datetime import datetime
-        
+
         # Use the directory where gui.py is located
         base_export = Path(os.path.dirname(os.path.abspath(__file__))) / "0-Exportes"
         base_export.mkdir(parents=True, exist_ok=True)
-        
+
         if not backup_dir:
             return base_export
-            
+
         device_name = "Dispositivo Sconosciuto"
         info_path = Path(backup_dir) / "Info.plist"
         if info_path.exists():
@@ -1036,20 +994,19 @@ class App(tk.Tk):
                     device_name = info.get("Device Name", device_name)
             except Exception:
                 pass
-                
+
         timestamp = datetime.now().strftime("%Y-%m-%d")
         safe_name = re.sub(r'[\\/*?:"<>|]', "", device_name)
         folder_name = f"{timestamp} - {safe_name}"
-        
+
         export_dir = base_export / folder_name
         export_dir.mkdir(parents=True, exist_ok=True)
         return export_dir
 
-    def _run_export(
-        self, backup_dir, passphrase, use_excel, do_calls, do_msgs, do_calls_html
-    ):
+    def _run_export(self, backup_dir, passphrase, use_excel, do_calls, do_msgs, do_calls_html):
         try:
             from datetime import datetime
+
             timestamp = datetime.now().strftime("%Y-%m-%d")
             export_dir = self.get_export_dir(backup_dir)
 
@@ -1057,22 +1014,14 @@ class App(tk.Tk):
                 from export_calls import process_and_export_calls
 
                 out_csv = str(export_dir / f"calls_export_{timestamp}.csv") if do_calls else None
-                out_html = (
-                    str(export_dir / "Calls_Viewer.html") if do_calls_html else None
-                )
+                out_html = str(export_dir / "Calls_Viewer.html") if do_calls_html else None
 
                 self.log_message("📞 Avvio estrazione Chiamate...\n")
-                process_and_export_calls(
-                    backup_dir, passphrase, out_csv, use_excel, output_html=out_html
-                )
+                process_and_export_calls(backup_dir, passphrase, out_csv, use_excel, output_html=out_html)
                 if do_calls:
-                    self.log_message(
-                        f"✅ Chiamate esportate con successo in:\n{out_csv}\n"
-                    )
+                    self.log_message(f"✅ Chiamate esportate con successo in:\n{out_csv}\n")
                 if do_calls_html:
-                    self.log_message(
-                        f"✅ HTML Viewer Chiamate esportato in:\n{out_html}\n"
-                    )
+                    self.log_message(f"✅ HTML Viewer Chiamate esportato in:\n{out_html}\n")
                 self.log_message("\n")
 
             if do_msgs:
@@ -1081,36 +1030,24 @@ class App(tk.Tk):
                 out_html = str(export_dir / "Messages_Viewer.html")
                 out_csv_msgs = str(export_dir / f"messages_export_{timestamp}.csv")
                 self.log_message("💬 Avvio estrazione Messaggi (SMS & iMessage)...\n")
-                count = export_messages_to_csv_and_html(
-                    backup_dir, passphrase, out_html, out_csv_msgs, use_excel
-                )
+                count = export_messages_to_csv_and_html(backup_dir, passphrase, out_html, out_csv_msgs, use_excel)
                 self.log_message(f"✅ Trovate {count} conversazioni.\n")
-                self.log_message(
-                    f"✅ Messaggi esportati con successo in:\n{out_html}\n{out_csv_msgs}\n\n"
-                )
+                self.log_message(f"✅ Messaggi esportati con successo in:\n{out_html}\n{out_csv_msgs}\n\n")
 
             self.after(0, self._export_success)
         except IncorrectPassphraseError as e:
-            app_logger.error(
-                "Password di decrittazione errata", exc_info=True
-            )
+            app_logger.error("Password di decrittazione errata", exc_info=True)
             self.after(0, self._export_passphrase_failure, str(e))
         except Exception as e:
-            app_logger.error(
-                "Errore durante l'esportazione in background", exc_info=True
-            )
+            app_logger.error("Errore durante l'esportazione in background", exc_info=True)
             self.after(0, self._export_failure, str(e))
 
     def _export_success(self):
         self.spinner.stop()
         self.spinner.pack_forget()
         self.btn_export.configure(state="normal")
-        self.log_message(
-            "✅ Tutte le operazioni di esportazione sono state completate!\nControlla i file esportati.\n"
-        )
-        messagebox.showinfo(
-            "Successo", "Esportazione completata!\nControlla i file esportati."
-        )
+        self.log_message("✅ Tutte le operazioni di esportazione sono state completate!\nControlla i file esportati.\n")
+        messagebox.showinfo("Successo", "Esportazione completata!\nControlla i file esportati.")
 
     def _export_passphrase_failure(self, error_msg):
         self.spinner.stop()
@@ -1139,9 +1076,7 @@ class App(tk.Tk):
         self.spinner.pack_forget()
         self.btn_export.configure(state="normal")
         self.log_message(f"❌ Errore durante l'esportazione: {error_msg}\n")
-        messagebox.showerror(
-            "Errore Esportazione", f"Si è verificato un errore:\n{error_msg}"
-        )
+        messagebox.showerror("Errore Esportazione", f"Si è verificato un errore:\n{error_msg}")
 
     # --- File Explorer Methods ---
 
@@ -1209,9 +1144,7 @@ class App(tk.Tk):
     def _populate_backup_tree(self, files, error_msg):
         self.btn_load_files.configure(state="normal", text="Carica Lista File")
         if error_msg:
-            messagebox.showerror(
-                "Errore di Caricamento", f"Impossibile leggere il backup:\n{error_msg}"
-            )
+            messagebox.showerror("Errore di Caricamento", f"Impossibile leggere il backup:\n{error_msg}")
             return
 
         self.all_files = files
@@ -1228,9 +1161,7 @@ class App(tk.Tk):
         path = self.live_path_var.get()
         self.lbl_live_path.configure(text=f"Percorso: {path}")
 
-        thread = threading.Thread(
-            target=self._run_load_live_files, args=(path,), daemon=True
-        )
+        thread = threading.Thread(target=self._run_load_live_files, args=(path,), daemon=True)
         thread.start()
 
     def _run_load_live_files(self, path):
@@ -1250,9 +1181,7 @@ class App(tk.Tk):
             )
         except Exception as e:
             app_logger.error("Errore popolamento albero live", exc_info=True)
-            self.after(
-                0, self._populate_live_tree, None, [], f"Errore lettura live: {e}"
-            )
+            self.after(0, self._populate_live_tree, None, [], f"Errore lettura live: {e}")
 
     def _populate_live_tree(self, info, files, error_msg):
         self.btn_load_files.configure(state="normal", text="Carica Lista File")
@@ -1329,9 +1258,7 @@ class App(tk.Tk):
         for f in self.all_files:
             if source == "backup":
                 if query in f["domain"].lower() or query in f["relativePath"].lower():
-                    self.file_tree.insert(
-                        "", "end", values=(f["domain"], f["relativePath"])
-                    )
+                    self.file_tree.insert("", "end", values=(f["domain"], f["relativePath"]))
                     count += 1
             else:
                 if query in f["name"].lower():
@@ -1361,30 +1288,20 @@ class App(tk.Tk):
             passphrase = self.pass_var.get().strip()
 
             default_name = rel_path.split("/")[-1] if "/" in rel_path else rel_path
-            out_path = filedialog.asksaveasfilename(
-                title="Salva file estratto come", initialfile=default_name
-            )
+            out_path = filedialog.asksaveasfilename(title="Salva file estratto come", initialfile=default_name)
             if not out_path:
                 return
 
             try:
                 from iphone_backup_decrypt import EncryptedBackup
 
-                backup = EncryptedBackup(
-                    backup_directory=self.selected_backup_dir, passphrase=passphrase
-                )
-                backup.extract_file(
-                    relative_path=rel_path, domain_like=domain, output_filename=out_path
-                )
+                backup = EncryptedBackup(backup_directory=self.selected_backup_dir, passphrase=passphrase)
+                backup.extract_file(relative_path=rel_path, domain_like=domain, output_filename=out_path)
 
                 self.log_message(f"✅ Estratto: {rel_path} -> {out_path}\n")
-                messagebox.showinfo(
-                    "Successo", f"File estratto con successo:\n{out_path}"
-                )
+                messagebox.showinfo("Successo", f"File estratto con successo:\n{out_path}")
             except Exception as e:
-                messagebox.showerror(
-                    "Errore Estrazione", f"Errore durante l'estrazione:\n{e}"
-                )
+                messagebox.showerror("Errore Estrazione", f"Errore durante l'estrazione:\n{e}")
         else:
             tipo = item["values"][1]
             if tipo == "Cartella":
@@ -1399,9 +1316,7 @@ class App(tk.Tk):
                 remote_path = tags[1]
                 default_name = item["values"][0]
 
-                out_path = filedialog.asksaveasfilename(
-                    title="Salva file estratto come", initialfile=default_name
-                )
+                out_path = filedialog.asksaveasfilename(title="Salva file estratto come", initialfile=default_name)
                 if not out_path:
                     return
 
@@ -1409,16 +1324,10 @@ class App(tk.Tk):
                     from live_device_explorer import extract_live_file
 
                     extract_live_file(remote_path, out_path)
-                    self.log_message(
-                        f"✅ Estratto dal dispositivo live: {remote_path} -> {out_path}\n"
-                    )
-                    messagebox.showinfo(
-                        "Successo", f"File estratto con successo:\n{out_path}"
-                    )
+                    self.log_message(f"✅ Estratto dal dispositivo live: {remote_path} -> {out_path}\n")
+                    messagebox.showinfo("Successo", f"File estratto con successo:\n{out_path}")
                 except Exception as e:
-                    messagebox.showerror(
-                        "Errore Estrazione", f"Errore durante l'estrazione live:\n{e}"
-                    )
+                    messagebox.showerror("Errore Estrazione", f"Errore durante l'estrazione live:\n{e}")
 
     def on_closing(self):
         if hasattr(self, "db_backend") and self.db_backend:

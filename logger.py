@@ -43,9 +43,7 @@ class SQLiteHandler(logging.Handler):
 
     def emit(self, record):
         try:
-            timestamp = datetime.fromtimestamp(record.created).strftime(
-                "%Y-%m-%d %H:%M:%S.%f"
-            )[:-3]
+            timestamp = datetime.fromtimestamp(record.created).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
             level = record.levelname
             module = record.module
             line = record.lineno

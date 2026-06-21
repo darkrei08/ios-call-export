@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Extract iPhone call history from an encrypted local backup to CSV."""
 
-from logger import app_logger
-
 import argparse
 import contextlib
 import csv
@@ -21,13 +19,16 @@ import phonenumbers
 from dotenv import load_dotenv
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
 from phonenumbers import geocoder
+
 import master_settings
+from logger import app_logger
 
 load_dotenv()
 
 
 class IncorrectPassphraseError(Exception):
     """Raised when backup decryption fails due to an incorrect passphrase."""
+
     pass
 
 
@@ -154,9 +155,7 @@ def parse_phone_info(number: str) -> dict:
             info["country_prefix"] = f"+{parsed.country_code}"
             info["national_number"] = str(parsed.national_number)
             country_it = geocoder.country_name_for_number(parsed, "it")
-            info["phone_country"] = country_it or geocoder.country_name_for_number(
-                parsed, "en"
-            )
+            info["phone_country"] = country_it or geocoder.country_name_for_number(parsed, "en")
     except Exception:
         pass
 
@@ -175,9 +174,7 @@ def build_contact_lookup(backup: EncryptedBackup) -> dict[str, str]:
                 output_filename=tmp_path,
             )
     except Exception:
-        app_logger.error(
-            "Warning: Could not extract AddressBook — contact names will be empty"
-        )
+        app_logger.error("Warning: Could not extract AddressBook — contact names will be empty")
         return {}
 
     try:
@@ -234,11 +231,7 @@ def build_contact_lookup(backup: EncryptedBackup) -> dict[str, str]:
 
 def resolve_call_type(call_type: int, service_provider: str) -> str:
     if call_type == 0 and service_provider:
-        provider = (
-            service_provider.rsplit(".", 1)[-1]
-            if "." in service_provider
-            else service_provider
-        )
+        provider = service_provider.rsplit(".", 1)[-1] if "." in service_provider else service_provider
         return provider.title()
     return CALL_TYPES.get(call_type, f"Unknown ({call_type})")
 
@@ -253,9 +246,7 @@ def read_calls_from_db(db_path: str, contacts: dict[str, str]) -> list[dict]:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
 
-    columns = {
-        row[1] for row in conn.execute("PRAGMA table_info(ZCALLRECORD)").fetchall()
-    }
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(ZCALLRECORD)").fetchall()}
     has_unique_id = "ZUNIQUE_ID" in columns
     has_name = "ZNAME" in columns
     has_location = "ZLOCATION" in columns
@@ -308,11 +299,7 @@ def read_calls_from_db(db_path: str, contacts: dict[str, str]) -> list[dict]:
         service_provider = row["ZSERVICE_PROVIDER"] or ""
 
         duration_secs = int(row["ZDURATION"] or 0)
-        end_dt = (
-            apple_timestamp_to_datetime(row["ZDATE"] + row["ZDURATION"])
-            if dt and row["ZDURATION"]
-            else dt
-        )
+        end_dt = apple_timestamp_to_datetime(row["ZDATE"] + row["ZDURATION"]) if dt and row["ZDURATION"] else dt
 
         dt_local = dt.astimezone() if dt else None
         end_local = end_dt.astimezone() if end_dt else None
@@ -421,21 +408,23 @@ def process_and_export_calls(
 
     if not calls:
         raise ValueError("No call records found.")
-        
+
     device_name = master_settings.get_device_name(backup_dir)
     exclusions = master_settings.get_device_exclusions(device_name)
-    
+
     # Filter calls
     initial_count = len(calls)
     filtered_calls = []
     for c in calls:
         if not master_settings.is_excluded(c["contact_name"], c["phone_number"], exclusions):
             filtered_calls.append(c)
-            
+
     excluded_count = initial_count - len(filtered_calls)
     if excluded_count > 0:
-        app_logger.info(f"Esclusi {excluded_count} record in base alle impostazioni master del dispositivo ({device_name}).")
-        
+        app_logger.info(
+            f"Esclusi {excluded_count} record in base alle impostazioni master del dispositivo ({device_name})."
+        )
+
     calls = filtered_calls
 
     if not calls:
@@ -489,9 +478,7 @@ def process_and_export_calls(
     if output_html:
         import json
 
-        template_path = os.path.join(
-            os.path.dirname(__file__), "assets", "calls_template.html"
-        )
+        template_path = os.path.join(os.path.dirname(__file__), "assets", "calls_template.html")
         if os.path.exists(template_path):
             with open(template_path, "r", encoding="utf-8") as f:
                 html_template = f.read()
@@ -532,12 +519,8 @@ def process_and_export_calls(
     app_logger.info("\n--- Export Summary ---")
     app_logger.info(f"Total Calls:      {total_calls}")
     app_logger.info(f"Total Duration:   {duration_str}")
-    app_logger.info(
-        f"Directions:       Incoming: {incoming} | Outgoing: {outgoing} | Missed: {missed}"
-    )
-    app_logger.info(
-        f"Status:           Answered: {answered} | Unanswered/Missed: {total_calls - answered}"
-    )
+    app_logger.info(f"Directions:       Incoming: {incoming} | Outgoing: {outgoing} | Missed: {missed}")
+    app_logger.info(f"Status:           Answered: {answered} | Unanswered/Missed: {total_calls - answered}")
     if top_contacts:
         app_logger.info("Top 3 Contacts:")
         for idx, (contact, count) in enumerate(top_contacts, 1):
@@ -582,9 +565,7 @@ def main():
         else:
             app_logger.info("Multiple backups found:")
             for i, b in enumerate(backups):
-                mtime = datetime.fromtimestamp(b.stat().st_mtime).strftime(
-                    "%Y-%m-%d %H:%M"
-                )
+                mtime = datetime.fromtimestamp(b.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
                 app_logger.info(f"  [{i}] {b.name} (modified: {mtime})")
             choice = input("Select backup number: ").strip()
             backup_dir = str(backups[int(choice)])

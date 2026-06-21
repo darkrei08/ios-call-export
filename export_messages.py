@@ -9,9 +9,9 @@ from pathlib import Path
 
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
 
-from export_calls import build_contact_lookup, IncorrectPassphraseError
-from logger import app_logger
 import master_settings
+from export_calls import IncorrectPassphraseError, build_contact_lookup
+from logger import app_logger
 
 # iOS dates are typically measured in seconds from Jan 1, 2001
 APPLE_EPOCH_OFFSET = 978307200
@@ -28,9 +28,7 @@ def get_messages_data(backup_dir: str, passphrase: str) -> dict:
     try:
         app_logger.info("Extracting sms.db...")
         # Redirect stdout temporarily if library is noisy
-        backup.extract_file(
-            relative_path=RelativePath.TEXT_MESSAGES, output_filename=tmp_path
-        )
+        backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=tmp_path)
     except Exception as e:
         err_lower = str(e).lower()
         if (
@@ -133,9 +131,11 @@ def export_messages_to_csv_and_html(
             filtered_chat_data[handle_id] = chat
         else:
             excluded_count += 1
-            
+
     if excluded_count > 0:
-        app_logger.info(f"Escluse {excluded_count} conversazioni in base alle impostazioni master del dispositivo ({device_name}).")
+        app_logger.info(
+            f"Escluse {excluded_count} conversazioni in base alle impostazioni master del dispositivo ({device_name})."
+        )
 
     chat_data = filtered_chat_data
     app_logger.info(f"Trovate conversazioni per {len(chat_data)} contatti.")
@@ -164,16 +164,10 @@ def export_messages_to_csv_and_html(
         for handle_id, chat in chat_data.items():
             contact_name = chat.get("contact_name") or handle_id
             for msg in chat["messages"]:
-                dt_str = datetime.fromtimestamp(msg["timestamp"]).strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
+                dt_str = datetime.fromtimestamp(msg["timestamp"]).strftime("%Y-%m-%d %H:%M:%S")
                 direction = "Sent" if msg["is_from_me"] else "Received"
                 # Prevent excel formula injection for phone numbers
-                phone_out = (
-                    f'="{handle_id}"'
-                    if excel_compat and str(handle_id).startswith("+")
-                    else handle_id
-                )
+                phone_out = f'="{handle_id}"' if excel_compat and str(handle_id).startswith("+") else handle_id
 
                 writer.writerow(
                     [
