@@ -5,7 +5,7 @@ import tempfile
 
 from iphone_backup_decrypt import EncryptedBackup, RelativePath
 
-from export_calls import apple_timestamp_to_datetime, build_contact_lookup
+from export_calls import apple_timestamp_to_datetime, build_contact_lookup, suppress_size_warnings
 from export_whatsapp import WHATSAPP_DOMAIN, WHATSAPP_DB_PATH, MESSAGE_TYPES, SESSION_TYPES
 from logger import app_logger
 
@@ -31,7 +31,8 @@ class DataViewerBackend:
         # Extract Calls DB
         calls_path = os.path.join(self.temp_dir, "calls.sqlite")
         try:
-            backup.extract_file(relative_path=RelativePath.CALL_HISTORY, output_filename=calls_path)
+            with suppress_size_warnings():
+                backup.extract_file(relative_path=RelativePath.CALL_HISTORY, output_filename=calls_path)
             self.calls_db = sqlite3.connect(calls_path, check_same_thread=False)
             self.calls_db.row_factory = sqlite3.Row
         except Exception:
@@ -40,7 +41,8 @@ class DataViewerBackend:
         # Extract SMS DB
         sms_path = os.path.join(self.temp_dir, "sms.sqlite")
         try:
-            backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=sms_path)
+            with suppress_size_warnings():
+                backup.extract_file(relative_path=RelativePath.TEXT_MESSAGES, output_filename=sms_path)
             self.sms_db = sqlite3.connect(sms_path, check_same_thread=False)
             self.sms_db.row_factory = sqlite3.Row
         except Exception:
@@ -49,10 +51,12 @@ class DataViewerBackend:
         # Extract WhatsApp DB
         wa_path = os.path.join(self.temp_dir, "whatsapp.sqlite")
         try:
-            backup.extract_file(
-                relative_path=f"{WHATSAPP_DOMAIN}/{WHATSAPP_DB_PATH}",
-                output_filename=wa_path,
-            )
+            with suppress_size_warnings():
+                backup.extract_file(
+                    relative_path=RelativePath.WHATSAPP_MESSAGES,
+                    domain_like="%whatsapp%",
+                    output_filename=wa_path,
+                )
             self.whatsapp_db = sqlite3.connect(wa_path, check_same_thread=False)
             self.whatsapp_db.row_factory = sqlite3.Row
         except FileNotFoundError:

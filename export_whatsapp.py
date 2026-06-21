@@ -58,8 +58,10 @@ def _extract_whatsapp_db(backup: EncryptedBackup) -> str | None:
 
     try:
         with suppress_size_warnings():
+            from iphone_backup_decrypt import RelativePath
             backup.extract_file(
-                relative_path=f"{WHATSAPP_DOMAIN}/{WHATSAPP_DB_PATH}",
+                relative_path=RelativePath.WHATSAPP_MESSAGES,
+                domain_like="%whatsapp%",
                 output_filename=tmp_path,
             )
         return tmp_path
